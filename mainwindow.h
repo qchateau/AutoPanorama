@@ -1,9 +1,10 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "appbehaviour.h"
+#include "panoramamaker.h"
 
 #include <QMainWindow>
+#include <QFileSystemModel>
 
 namespace Ui {
 class MainWindow;
@@ -21,6 +22,9 @@ private:
     Ui::MainWindow *ui;
     QFileSystemModel *fs_model;
     QStringList getSelectedFiles();
+    void createWorkerUi(PanoramaMaker *worker);
+
+    QList<PanoramaMaker> workers;
 
 public slots:
     void onSelectDirClicked();

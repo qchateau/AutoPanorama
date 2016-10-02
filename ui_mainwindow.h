@@ -19,6 +19,8 @@
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QPushButton>
+#include <QtWidgets/QScrollArea>
+#include <QtWidgets/QSpacerItem>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QTabWidget>
 #include <QtWidgets/QTreeView>
@@ -32,14 +34,21 @@ class Ui_MainWindow
 public:
     QAction *actionQuit;
     QWidget *centralWidget;
-    QHBoxLayout *horizontalLayout;
-    QTabWidget *tabWidget;
+    QVBoxLayout *verticalLayout_2;
+    QTabWidget *mainWidget;
     QWidget *tabMain;
     QVBoxLayout *verticalLayout;
     QTreeView *fsView;
     QHBoxLayout *layoutButtons;
     QPushButton *buttonSelectDir;
     QPushButton *buttonMakePanorama;
+    QWidget *tabProgress;
+    QVBoxLayout *verticalLayout_3;
+    QScrollArea *scrollArea;
+    QWidget *scrollAreaWidgetContents;
+    QVBoxLayout *verticalLayout_4;
+    QVBoxLayout *tabProgressLayout;
+    QSpacerItem *verticalSpacer;
     QMenuBar *menuBar;
     QMenu *menuFile;
     QStatusBar *statusBar;
@@ -53,12 +62,12 @@ public:
         actionQuit->setObjectName(QStringLiteral("actionQuit"));
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
-        horizontalLayout = new QHBoxLayout(centralWidget);
-        horizontalLayout->setSpacing(6);
-        horizontalLayout->setContentsMargins(11, 11, 11, 11);
-        horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
-        tabWidget = new QTabWidget(centralWidget);
-        tabWidget->setObjectName(QStringLiteral("tabWidget"));
+        verticalLayout_2 = new QVBoxLayout(centralWidget);
+        verticalLayout_2->setSpacing(6);
+        verticalLayout_2->setContentsMargins(11, 11, 11, 11);
+        verticalLayout_2->setObjectName(QStringLiteral("verticalLayout_2"));
+        mainWidget = new QTabWidget(centralWidget);
+        mainWidget->setObjectName(QStringLiteral("mainWidget"));
         tabMain = new QWidget();
         tabMain->setObjectName(QStringLiteral("tabMain"));
         verticalLayout = new QVBoxLayout(tabMain);
@@ -88,9 +97,52 @@ public:
 
         verticalLayout->addLayout(layoutButtons);
 
-        tabWidget->addTab(tabMain, QString());
+        mainWidget->addTab(tabMain, QString());
+        tabProgress = new QWidget();
+        tabProgress->setObjectName(QStringLiteral("tabProgress"));
+        verticalLayout_3 = new QVBoxLayout(tabProgress);
+        verticalLayout_3->setSpacing(6);
+        verticalLayout_3->setContentsMargins(11, 11, 11, 11);
+        verticalLayout_3->setObjectName(QStringLiteral("verticalLayout_3"));
+        verticalLayout_3->setSizeConstraint(QLayout::SetDefaultConstraint);
+        scrollArea = new QScrollArea(tabProgress);
+        scrollArea->setObjectName(QStringLiteral("scrollArea"));
+        scrollArea->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
+        scrollArea->setWidgetResizable(true);
+        scrollArea->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop);
+        scrollAreaWidgetContents = new QWidget();
+        scrollAreaWidgetContents->setObjectName(QStringLiteral("scrollAreaWidgetContents"));
+        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 756, 495));
+        QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+        sizePolicy.setHorizontalStretch(0);
+        sizePolicy.setVerticalStretch(0);
+        sizePolicy.setHeightForWidth(scrollAreaWidgetContents->sizePolicy().hasHeightForWidth());
+        scrollAreaWidgetContents->setSizePolicy(sizePolicy);
+        scrollAreaWidgetContents->setMinimumSize(QSize(0, 0));
+        scrollAreaWidgetContents->setAutoFillBackground(true);
+        verticalLayout_4 = new QVBoxLayout(scrollAreaWidgetContents);
+        verticalLayout_4->setSpacing(6);
+        verticalLayout_4->setContentsMargins(11, 11, 11, 11);
+        verticalLayout_4->setObjectName(QStringLiteral("verticalLayout_4"));
+        verticalLayout_4->setSizeConstraint(QLayout::SetDefaultConstraint);
+        verticalLayout_4->setContentsMargins(0, 0, 0, 0);
+        tabProgressLayout = new QVBoxLayout();
+        tabProgressLayout->setSpacing(6);
+        tabProgressLayout->setObjectName(QStringLiteral("tabProgressLayout"));
 
-        horizontalLayout->addWidget(tabWidget);
+        verticalLayout_4->addLayout(tabProgressLayout);
+
+        verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+
+        verticalLayout_4->addItem(verticalSpacer);
+
+        scrollArea->setWidget(scrollAreaWidgetContents);
+
+        verticalLayout_3->addWidget(scrollArea);
+
+        mainWidget->addTab(tabProgress, QString());
+
+        verticalLayout_2->addWidget(mainWidget);
 
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
@@ -111,7 +163,7 @@ public:
         QObject::connect(buttonSelectDir, SIGNAL(clicked()), MainWindow, SLOT(onSelectDirClicked()));
         QObject::connect(buttonMakePanorama, SIGNAL(clicked()), MainWindow, SLOT(onMakePanoramaClicked()));
 
-        tabWidget->setCurrentIndex(0);
+        mainWidget->setCurrentIndex(0);
 
 
         QMetaObject::connectSlotsByName(MainWindow);
@@ -123,7 +175,8 @@ public:
         actionQuit->setText(QApplication::translate("MainWindow", "Quit", 0));
         buttonSelectDir->setText(QApplication::translate("MainWindow", "Select source directory", 0));
         buttonMakePanorama->setText(QApplication::translate("MainWindow", "Make panorama", 0));
-        tabWidget->setTabText(tabWidget->indexOf(tabMain), QApplication::translate("MainWindow", "Files", 0));
+        mainWidget->setTabText(mainWidget->indexOf(tabMain), QApplication::translate("MainWindow", "Files", 0));
+        mainWidget->setTabText(mainWidget->indexOf(tabProgress), QApplication::translate("MainWindow", "Progress", 0));
         menuFile->setTitle(QApplication::translate("MainWindow", "File", 0));
     } // retranslateUi
 

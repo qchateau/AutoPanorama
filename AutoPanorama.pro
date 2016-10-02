@@ -13,8 +13,10 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    panoramamaker.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    panoramamaker.h
 
 FORMS    += mainwindow.ui
