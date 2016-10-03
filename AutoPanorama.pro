@@ -11,6 +11,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = AutoPanorama
 TEMPLATE = app
 
+INCLUDEPATH += /usr/local/include/opencv2
+LIBS += -L/usr/local/lib -lopencv_core -lopencv_imgcodecs -lopencv_stitching
 
 SOURCES += main.cpp\
         mainwindow.cpp \
