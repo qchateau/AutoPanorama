@@ -12,6 +12,8 @@
 using namespace cv;
 using namespace std;
 
+typedef enum WarpMode { Plane, Cylindrical, Spherical } WarpMode;
+
 class PanoramaMaker : public QThread
 {
     Q_OBJECT
@@ -19,8 +21,14 @@ public:
     explicit PanoramaMaker(QObject *parent = 0);
     void setImages(QStringList files,
                    QString output_filepath);
+
+    void setWarpMode(QString mode);
+    void setWarpMode(WarpMode mode);
+    void setDownscale(double scale=1);
     void run();
+
     QFileInfo out_fileinfo() { return output_fileinfo; }
+    Stitcher* get_stitcher() { return &stitcher; }
 
 private:
     QStringList images_path;
@@ -28,11 +36,12 @@ private:
     vector<Mat> images;
 
     bool try_use_gpu;
+    double scale;
     Stitcher stitcher;
 
 signals:
     void percentage(int);
-    void done();
+    void failed(QString msg=QString());
 
 public slots:
 };

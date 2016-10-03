@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>AutoPanorama</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -36,41 +36,6 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="output_label">
-          <property name="text">
-           <string>Output file name</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="layoutOutput">
-          <item>
-           <widget class="QLineEdit" name="output_filename_lineedit">
-            <property name="text">
-             <string>panorama</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QComboBox" name="extension_combobox">
-            <property name="editable">
-             <bool>false</bool>
-            </property>
-            <item>
-             <property name="text">
-              <string>.png</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>.jpg</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
          <layout class="QHBoxLayout" name="layoutButtons">
           <item>
            <widget class="QPushButton" name="buttonSelectDir">
@@ -79,14 +44,85 @@
             </property>
            </widget>
           </item>
-          <item>
-           <widget class="QPushButton" name="buttonMakePanorama">
-            <property name="text">
-             <string>Make panorama</string>
-            </property>
-           </widget>
-          </item>
          </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab">
+       <attribute name="title">
+        <string>Settings</string>
+       </attribute>
+       <layout class="QFormLayout" name="formLayout_2">
+        <item row="0" column="0">
+         <widget class="QLabel" name="cut_label">
+          <property name="text">
+           <string>Warp mode</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QComboBox" name="warpmode_combobox">
+          <item>
+           <property name="text">
+            <string>Spherical</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Cylindrical</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Plane</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Scale source image</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="warpmode_label">
+          <property name="text">
+           <string>Final cut</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QComboBox" name="cut_combobox">
+          <item>
+           <property name="text">
+            <string>Keep all pixels</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QDoubleSpinBox" name="downscale_spinbox">
+          <property name="suffix">
+           <string>%</string>
+          </property>
+          <property name="decimals">
+           <number>0</number>
+          </property>
+          <property name="minimum">
+           <double>10.000000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>100.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>10.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>100.000000000000000</double>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -114,8 +150,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>758</width>
-             <height>482</height>
+             <width>756</width>
+             <height>445</height>
             </rect>
            </property>
            <property name="sizePolicy">
@@ -173,6 +209,48 @@
       </widget>
      </widget>
     </item>
+    <item>
+     <widget class="QLabel" name="output_label">
+      <property name="text">
+       <string>Output file name</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="layoutOutput">
+      <item>
+       <widget class="QLineEdit" name="output_filename_lineedit">
+        <property name="text">
+         <string>panorama</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="extension_combobox">
+        <property name="editable">
+         <bool>false</bool>
+        </property>
+        <item>
+         <property name="text">
+          <string>.png</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>.jpg</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="buttonMakePanorama">
+        <property name="text">
+         <string>Make panorama</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -181,7 +259,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>25</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

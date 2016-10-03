@@ -6,6 +6,7 @@
 #include <QFileDialog>
 #include <QProgressBar>
 #include <QLineEdit>
+#include <QFile>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -72,9 +73,31 @@ void MainWindow::onMakePanoramaClicked() {
             output_filename += ui->extension_combobox->currentText();
             output_fileinfo = QFileInfo(QDir(QFileInfo(files[0]).absoluteDir()).filePath(output_filename));
         } while (output_fileinfo.exists());
+
+        QFile fil(output_fileinfo.absoluteFilePath());
+        fil.open(QIODevice::ReadWrite);
+
         worker->setImages(files, output_fileinfo.absoluteFilePath());
-        worker->start();
+        worker->setWarpMode(ui->warpmode_combobox->currentText());
+        worker->setDownscale(ui->downscale_spinbox->value()/100.0);
+        connect(worker, SIGNAL(finished()), this, SLOT(runWorkers()));
         createWorkerUi(worker);
+        workers << worker;
+        runWorkers();
+    }
+}
+
+void MainWindow::runWorkers() {
+    if (workers.isEmpty())
+        return;
+    PanoramaMaker *worker = workers[0];
+    if (worker->isFinished()) {
+        qDebug() << "Deleting worker";
+        workers.pop_front();
+        runWorkers();
+    } else if (!worker->isRunning()) {
+        qDebug() << "Starting worker";
+        worker->start();
     }
 }
 
@@ -83,7 +106,8 @@ void MainWindow::createWorkerUi(PanoramaMaker *worker) {
     progress_bar->setRange(0,100);
     progress_bar->setFormat(worker->out_fileinfo().fileName()+" : %p%");
     progress_bar->setAlignment(Qt::AlignCenter);
+    progress_bar->setValue(0);
     connect(worker, SIGNAL(percentage(int)), progress_bar, SLOT(setValue(int)));
-    connect(worker, SIGNAL(done()), progress_bar, SLOT(close()));
+    //connect(worker, SIGNAL(finished()), progress_bar, SLOT(close()));
     ui->tabProgressLayout->addWidget(progress_bar);
 }

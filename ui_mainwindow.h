@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created by: Qt User Interface Compiler version 5.5.1
+** Created by: Qt User Interface Compiler version 5.7.0
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -14,6 +14,8 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QComboBox>
+#include <QtWidgets/QDoubleSpinBox>
+#include <QtWidgets/QFormLayout>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLabel>
@@ -42,13 +44,16 @@ public:
     QWidget *tabMain;
     QVBoxLayout *verticalLayout;
     QTreeView *fsView;
-    QLabel *output_label;
-    QHBoxLayout *layoutOutput;
-    QLineEdit *output_filename_lineedit;
-    QComboBox *extension_combobox;
     QHBoxLayout *layoutButtons;
     QPushButton *buttonSelectDir;
-    QPushButton *buttonMakePanorama;
+    QWidget *tab;
+    QFormLayout *formLayout_2;
+    QLabel *cut_label;
+    QComboBox *warpmode_combobox;
+    QLabel *label;
+    QLabel *warpmode_label;
+    QComboBox *cut_combobox;
+    QDoubleSpinBox *downscale_spinbox;
     QWidget *tabProgress;
     QVBoxLayout *verticalLayout_3;
     QScrollArea *scrollArea;
@@ -56,6 +61,11 @@ public:
     QVBoxLayout *verticalLayout_4;
     QVBoxLayout *tabProgressLayout;
     QSpacerItem *verticalSpacer;
+    QLabel *output_label;
+    QHBoxLayout *layoutOutput;
+    QLineEdit *output_filename_lineedit;
+    QComboBox *extension_combobox;
+    QPushButton *buttonMakePanorama;
     QMenuBar *menuBar;
     QMenu *menuFile;
     QStatusBar *statusBar;
@@ -88,28 +98,6 @@ public:
 
         verticalLayout->addWidget(fsView);
 
-        output_label = new QLabel(tabMain);
-        output_label->setObjectName(QStringLiteral("output_label"));
-
-        verticalLayout->addWidget(output_label);
-
-        layoutOutput = new QHBoxLayout();
-        layoutOutput->setSpacing(6);
-        layoutOutput->setObjectName(QStringLiteral("layoutOutput"));
-        output_filename_lineedit = new QLineEdit(tabMain);
-        output_filename_lineedit->setObjectName(QStringLiteral("output_filename_lineedit"));
-
-        layoutOutput->addWidget(output_filename_lineedit);
-
-        extension_combobox = new QComboBox(tabMain);
-        extension_combobox->setObjectName(QStringLiteral("extension_combobox"));
-        extension_combobox->setEditable(false);
-
-        layoutOutput->addWidget(extension_combobox);
-
-
-        verticalLayout->addLayout(layoutOutput);
-
         layoutButtons = new QHBoxLayout();
         layoutButtons->setSpacing(6);
         layoutButtons->setObjectName(QStringLiteral("layoutButtons"));
@@ -118,15 +106,52 @@ public:
 
         layoutButtons->addWidget(buttonSelectDir);
 
-        buttonMakePanorama = new QPushButton(tabMain);
-        buttonMakePanorama->setObjectName(QStringLiteral("buttonMakePanorama"));
-
-        layoutButtons->addWidget(buttonMakePanorama);
-
 
         verticalLayout->addLayout(layoutButtons);
 
         mainWidget->addTab(tabMain, QString());
+        tab = new QWidget();
+        tab->setObjectName(QStringLiteral("tab"));
+        formLayout_2 = new QFormLayout(tab);
+        formLayout_2->setSpacing(6);
+        formLayout_2->setContentsMargins(11, 11, 11, 11);
+        formLayout_2->setObjectName(QStringLiteral("formLayout_2"));
+        cut_label = new QLabel(tab);
+        cut_label->setObjectName(QStringLiteral("cut_label"));
+
+        formLayout_2->setWidget(0, QFormLayout::LabelRole, cut_label);
+
+        warpmode_combobox = new QComboBox(tab);
+        warpmode_combobox->setObjectName(QStringLiteral("warpmode_combobox"));
+
+        formLayout_2->setWidget(0, QFormLayout::FieldRole, warpmode_combobox);
+
+        label = new QLabel(tab);
+        label->setObjectName(QStringLiteral("label"));
+
+        formLayout_2->setWidget(2, QFormLayout::LabelRole, label);
+
+        warpmode_label = new QLabel(tab);
+        warpmode_label->setObjectName(QStringLiteral("warpmode_label"));
+
+        formLayout_2->setWidget(3, QFormLayout::LabelRole, warpmode_label);
+
+        cut_combobox = new QComboBox(tab);
+        cut_combobox->setObjectName(QStringLiteral("cut_combobox"));
+
+        formLayout_2->setWidget(3, QFormLayout::FieldRole, cut_combobox);
+
+        downscale_spinbox = new QDoubleSpinBox(tab);
+        downscale_spinbox->setObjectName(QStringLiteral("downscale_spinbox"));
+        downscale_spinbox->setDecimals(0);
+        downscale_spinbox->setMinimum(10);
+        downscale_spinbox->setMaximum(100);
+        downscale_spinbox->setSingleStep(10);
+        downscale_spinbox->setValue(100);
+
+        formLayout_2->setWidget(2, QFormLayout::FieldRole, downscale_spinbox);
+
+        mainWidget->addTab(tab, QString());
         tabProgress = new QWidget();
         tabProgress->setObjectName(QStringLiteral("tabProgress"));
         verticalLayout_3 = new QVBoxLayout(tabProgress);
@@ -141,7 +166,7 @@ public:
         scrollArea->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop);
         scrollAreaWidgetContents = new QWidget();
         scrollAreaWidgetContents->setObjectName(QStringLiteral("scrollAreaWidgetContents"));
-        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 758, 482));
+        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 756, 445));
         QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
         sizePolicy.setHorizontalStretch(0);
         sizePolicy.setVerticalStretch(0);
@@ -173,10 +198,37 @@ public:
 
         verticalLayout_2->addWidget(mainWidget);
 
+        output_label = new QLabel(centralWidget);
+        output_label->setObjectName(QStringLiteral("output_label"));
+
+        verticalLayout_2->addWidget(output_label);
+
+        layoutOutput = new QHBoxLayout();
+        layoutOutput->setSpacing(6);
+        layoutOutput->setObjectName(QStringLiteral("layoutOutput"));
+        output_filename_lineedit = new QLineEdit(centralWidget);
+        output_filename_lineedit->setObjectName(QStringLiteral("output_filename_lineedit"));
+
+        layoutOutput->addWidget(output_filename_lineedit);
+
+        extension_combobox = new QComboBox(centralWidget);
+        extension_combobox->setObjectName(QStringLiteral("extension_combobox"));
+        extension_combobox->setEditable(false);
+
+        layoutOutput->addWidget(extension_combobox);
+
+        buttonMakePanorama = new QPushButton(centralWidget);
+        buttonMakePanorama->setObjectName(QStringLiteral("buttonMakePanorama"));
+
+        layoutOutput->addWidget(buttonMakePanorama);
+
+
+        verticalLayout_2->addLayout(layoutOutput);
+
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 800, 25));
+        menuBar->setGeometry(QRect(0, 0, 800, 21));
         menuFile = new QMenu(menuBar);
         menuFile->setObjectName(QStringLiteral("menuFile"));
         MainWindow->setMenuBar(menuBar);
@@ -200,8 +252,26 @@ public:
 
     void retranslateUi(QMainWindow *MainWindow)
     {
-        MainWindow->setWindowTitle(QApplication::translate("MainWindow", "MainWindow", 0));
+        MainWindow->setWindowTitle(QApplication::translate("MainWindow", "AutoPanorama", 0));
         actionQuit->setText(QApplication::translate("MainWindow", "Quit", 0));
+        buttonSelectDir->setText(QApplication::translate("MainWindow", "Select source directory", 0));
+        mainWidget->setTabText(mainWidget->indexOf(tabMain), QApplication::translate("MainWindow", "Files", 0));
+        cut_label->setText(QApplication::translate("MainWindow", "Warp mode", 0));
+        warpmode_combobox->clear();
+        warpmode_combobox->insertItems(0, QStringList()
+         << QApplication::translate("MainWindow", "Spherical", 0)
+         << QApplication::translate("MainWindow", "Cylindrical", 0)
+         << QApplication::translate("MainWindow", "Plane", 0)
+        );
+        label->setText(QApplication::translate("MainWindow", "Scale source image", 0));
+        warpmode_label->setText(QApplication::translate("MainWindow", "Final cut", 0));
+        cut_combobox->clear();
+        cut_combobox->insertItems(0, QStringList()
+         << QApplication::translate("MainWindow", "Keep all pixels", 0)
+        );
+        downscale_spinbox->setSuffix(QApplication::translate("MainWindow", "%", 0));
+        mainWidget->setTabText(mainWidget->indexOf(tab), QApplication::translate("MainWindow", "Settings", 0));
+        mainWidget->setTabText(mainWidget->indexOf(tabProgress), QApplication::translate("MainWindow", "Progress", 0));
         output_label->setText(QApplication::translate("MainWindow", "Output file name", 0));
         output_filename_lineedit->setText(QApplication::translate("MainWindow", "panorama", 0));
         extension_combobox->clear();
@@ -209,10 +279,7 @@ public:
          << QApplication::translate("MainWindow", ".png", 0)
          << QApplication::translate("MainWindow", ".jpg", 0)
         );
-        buttonSelectDir->setText(QApplication::translate("MainWindow", "Select source directory", 0));
         buttonMakePanorama->setText(QApplication::translate("MainWindow", "Make panorama", 0));
-        mainWidget->setTabText(mainWidget->indexOf(tabMain), QApplication::translate("MainWindow", "Files", 0));
-        mainWidget->setTabText(mainWidget->indexOf(tabProgress), QApplication::translate("MainWindow", "Progress", 0));
         menuFile->setTitle(QApplication::translate("MainWindow", "File", 0));
     } // retranslateUi
 

@@ -5,6 +5,7 @@
 
 #include <QMainWindow>
 #include <QFileSystemModel>
+#include <QTimer>
 
 namespace Ui {
 class MainWindow;
@@ -24,11 +25,12 @@ private:
     QStringList getSelectedFiles();
     void createWorkerUi(PanoramaMaker *worker);
 
-    QList<PanoramaMaker> workers;
+    QList<PanoramaMaker*> workers;
 
 public slots:
     void onSelectDirClicked();
     void onMakePanoramaClicked();
+    void runWorkers();
 };
 
 #endif // MAINWINDOW_H
