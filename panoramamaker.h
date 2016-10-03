@@ -6,6 +6,7 @@
 #include <opencv2/opencv.hpp>
 
 #include <QThread>
+#include <QFileInfo>
 #include <vector>
 
 using namespace cv;
@@ -16,13 +17,14 @@ class PanoramaMaker : public QThread
     Q_OBJECT
 public:
     explicit PanoramaMaker(QObject *parent = 0);
-    void setImages(QStringList files);
+    void setImages(QStringList files,
+                   QString output_filepath);
     void run();
-    QString out_filename() { return output_filename; }
+    QFileInfo out_fileinfo() { return output_fileinfo; }
 
 private:
     QStringList images_path;
-    QString output_filename;
+    QFileInfo output_fileinfo;
     vector<Mat> images;
 
     bool try_use_gpu;

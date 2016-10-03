@@ -36,6 +36,41 @@
          </widget>
         </item>
         <item>
+         <widget class="QLabel" name="output_label">
+          <property name="text">
+           <string>Output file name</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="layoutOutput">
+          <item>
+           <widget class="QLineEdit" name="output_filename_lineedit">
+            <property name="text">
+             <string>panorama</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="extension_combobox">
+            <property name="editable">
+             <bool>false</bool>
+            </property>
+            <item>
+             <property name="text">
+              <string>.png</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>.jpg</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
          <layout class="QHBoxLayout" name="layoutButtons">
           <item>
            <widget class="QPushButton" name="buttonSelectDir">
@@ -79,8 +114,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>756</width>
-             <height>495</height>
+             <width>758</width>
+             <height>482</height>
             </rect>
            </property>
            <property name="sizePolicy">
@@ -146,7 +181,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>21</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

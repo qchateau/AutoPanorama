@@ -6,9 +6,11 @@
 
 #include <QtDebug>
 #include <QFileInfo>
+#include <QDir>
 #include <unistd.h>
 
 using namespace cv;
+using namespace std;
 
 PanoramaMaker::PanoramaMaker(QObject *parent) :
     QThread(parent),
@@ -33,21 +35,15 @@ void PanoramaMaker::run() {
         qDebug() << "Can't stitch images, error code = " << int(status);
     } else {
         qDebug() << "Stiching worked !";
-        imwrite(output_filename.toUtf8().constData(), pano);
+        string out = output_fileinfo.absoluteFilePath().toUtf8().constData();
+        qDebug() << "Writing to " << QString::fromStdString(out);
+        imwrite(out, pano);
     }
     emit percentage(100);
     emit done();
 }
 
-void PanoramaMaker::setImages(QStringList files) {
+void PanoramaMaker::setImages(QStringList files, QString output_filepath) {
     images_path = files;
-    output_filename = QString();
-    for (int i=0; i<files.size(); ++i) {
-        QFileInfo file(files[i]);
-        output_filename += file.baseName();
-        if (i < files.size()-1) {
-            output_filename += "_";
-        }
-    }
-    output_filename += ".png";
+    output_fileinfo = QFileInfo(output_filepath);
 }

@@ -5,6 +5,7 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QProgressBar>
+#include <QLineEdit>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -61,7 +62,17 @@ void MainWindow::onMakePanoramaClicked() {
         QMessageBox::warning(this, "Not enough files", "Please select at least 2 files");
     } else {
         PanoramaMaker *worker = new PanoramaMaker;
-        worker->setImages(files);
+        int nr = 0;
+        QFileInfo output_fileinfo;
+        do {
+            QString output_filename(ui->output_filename_lineedit->text());
+            if (nr++ > 0) {
+                output_filename += "_"+QString::number(nr);
+            }
+            output_filename += ui->extension_combobox->currentText();
+            output_fileinfo = QFileInfo(QDir(QFileInfo(files[0]).absoluteDir()).filePath(output_filename));
+        } while (output_fileinfo.exists());
+        worker->setImages(files, output_fileinfo.absoluteFilePath());
         worker->start();
         createWorkerUi(worker);
     }
@@ -70,7 +81,7 @@ void MainWindow::onMakePanoramaClicked() {
 void MainWindow::createWorkerUi(PanoramaMaker *worker) {
     QProgressBar *progress_bar = new QProgressBar;
     progress_bar->setRange(0,100);
-    progress_bar->setFormat(worker->out_filename()+" : %p%");
+    progress_bar->setFormat(worker->out_fileinfo().fileName()+" : %p%");
     progress_bar->setAlignment(Qt::AlignCenter);
     connect(worker, SIGNAL(percentage(int)), progress_bar, SLOT(setValue(int)));
     connect(worker, SIGNAL(done()), progress_bar, SLOT(close()));

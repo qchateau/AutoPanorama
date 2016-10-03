@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created by: Qt User Interface Compiler version 5.7.0
+** Created by: Qt User Interface Compiler version 5.5.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -13,8 +13,11 @@
 #include <QtWidgets/QAction>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QButtonGroup>
+#include <QtWidgets/QComboBox>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLineEdit>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
@@ -39,6 +42,10 @@ public:
     QWidget *tabMain;
     QVBoxLayout *verticalLayout;
     QTreeView *fsView;
+    QLabel *output_label;
+    QHBoxLayout *layoutOutput;
+    QLineEdit *output_filename_lineedit;
+    QComboBox *extension_combobox;
     QHBoxLayout *layoutButtons;
     QPushButton *buttonSelectDir;
     QPushButton *buttonMakePanorama;
@@ -81,6 +88,28 @@ public:
 
         verticalLayout->addWidget(fsView);
 
+        output_label = new QLabel(tabMain);
+        output_label->setObjectName(QStringLiteral("output_label"));
+
+        verticalLayout->addWidget(output_label);
+
+        layoutOutput = new QHBoxLayout();
+        layoutOutput->setSpacing(6);
+        layoutOutput->setObjectName(QStringLiteral("layoutOutput"));
+        output_filename_lineedit = new QLineEdit(tabMain);
+        output_filename_lineedit->setObjectName(QStringLiteral("output_filename_lineedit"));
+
+        layoutOutput->addWidget(output_filename_lineedit);
+
+        extension_combobox = new QComboBox(tabMain);
+        extension_combobox->setObjectName(QStringLiteral("extension_combobox"));
+        extension_combobox->setEditable(false);
+
+        layoutOutput->addWidget(extension_combobox);
+
+
+        verticalLayout->addLayout(layoutOutput);
+
         layoutButtons = new QHBoxLayout();
         layoutButtons->setSpacing(6);
         layoutButtons->setObjectName(QStringLiteral("layoutButtons"));
@@ -112,7 +141,7 @@ public:
         scrollArea->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop);
         scrollAreaWidgetContents = new QWidget();
         scrollAreaWidgetContents->setObjectName(QStringLiteral("scrollAreaWidgetContents"));
-        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 756, 495));
+        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 758, 482));
         QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
         sizePolicy.setHorizontalStretch(0);
         sizePolicy.setVerticalStretch(0);
@@ -147,7 +176,7 @@ public:
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 800, 21));
+        menuBar->setGeometry(QRect(0, 0, 800, 25));
         menuFile = new QMenu(menuBar);
         menuFile->setObjectName(QStringLiteral("menuFile"));
         MainWindow->setMenuBar(menuBar);
@@ -173,6 +202,13 @@ public:
     {
         MainWindow->setWindowTitle(QApplication::translate("MainWindow", "MainWindow", 0));
         actionQuit->setText(QApplication::translate("MainWindow", "Quit", 0));
+        output_label->setText(QApplication::translate("MainWindow", "Output file name", 0));
+        output_filename_lineedit->setText(QApplication::translate("MainWindow", "panorama", 0));
+        extension_combobox->clear();
+        extension_combobox->insertItems(0, QStringList()
+         << QApplication::translate("MainWindow", ".png", 0)
+         << QApplication::translate("MainWindow", ".jpg", 0)
+        );
         buttonSelectDir->setText(QApplication::translate("MainWindow", "Select source directory", 0));
         buttonMakePanorama->setText(QApplication::translate("MainWindow", "Make panorama", 0));
         mainWidget->setTabText(mainWidget->indexOf(tabMain), QApplication::translate("MainWindow", "Files", 0));
