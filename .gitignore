@@ -1,3 +1,4 @@
+*.pro.user*
 release
 debug
 deployed
