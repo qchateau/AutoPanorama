@@ -7,6 +7,8 @@
 #include <QProgressBar>
 #include <QLineEdit>
 #include <QFile>
+#include <QToolTip>
+#include <QPoint>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -26,6 +28,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->fsView->setModel(fs_model);
     ui->fsView->setRootIndex(fs_model->index(root_dir));
     ui->fsView->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+    onBlenderTypeChange();
 }
 
 MainWindow::~MainWindow()
@@ -78,13 +81,36 @@ void MainWindow::onMakePanoramaClicked() {
         fil.open(QIODevice::ReadWrite);
 
         worker->setImages(files, output_fileinfo.absoluteFilePath());
-        worker->setWarpMode(ui->warpmode_combobox->currentText());
-        worker->setDownscale(ui->downscale_spinbox->value()/100.0);
-        connect(worker, SIGNAL(finished()), this, SLOT(runWorkers()));
+        configureWorker(worker);
         createWorkerUi(worker);
+        connect(worker, SIGNAL(finished()), this, SLOT(runWorkers()));
         workers << worker;
         runWorkers();
     }
+}
+
+void MainWindow::configureWorker(PanoramaMaker *worker) {
+    worker->setDownscale(ui->downscale_spinbox->value()/100.0);
+    worker->setWarpMode(ui->warpmode_combobox->currentText());
+    worker->setSeamFinderMode(ui->seamfindermode_combobox->currentText());
+    worker->get_stitcher()->setSeamEstimationResol(ui->seamfinderres_spinbox->value());
+
+    QString wave_cor_kind_txt = ui->wavecorkind_combobox->currentText();
+    if (wave_cor_kind_txt == QString("Horizontal")) {
+        worker->get_stitcher()->setWaveCorrection(true);
+        worker->get_stitcher()->setWaveCorrectKind(detail::WAVE_CORRECT_HORIZ);
+    } else if (wave_cor_kind_txt == QString("Vertical")) {
+        worker->get_stitcher()->setWaveCorrection(true);
+        worker->get_stitcher()->setWaveCorrectKind(detail::WAVE_CORRECT_VERT);
+    } else {
+        worker->get_stitcher()->setWaveCorrection(false);
+    }
+
+    double compositing_res = ui->compositingres_spinbox->value();
+    if (compositing_res <= 0) {
+        compositing_res = Stitcher::ORIG_RESOL;
+    }
+    worker->get_stitcher()->setCompositingResol(compositing_res);
 }
 
 void MainWindow::runWorkers() {
@@ -108,7 +134,23 @@ void MainWindow::createWorkerUi(PanoramaMaker *worker) {
     progress_bar->setFormat(worker->out_fileinfo().fileName()+" : %p%");
     progress_bar->setAlignment(Qt::AlignCenter);
     progress_bar->setValue(0);
+    progress_bar->setToolTip(worker->getStitcherConfString());
     connect(worker, SIGNAL(percentage(int)), progress_bar, SLOT(setValue(int)));
     //connect(worker, SIGNAL(finished()), progress_bar, SLOT(close()));
     ui->tabProgressLayout->addWidget(progress_bar);
+}
+
+void MainWindow::onBlenderTypeChange() {
+    QString type = ui->blendertype_combobox->currentText();
+    if (type == QString("Multiband")) {
+        ui->sharpness_label->hide();
+        ui->sharpness_spinbox->hide();
+        ui->nbands_label->show();
+        ui->nbands_spinbox->show();
+    } else if (type == QString("Feather")) {
+        ui->sharpness_label->show();
+        ui->sharpness_spinbox->show();
+        ui->nbands_label->hide();
+        ui->nbands_spinbox->hide();
+    }
 }

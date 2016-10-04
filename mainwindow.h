@@ -24,6 +24,7 @@ private:
     QFileSystemModel *fs_model;
     QStringList getSelectedFiles();
     void createWorkerUi(PanoramaMaker *worker);
+    void configureWorker(PanoramaMaker *worker);
 
     QList<PanoramaMaker*> workers;
 
@@ -31,6 +32,7 @@ public slots:
     void onSelectDirClicked();
     void onMakePanoramaClicked();
     void runWorkers();
+    void onBlenderTypeChange();
 };
 
 #endif // MAINWINDOW_H

@@ -12,8 +12,6 @@
 using namespace cv;
 using namespace std;
 
-typedef enum WarpMode { Plane, Cylindrical, Spherical } WarpMode;
-
 class PanoramaMaker : public QThread
 {
     Q_OBJECT
@@ -23,10 +21,14 @@ public:
                    QString output_filepath);
 
     void setWarpMode(QString mode);
-    void setWarpMode(WarpMode mode);
+    void setSeamFinderMode(QString mode);
+    void setBlenderMode(QString mode, double param=-1);
+
     void setDownscale(double scale=1);
+    void unsafeRun();
     void run();
 
+    QString getStitcherConfString();
     QFileInfo out_fileinfo() { return output_fileinfo; }
     Stitcher* get_stitcher() { return &stitcher; }
 
@@ -38,6 +40,11 @@ private:
     bool try_use_gpu;
     double scale;
     Stitcher stitcher;
+    Mat pano;
+    Stitcher::Status status;
+
+    QString seam_finder_mode, warp_mode, blender_mode;
+    double blender_param;
 
 signals:
     void percentage(int);
