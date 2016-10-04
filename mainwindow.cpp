@@ -94,6 +94,7 @@ void MainWindow::runWorkers() {
     if (worker->isFinished()) {
         qDebug() << "Deleting worker";
         workers.pop_front();
+        delete worker;
         runWorkers();
     } else if (!worker->isRunning()) {
         qDebug() << "Starting worker";
