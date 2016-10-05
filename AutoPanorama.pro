@@ -18,6 +18,7 @@ win32 {
 
     INCLUDEPATH += $$PWD/lib/include
     DEPENDPATH += $$PWD/lib/include
+    QMAKE_LFLAGS += -Wl,--large-address-aware
 } else {
     INCLUDEPATH += /usr/local/include/opencv2
     LIBS += -L/usr/local/lib -lopencv_core -lopencv_imgcodecs \
@@ -36,3 +37,4 @@ FORMS    += mainwindow.ui
 DISTFILES += \
     autopanorama.rc \
     autopanorama.ico
+

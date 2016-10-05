@@ -29,6 +29,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->fsView->setRootIndex(fs_model->index(root_dir));
     ui->fsView->header()->setSectionResizeMode(0, QHeaderView::Stretch);
     onBlenderTypeChange();
+    onExposureCompensatorChange();
 }
 
 MainWindow::~MainWindow()
@@ -66,21 +67,7 @@ void MainWindow::onMakePanoramaClicked() {
         QMessageBox::warning(this, "Not enough files", "Please select at least 2 files");
     } else {
         PanoramaMaker *worker = new PanoramaMaker;
-        int nr = 0;
-        QFileInfo output_fileinfo;
-        do {
-            QString output_filename(ui->output_filename_lineedit->text());
-            if (nr++ > 0) {
-                output_filename += "_"+QString::number(nr);
-            }
-            output_filename += ui->extension_combobox->currentText();
-            output_fileinfo = QFileInfo(QDir(QFileInfo(files[0]).absoluteDir()).filePath(output_filename));
-        } while (output_fileinfo.exists());
-
-        QFile fil(output_fileinfo.absoluteFilePath());
-        fil.open(QIODevice::ReadWrite);
-
-        worker->setImages(files, output_fileinfo.absoluteFilePath());
+        worker->setImages(files, ui->output_filename_lineedit->text(), ui->extension_combobox->currentText());
         configureWorker(worker);
         createWorkerUi(worker);
         connect(worker, SIGNAL(finished()), this, SLOT(runWorkers()));
@@ -90,11 +77,20 @@ void MainWindow::onMakePanoramaClicked() {
 }
 
 void MainWindow::configureWorker(PanoramaMaker *worker) {
-    worker->setDownscale(ui->downscale_spinbox->value()/100.0);
-    worker->setWarpMode(ui->warpmode_combobox->currentText());
-    worker->setSeamFinderMode(ui->seamfindermode_combobox->currentText());
-    worker->get_stitcher()->setSeamEstimationResol(ui->seamfinderres_spinbox->value());
+    // Registration resolution
+    worker->get_stitcher()->setRegistrationResol(ui->regres_spinbox->value());
 
+    // Feature finder mode
+    worker->setFeaturesFinderMode(ui->featuresfinder_combobox->currentText());
+
+    // Feature matching mode and confidence
+    worker->setFeaturesMatchingMode(ui->featuresmatcher_combobox->currentText(),
+                                    ui->featuresmatcherconf_spinbox->value());
+
+    // Warp mode
+    worker->setWarpMode(ui->warpmode_combobox->currentText());
+
+    // Wave correction
     QString wave_cor_kind_txt = ui->wavecorkind_combobox->currentText();
     if (wave_cor_kind_txt == QString("Horizontal")) {
         worker->get_stitcher()->setWaveCorrection(true);
@@ -106,6 +102,32 @@ void MainWindow::configureWorker(PanoramaMaker *worker) {
         worker->get_stitcher()->setWaveCorrection(false);
     }
 
+    // Bundle adjuster
+    worker->setBundleAdjusterMode(ui->bundleadj_combobox->currentText());
+
+    // Panorama confidence
+    worker->get_stitcher()->setPanoConfidenceThresh(ui->confth_spinbox->value());
+
+    // Exposure compensator mode
+    worker->setExposureCompensatorMode(ui->expcomp_combobox->currentText(), ui->blocksize_spinbox->value());
+
+    // Seam estimation resolution
+    worker->get_stitcher()->setSeamEstimationResol(ui->seamfinderres_spinbox->value());
+
+    // Seam finder mode
+    worker->setSeamFinderMode(ui->seamfindermode_combobox->currentText());
+
+    // Blender
+    QString blender_type = ui->blendertype_combobox->currentText();
+    double blender_param = -1;
+    if (blender_type == QString("Feather")) {
+        blender_param = ui->sharpness_spinbox->value();
+    } else if (blender_type == QString("Multiband")) {
+        blender_param = ui->nbands_spinbox->value();
+    }
+    worker->setBlenderMode(blender_type, blender_param);
+
+    // Compositing resolution
     double compositing_res = ui->compositingres_spinbox->value();
     if (compositing_res <= 0) {
         compositing_res = Stitcher::ORIG_RESOL;
@@ -131,11 +153,12 @@ void MainWindow::runWorkers() {
 void MainWindow::createWorkerUi(PanoramaMaker *worker) {
     QProgressBar *progress_bar = new QProgressBar;
     progress_bar->setRange(0,100);
-    progress_bar->setFormat(worker->out_fileinfo().fileName()+" : %p%");
+    progress_bar->setFormat(worker->get_output_filename()+" : %p%");
     progress_bar->setAlignment(Qt::AlignCenter);
     progress_bar->setValue(0);
     progress_bar->setToolTip(worker->getStitcherConfString());
     connect(worker, SIGNAL(percentage(int)), progress_bar, SLOT(setValue(int)));
+    connect(worker, SIGNAL(failed(QString)), progress_bar, SLOT(close()));
     //connect(worker, SIGNAL(finished()), progress_bar, SLOT(close()));
     ui->tabProgressLayout->addWidget(progress_bar);
 }
@@ -154,3 +177,15 @@ void MainWindow::onBlenderTypeChange() {
         ui->nbands_spinbox->hide();
     }
 }
+
+void MainWindow::onExposureCompensatorChange() {
+    QString type = ui->expcomp_combobox->currentText();
+    if (type == QString("Blocks Gain")) {
+        ui->blocksize_label->show();
+        ui->blocksize_spinbox->show();
+    } else {
+        ui->blocksize_label->show();
+        ui->blocksize_spinbox->show();
+    }
+}
+

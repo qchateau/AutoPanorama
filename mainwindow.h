@@ -33,6 +33,7 @@ public slots:
     void onMakePanoramaClicked();
     void runWorkers();
     void onBlenderTypeChange();
+    void onExposureCompensatorChange();
 };
 
 #endif // MAINWINDOW_H
