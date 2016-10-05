@@ -15,13 +15,6 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="1" column="0">
-     <widget class="QLabel" name="output_label">
-      <property name="text">
-       <string>Output file name</string>
-      </property>
-     </widget>
-    </item>
     <item row="0" column="0">
      <widget class="QTabWidget" name="mainWidget">
       <property name="currentIndex">
@@ -34,9 +27,6 @@
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
          <widget class="QTreeView" name="fsView">
-          <property name="defaultDropAction">
-           <enum>Qt::LinkAction</enum>
-          </property>
           <property name="selectionMode">
            <enum>QAbstractItemView::ExtendedSelection</enum>
           </property>
@@ -718,6 +708,13 @@
        </widget>
       </item>
      </layout>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="output_label">
+      <property name="text">
+       <string>Output file name</string>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>

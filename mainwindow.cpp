@@ -17,17 +17,18 @@ MainWindow::MainWindow(QWidget *parent) :
     fs_model = new QFileSystemModel;
 
     QStringList filters;
-    filters << "*.png" << "*.jpg" << "*.bmp";
+    QString root_dir = QDir::homePath();
+    filters << "*.png" << "*.jpg" << "*.jpeg" << "*.bmp";
+    filters << "*.PNG" << "*.JPG" << "*.JPEG" << "*.BMP";
     fs_model->setNameFilters(filters);
     fs_model->setNameFilterDisables(false);
-
-    QString root_dir = "";
     fs_model->setRootPath(root_dir);
 
     ui->setupUi(this);
     ui->fsView->setModel(fs_model);
     ui->fsView->setRootIndex(fs_model->index(root_dir));
     ui->fsView->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+
     onBlenderTypeChange();
     onExposureCompensatorChange();
 }
@@ -52,11 +53,12 @@ QStringList MainWindow::getSelectedFiles() {
 }
 
 void MainWindow::onSelectDirClicked() {
-    QString source_dir = QFileDialog::getExistingDirectory();
+    QString source_dir = QFileDialog::getExistingDirectory(this, "Open directory", QDir::homePath(), 0);
     qDebug() << "Selected directory : " << source_dir;
 
     fs_model->setRootPath(source_dir);
     ui->fsView->setRootIndex(fs_model->index(source_dir));
+    ui->fsView->clearSelection();
 }
 
 void MainWindow::onMakePanoramaClicked() {
