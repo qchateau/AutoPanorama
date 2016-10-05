@@ -14,7 +14,8 @@ RC_FILE = autopanorama.rc
 
 win32 {
     LIBS += -L$$PWD/lib/ -lopencv_core310.dll -lopencv_imgcodecs310.dll \
-            -lopencv_stitching310.dll -lopencv_imgproc310.dll
+            -lopencv_stitching310.dll -lopencv_imgproc310.dll \
+            -lopencv_features2d310.dll
 
     INCLUDEPATH += $$PWD/lib/include
     DEPENDPATH += $$PWD/lib/include
@@ -22,15 +23,17 @@ win32 {
 } else {
     INCLUDEPATH += /usr/local/include/opencv2
     LIBS += -L/usr/local/lib -lopencv_core -lopencv_imgcodecs \
-            -lopencv_stitching -lopencv_imgproc
+            -lopencv_stitching -lopencv_imgproc -lopencv_features2d
 }
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    panoramamaker.cpp
+    panoramamaker.cpp \
+    akazefeaturesfinder.cpp
 
 HEADERS  += mainwindow.h \
-    panoramamaker.h
+    panoramamaker.h \
+    akazefeaturesfinder.h
 
 FORMS    += mainwindow.ui
 

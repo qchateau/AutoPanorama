@@ -41,7 +41,8 @@ public:
     QString get_output_filename() { return output_filename; }
 
 private:
-    void fail(int status=-1);
+    void fail(Stitcher::Status status);
+    void fail(QString msg=QString("Unknown error"));
 
     bool try_use_gpu;
     QStringList images_path;

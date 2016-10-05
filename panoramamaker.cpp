@@ -1,4 +1,5 @@
 #include "panoramamaker.h"
+#include "akazefeaturesfinder.h"
 
 #include <opencv2/stitching.hpp>
 #include <opencv2/imgcodecs.hpp>
@@ -30,11 +31,14 @@ void PanoramaMaker::run() {
     }
     catch (cv::Exception& e) {
         qDebug() << "OpenCV error during stitching : " << QString(e.what());
+        fail("OpenCV error during stitching");
     }
     catch(std::bad_alloc& e) {
+        fail("Bad alloc error");
         qDebug() << "Bad alloc error : " << QString(e.what());
     }
     catch(...) {
+        fail();
         qDebug() << "Unknown exception";
     }
 }
@@ -85,7 +89,7 @@ void PanoramaMaker::unsafeRun() {
     emit percentage(100);
 }
 
-void PanoramaMaker::fail(int status) {
+void PanoramaMaker::fail(Stitcher::Status status) {
     QString msg;
     switch(status) {
     case Stitcher::ERR_NEED_MORE_IMGS:
@@ -100,6 +104,10 @@ void PanoramaMaker::fail(int status) {
     default:
         msg = "Unknown error";
     }
+    emit failed(msg);
+}
+
+void PanoramaMaker::fail(QString msg) {
     emit failed(msg);
 }
 
@@ -193,6 +201,8 @@ void PanoramaMaker::setFeaturesFinderMode(QString mode) {
     Ptr<detail::FeaturesFinder> ffinder;
     if (mode == QString("ORB")) {
         ffinder = makePtr<detail::OrbFeaturesFinder>();
+    } else if (mode == QString("AKAZE")) {
+        ffinder = makePtr<AKAZEFeaturesFinder>();
     } else if (mode == QString("SURF")) {
         ffinder = makePtr<detail::SurfFeaturesFinder>();
     } else {

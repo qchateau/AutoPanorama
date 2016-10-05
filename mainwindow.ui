@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>600</height>
+    <height>700</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -163,6 +163,11 @@
           <property name="enabled">
            <bool>true</bool>
           </property>
+          <item>
+           <property name="text">
+            <string>AKAZE</string>
+           </property>
+          </item>
           <item>
            <property name="text">
             <string>ORB</string>
@@ -615,8 +620,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>756</width>
-             <height>445</height>
+             <width>758</width>
+             <height>524</height>
             </rect>
            </property>
            <property name="sizePolicy">
@@ -724,7 +729,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>21</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
