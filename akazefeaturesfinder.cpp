@@ -5,10 +5,15 @@
 #include <opencv2/stitching/detail/matchers.hpp>
 #include <QtDebug>
 
-AKAZEFeaturesFinder::AKAZEFeaturesFinder() {
-    qDebug() << "Creating akaze";
-    akaze = AKAZE::create();
-    qDebug() << "Created akaze";
+AKAZEFeaturesFinder::AKAZEFeaturesFinder(int descriptor_type,
+                                         int descriptor_size,
+                                         int descriptor_channels,
+                                         float threshold,
+                                         int nOctaves,
+                                         int nOctaveLayers,
+                                         int diffusivity) {
+    akaze = AKAZE::create(descriptor_type, descriptor_size, descriptor_channels,
+                          threshold, nOctaves, nOctaveLayers, diffusivity);
 }
 
 void AKAZEFeaturesFinder::find(InputArray image, detail::ImageFeatures &features) {

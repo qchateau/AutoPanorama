@@ -12,7 +12,13 @@ using namespace std;
 
 class AKAZEFeaturesFinder : public detail::FeaturesFinder {
 public:
-    AKAZEFeaturesFinder();
+    AKAZEFeaturesFinder(int descriptor_type = AKAZE::DESCRIPTOR_MLDB,
+                        int descriptor_size = 0,
+                        int descriptor_channels = 3,
+                        float threshold = 0.001f,
+                        int nOctaves = 4,
+                        int nOctaveLayers = 4,
+                        int diffusivity = KAZE::DIFF_PM_G2);
 
 private:
     void find(InputArray image, detail::ImageFeatures &features);

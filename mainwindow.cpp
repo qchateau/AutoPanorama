@@ -195,8 +195,8 @@ void MainWindow::onExposureCompensatorChange() {
         ui->blocksize_label->show();
         ui->blocksize_spinbox->show();
     } else {
-        ui->blocksize_label->show();
-        ui->blocksize_spinbox->show();
+        ui->blocksize_label->hide();
+        ui->blocksize_spinbox->hide();
     }
 }
 
