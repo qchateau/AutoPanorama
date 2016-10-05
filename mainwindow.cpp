@@ -159,10 +159,19 @@ void MainWindow::createWorkerUi(PanoramaMaker *worker) {
     progress_bar->setAlignment(Qt::AlignCenter);
     progress_bar->setValue(0);
     progress_bar->setToolTip(worker->getStitcherConfString());
+    worker->setAssociatedProgressBar(progress_bar);
     connect(worker, SIGNAL(percentage(int)), progress_bar, SLOT(setValue(int)));
-    connect(worker, SIGNAL(failed(QString)), progress_bar, SLOT(close()));
+    connect(worker, SIGNAL(failed(QString)), this, SLOT(onWorkerFailed(QString)));
     //connect(worker, SIGNAL(finished()), progress_bar, SLOT(close()));
     ui->tabProgressLayout->addWidget(progress_bar);
+}
+
+void MainWindow::onWorkerFailed(QString msg) {
+    PanoramaMaker* sender = qobject_cast<PanoramaMaker*>(QObject::sender());
+    QProgressBar *pb = sender->getAssociatedProgresBar();
+    pb->setFormat(QString("%1 failed : ").arg(sender->get_output_filename())+msg);
+    pb->setValue(100);
+    pb->setStyleSheet("QProgressBar::chunk{background-color:red}");
 }
 
 void MainWindow::onBlenderTypeChange() {

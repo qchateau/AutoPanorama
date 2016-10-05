@@ -51,7 +51,7 @@ void PanoramaMaker::unsafeRun() {
     status = stitcher.estimateTransform(images);
     qDebug() << "estimateTransform done : " << ((status != Stitcher::OK) ? "KO" : "OK");
     if (status != Stitcher::OK) {
-        fail();
+        fail(status);
         return;
     } else {
         emit percentage(30);
@@ -60,7 +60,7 @@ void PanoramaMaker::unsafeRun() {
     status = stitcher.composePanorama(pano);
     qDebug() << "composePanorama done : " << ((status != Stitcher::OK) ? "KO" : "OK");
     if (status != Stitcher::OK) {
-        fail();
+        fail(status);
         return;
     } else {
         emit percentage(90);
@@ -85,7 +85,21 @@ void PanoramaMaker::unsafeRun() {
     emit percentage(100);
 }
 
-void PanoramaMaker::fail(QString msg) {
+void PanoramaMaker::fail(int status) {
+    QString msg;
+    switch(status) {
+    case Stitcher::ERR_NEED_MORE_IMGS:
+        msg = "Need more images";
+        break;
+    case Stitcher::ERR_HOMOGRAPHY_EST_FAIL:
+        msg = "Homography estimation failed";
+        break;
+    case Stitcher::ERR_CAMERA_PARAMS_ADJUST_FAIL:
+        msg = "Camera parameters adjustment failed";
+        break;
+    default:
+        msg = "Unknown error";
+    }
     emit failed(msg);
 }
 

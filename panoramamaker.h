@@ -8,6 +8,7 @@
 #include <QThread>
 #include <QFileInfo>
 #include <vector>
+#include <QProgressBar>
 
 using namespace cv;
 using namespace std;
@@ -28,6 +29,9 @@ public:
     void setBundleAdjusterMode(QString mode);
     void setFeaturesFinderMode(QString mode);
     void setFeaturesMatchingMode(QString mode, double param=0.65);
+    void setAssociatedProgressBar(QProgressBar *pb) { progress_bar = pb; }
+
+    QProgressBar* getAssociatedProgresBar() { return progress_bar; }
 
     void unsafeRun();
     void run();
@@ -37,19 +41,22 @@ public:
     QString get_output_filename() { return output_filename; }
 
 private:
-    void fail(QString msg=QString());
-    QStringList images_path;
-    QString output_filename, output_ext;
-    vector<Mat> images;
+    void fail(int status=-1);
 
     bool try_use_gpu;
+    QStringList images_path;
+    QString output_filename, output_ext;
+
     Stitcher stitcher;
-    Mat pano;
     Stitcher::Status status;
+    vector<Mat> images;
+    Mat pano;
 
     QString seam_finder_mode, warp_mode, blender_mode, exposure_compensator_mode;
     QString bundle_adjuster_mode, features_finder_mode, features_matcher_mode;
     double blender_param, features_matcher_param;
+
+    QProgressBar *progress_bar;
 
 signals:
     void percentage(int);

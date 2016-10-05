@@ -34,6 +34,7 @@ public slots:
     void runWorkers();
     void onBlenderTypeChange();
     void onExposureCompensatorChange();
+    void onWorkerFailed(QString msg);
 };
 
 #endif // MAINWINDOW_H

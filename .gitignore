@@ -2,6 +2,10 @@
 release
 debug
 deployed
+*.PNG
+*png
+*.jpg
+*.JPG
 
 # Windows image file caches
 Thumbs.db
