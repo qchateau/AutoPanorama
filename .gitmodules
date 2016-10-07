@@ -1,3 +1,4 @@
 [submodule "opencv"]
 	path = opencv
 	url = git@github.com:Tytan/opencv.git
+	ignore = untracked

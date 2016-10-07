@@ -17,7 +17,7 @@ INCLUDEPATH += $$PWD/opencv/install/include/
 DEPENDPATH += $$PWD/opencv/install/include/
 
 win32 {
-    LIBS += -L$$PWD/opencv/x86/mingw/bin/ -L$$PWD/opencv/x86/mingw/lib/ \
+    LIBS += -L$$PWD/opencv/install/x86/mingw/bin/ -L$$PWD/opencv/install/x86/mingw/lib/ \
             -lopencv_stitching310.dll \
             -lopencv_features2d310.dll \
             -lopencv_imgcodecs310.dll \
@@ -61,12 +61,10 @@ win32 {
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    panoramamaker.cpp \
-    akazefeaturesfinder.cpp
+    panoramamaker.cpp
 
 HEADERS  += mainwindow.h \
-    panoramamaker.h \
-    akazefeaturesfinder.h
+    panoramamaker.h
 
 FORMS    += mainwindow.ui
 
