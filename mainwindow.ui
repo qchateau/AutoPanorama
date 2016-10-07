@@ -157,7 +157,7 @@
            <double>0.100000000000000</double>
           </property>
           <property name="value">
-           <double>0.600000000000000</double>
+           <double>0.200000000000000</double>
           </property>
          </widget>
         </item>
@@ -196,6 +196,9 @@
           </property>
           <property name="maximum">
            <double>100.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.500000000000000</double>
           </property>
          </widget>
         </item>
@@ -623,8 +626,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>758</width>
-             <height>524</height>
+             <width>63</width>
+             <height>16</height>
             </rect>
            </property>
            <property name="sizePolicy">
@@ -732,7 +735,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>25</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

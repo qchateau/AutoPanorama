@@ -186,6 +186,11 @@ void MainWindow::onBlenderTypeChange() {
         ui->sharpness_spinbox->show();
         ui->nbands_label->hide();
         ui->nbands_spinbox->hide();
+    } else {
+        ui->sharpness_label->hide();
+        ui->sharpness_spinbox->hide();
+        ui->nbands_label->hide();
+        ui->nbands_spinbox->hide();
     }
 }
 

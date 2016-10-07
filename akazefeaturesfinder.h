@@ -8,11 +8,9 @@
 #include <vector>
 
 using namespace std;
+using namespace cv;
 
-namespace cv {
-namespace detail {
-
-class AKAZEFeaturesFinder : public FeaturesFinder {
+class AKAZEFeaturesFinder : public detail::FeaturesFinder {
 public:
     AKAZEFeaturesFinder(int descriptor_type = AKAZE::DESCRIPTOR_MLDB,
                         int descriptor_size = 0,
@@ -23,12 +21,9 @@ public:
                         int diffusivity = KAZE::DIFF_PM_G2);
 
 private:
-    void find(InputArray image, ImageFeatures &features);
+    void find(InputArray image, detail::ImageFeatures &features);
 
     Ptr<AKAZE> akaze;
 };
-
-} // namespace detail
-} // namespace cv
 
 #endif // AKAZEFEATURESFINDER_H

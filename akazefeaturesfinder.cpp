@@ -5,9 +5,6 @@
 #include <opencv2/stitching/detail/matchers.hpp>
 #include <QtDebug>
 
-namespace cv {
-namespace detail {
-
 AKAZEFeaturesFinder::AKAZEFeaturesFinder(int descriptor_type,
                                          int descriptor_size,
                                          int descriptor_channels,
@@ -19,13 +16,10 @@ AKAZEFeaturesFinder::AKAZEFeaturesFinder(int descriptor_type,
                           threshold, nOctaves, nOctaveLayers, diffusivity);
 }
 
-void AKAZEFeaturesFinder::find(InputArray image, ImageFeatures &features) {
+void AKAZEFeaturesFinder::find(InputArray image, detail::ImageFeatures &features) {
     CV_Assert((image.type() == CV_8UC3) || (image.type() == CV_8UC1));
     Mat desc;
     UMat uimg = image.getUMat();
     akaze->detectAndCompute(uimg, UMat(), features.keypoints, desc);
     features.descriptors = desc.getUMat(ACCESS_READ);
 }
-
-} // namespace detail
-} // namespace cv
