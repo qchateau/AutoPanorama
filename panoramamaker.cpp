@@ -203,8 +203,6 @@ void PanoramaMaker::setFeaturesFinderMode(QString mode) {
         ffinder = makePtr<detail::OrbFeaturesFinder>();
     } else if (mode == QString("AKAZE")) {
         ffinder = makePtr<AKAZEFeaturesFinder>();
-    } else if (mode == QString("SURF")) {
-        ffinder = makePtr<detail::SurfFeaturesFinder>();
     } else {
         return;
     }
