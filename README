@@ -1,0 +1,20 @@
+TODO:
+- build with IPP on linux
+- static linking on win32
+- opencv submodule build script
+
+This build needs the opencv sumodule to be built correctly :
+    Linux :
+        Build as static lib
+        Disable IPP
+        Install localy in opencv/install/
+    Win32 :
+        Build as dynamic lib
+        Install localy in opencv/install/
+
+To deploy the windows executable :
+    Copy dependant opencv dlls
+    Copy the content of lib_for_windows
+    Copy the executable
+
+
