@@ -10,7 +10,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = AutoPanorama
 TEMPLATE = app
-RC_FILE = autopanorama.rc
+RC_FILE = res/autopanorama.rc
 
 
 INCLUDEPATH += $$PWD/opencv/install/include/
@@ -52,6 +52,7 @@ win32 {
             -ljpeg \
             -lpng \
             -lz \
+            -lippicv \
             #-lgtk-x11-2.0 -lgdk-x11-2.0 -lpangocairo-1.0 \
             #-lcairo -lgio-2.0 -lpangoft2-1.0 -lpango-1.0 -lgobject-2.0 -lfontconfig \
             #-lfreetype -lgthread-2.0 -lglib-2.0 -lavcodec-ffmpeg -lavformat-ffmpeg -lavutil-ffmpeg \
@@ -59,16 +60,17 @@ win32 {
             -Wl,-Bdynamic -ldl
 }
 
-SOURCES += main.cpp\
-        mainwindow.cpp \
-    panoramamaker.cpp
+SOURCES +=  src/main.cpp \
+            src/mainwindow.cpp \
+            src/panoramamaker.cpp \
+    src/qfilewidget.cpp
 
-HEADERS  += mainwindow.h \
-    panoramamaker.h
+HEADERS  += src/mainwindow.h \
+            src/panoramamaker.h \
+    src/qfilewidget.h
 
-FORMS    += mainwindow.ui
+FORMS    += src/mainwindow.ui
 
-DISTFILES += \
-    autopanorama.rc \
-    autopanorama.ico
+DISTFILES += res/autopanorama.ico \
+             res/autopanorama.rc
 

@@ -1,13 +1,13 @@
 TODO:
-- build with IPP on linux
 - static linking on win32
-- opencv submodule build script
+- opencv submodule build win32 script
+- mingw on linux (cross compile ?)
+- make it so item don't stack AND don't allow internal drag
+- wait cursor while dropping ?
 
 This build needs the opencv sumodule to be built correctly :
     Linux :
-        Build as static lib
-        Disable IPP
-        Install localy in opencv/install/
+        Use script in the script folder
     Win32 :
         Build as dynamic lib
         Install localy in opencv/install/

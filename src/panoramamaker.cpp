@@ -25,9 +25,7 @@ PanoramaMaker::PanoramaMaker(QObject *parent) :
 
 void PanoramaMaker::run() {
     try {
-        qDebug() << "Starting unsafe run";
         unsafeRun();
-        qDebug() << "Unsafe run went well";
     }
     catch (cv::Exception& e) {
         qDebug() << "OpenCV error during stitching : " << QString(e.what());
@@ -53,7 +51,6 @@ void PanoramaMaker::unsafeRun() {
     }
 
     status = stitcher.estimateTransform(images);
-    qDebug() << "estimateTransform done : " << ((status != Stitcher::OK) ? "KO" : "OK");
     if (status != Stitcher::OK) {
         fail(status);
         return;
@@ -62,15 +59,12 @@ void PanoramaMaker::unsafeRun() {
     }
 
     status = stitcher.composePanorama(pano);
-    qDebug() << "composePanorama done : " << ((status != Stitcher::OK) ? "KO" : "OK");
     if (status != Stitcher::OK) {
         fail(status);
         return;
     } else {
         emit percentage(90);
     }
-
-    qDebug() << "Stiching worked !";
 
     int nr = 0;
     QFileInfo output_fileinfo;

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
+    <width>940</width>
     <height>700</height>
    </rect>
   </property>
@@ -26,21 +26,58 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
-         <widget class="QTreeView" name="fsView">
+         <widget class="QFileWidget" name="filesListWidget">
+          <property name="editTriggers">
+           <set>QAbstractItemView::NoEditTriggers</set>
+          </property>
           <property name="selectionMode">
            <enum>QAbstractItemView::ExtendedSelection</enum>
           </property>
-          <attribute name="headerStretchLastSection">
-           <bool>false</bool>
-          </attribute>
+          <property name="iconSize">
+           <size>
+            <width>200</width>
+            <height>130</height>
+           </size>
+          </property>
+          <property name="movement">
+           <enum>QListView::Snap</enum>
+          </property>
+          <property name="resizeMode">
+           <enum>QListView::Adjust</enum>
+          </property>
+          <property name="layoutMode">
+           <enum>QListView::Batched</enum>
+          </property>
+          <property name="gridSize">
+           <size>
+            <width>210</width>
+            <height>150</height>
+           </size>
+          </property>
+          <property name="viewMode">
+           <enum>QListView::IconMode</enum>
+          </property>
+          <property name="batchSize">
+           <number>1</number>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
          </widget>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="layoutButtons">
+         <layout class="QHBoxLayout" name="buttonshorizontalLayout">
           <item>
-           <widget class="QPushButton" name="buttonSelectDir">
+           <widget class="QPushButton" name="addFiles_button">
             <property name="text">
-             <string>Select source directory</string>
+             <string>Add files</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="removeFiles_button">
+            <property name="text">
+             <string>Remove selected</string>
             </property>
            </widget>
           </item>
@@ -154,10 +191,10 @@
            <double>10.000000000000000</double>
           </property>
           <property name="singleStep">
-           <double>0.100000000000000</double>
+           <double>0.050000000000000</double>
           </property>
           <property name="value">
-           <double>0.200000000000000</double>
+           <double>0.100000000000000</double>
           </property>
          </widget>
         </item>
@@ -358,7 +395,7 @@
            <double>0.100000000000000</double>
           </property>
           <property name="value">
-           <double>1.000000000000000</double>
+           <double>0.600000000000000</double>
           </property>
          </widget>
         </item>
@@ -621,8 +658,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>756</width>
-             <height>545</height>
+             <width>898</width>
+             <height>524</height>
             </rect>
            </property>
            <property name="sizePolicy">
@@ -696,12 +733,12 @@
         </property>
         <item>
          <property name="text">
-          <string>.png</string>
+          <string>.jpg</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>.jpg</string>
+          <string>.png</string>
          </property>
         </item>
        </widget>
@@ -729,8 +766,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
-     <height>21</height>
+     <width>940</width>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -749,6 +786,17 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>QFileWidget</class>
+   <extends>QListWidget</extends>
+   <header>src/qfilewidget.h</header>
+   <slots>
+    <slot>selectAndAddFiles()</slot>
+    <slot>removeSelected()</slot>
+   </slots>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>
@@ -760,22 +808,6 @@
     <hint type="sourcelabel">
      <x>-1</x>
      <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>199</x>
-     <y>149</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>buttonSelectDir</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>onSelectDirClicked()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>108</x>
-     <y>245</y>
     </hint>
     <hint type="destinationlabel">
      <x>199</x>
@@ -828,6 +860,38 @@
     <hint type="destinationlabel">
      <x>399</x>
      <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>addFiles_button</sender>
+   <signal>clicked()</signal>
+   <receiver>filesListWidget</receiver>
+   <slot>selectAndAddFiles()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>399</x>
+     <y>586</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>320</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>removeFiles_button</sender>
+   <signal>clicked()</signal>
+   <receiver>filesListWidget</receiver>
+   <slot>removeSelected()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>590</x>
+     <y>585</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>319</y>
     </hint>
    </hints>
   </connection>

@@ -14,20 +14,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-    fs_model = new QFileSystemModel;
-
-    QStringList filters;
-    QString root_dir = QDir::homePath();
-    filters << "*.png" << "*.jpg" << "*.jpeg" << "*.bmp";
-    filters << "*.PNG" << "*.JPG" << "*.JPEG" << "*.BMP";
-    fs_model->setNameFilters(filters);
-    fs_model->setNameFilterDisables(false);
-    fs_model->setRootPath(root_dir);
-
     ui->setupUi(this);
-    ui->fsView->setModel(fs_model);
-    ui->fsView->setRootIndex(fs_model->index(root_dir));
-    ui->fsView->header()->setSectionResizeMode(0, QHeaderView::Stretch);
 
     onBlenderTypeChange();
     onExposureCompensatorChange();
@@ -36,34 +23,11 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
-    delete fs_model;
-}
-
-QStringList MainWindow::getSelectedFiles() {
-    QStringList files;
-    QModelIndexList idx = ui->fsView->selectionModel()->selectedRows();
-    for(int i=0; i<idx.size(); i++) {
-        QString path = fs_model->filePath(idx[i]);
-        QFileInfo check_file(path);
-        if (check_file.exists() && check_file.isFile()) {
-            files << path;
-        }
-    }
-    return files;
-}
-
-void MainWindow::onSelectDirClicked() {
-    QString source_dir = QFileDialog::getExistingDirectory(this, "Open directory", QDir::homePath(), 0);
-    qDebug() << "Selected directory : " << source_dir;
-
-    fs_model->setRootPath(source_dir);
-    ui->fsView->setRootIndex(fs_model->index(source_dir));
-    ui->fsView->clearSelection();
 }
 
 void MainWindow::onMakePanoramaClicked() {
-    QStringList files = getSelectedFiles();
-    qDebug() << "Making panorama from : " << files;
+    QStringList files;
+    files = ui->filesListWidget->getFilesList();
 
     if (files.size() < 2) {
         QMessageBox::warning(this, "Not enough files", "Please select at least 2 files");
@@ -73,8 +37,10 @@ void MainWindow::onMakePanoramaClicked() {
         configureWorker(worker);
         createWorkerUi(worker);
         connect(worker, SIGNAL(finished()), this, SLOT(runWorkers()));
+        qDebug() << "Queuing worker";
         workers << worker;
         runWorkers();
+        ui->filesListWidget->clear();
     }
 }
 
