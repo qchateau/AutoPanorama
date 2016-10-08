@@ -27,7 +27,16 @@ MainWindow::~MainWindow()
 
 void MainWindow::onMakePanoramaClicked() {
     QStringList files;
-    files = ui->filesListWidget->getFilesList();
+    bool clear_files = false;
+    if (ui->selectedOnly_checkbox->isChecked())
+    {
+        files = ui->filesListWidget->getSelectedFilesList();
+    }
+    else
+    {
+        files = ui->filesListWidget->getFilesList();
+        clear_files = true;
+    }
 
     if (files.size() < 2) {
         QMessageBox::warning(this, "Not enough files", "Please select at least 2 files");
@@ -37,10 +46,13 @@ void MainWindow::onMakePanoramaClicked() {
         configureWorker(worker);
         createWorkerUi(worker);
         connect(worker, SIGNAL(finished()), this, SLOT(runWorkers()));
+
         qDebug() << "Queuing worker";
         workers << worker;
         runWorkers();
-        ui->filesListWidget->clear();
+
+        if (clear_files)
+            ui->filesListWidget->clear();
     }
 }
 

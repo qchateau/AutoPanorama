@@ -12,6 +12,7 @@ public:
     QFileWidget(QWidget *parent=0);
 
     void addFiles(QStringList files);
+    void asyncAddFiles(QStringList files);
     QStringList getFilesList();
     QStringList getSelectedFilesList();
 

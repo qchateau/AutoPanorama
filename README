@@ -2,8 +2,6 @@ TODO:
 - static linking on win32
 - opencv submodule build win32 script
 - mingw on linux (cross compile ?)
-- make it so item don't stack AND don't allow internal drag
-- wait cursor while dropping ?
 
 This build needs the opencv sumodule to be built correctly :
     Linux :

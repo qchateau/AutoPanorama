@@ -14,6 +14,7 @@
 #include <QFileDialog>
 #include <QDrag>
 #include <QApplication>
+#include <QtConcurrent/QtConcurrentRun>
 
 QFileWidget::QFileWidget(QWidget *parent) :
     QListWidget(parent)
@@ -26,7 +27,11 @@ void QFileWidget::dragEnterEvent(QDragEnterEvent *event)
     QListWidget::dragEnterEvent(event);
 
     const QMimeData *mimeData = event->mimeData();
-    if (mimeData->hasUrls())
+    if (event->source() == this)
+    {
+        event->ignore();
+    }
+    else if (mimeData->hasUrls() && (event->source() == 0))
     {
         event->acceptProposedAction();
     }
@@ -36,7 +41,7 @@ void QFileWidget::dragMoveEvent(QDragMoveEvent *event)
 {
     QListWidget::dragMoveEvent(event);
 
-    if (event->mimeData()->hasUrls())
+    if (event->mimeData()->hasUrls() && (event->source() == 0))
     {
         event->acceptProposedAction();
     }
@@ -47,7 +52,7 @@ void QFileWidget::dropEvent(QDropEvent *event)
     QListWidget::dropEvent(event);
 
     const QMimeData *mimeData = event->mimeData();
-    if (mimeData->hasUrls())
+    if (mimeData->hasUrls() && (event->source() == 0))
     {
         QStringList new_files;
         QList<QUrl> urlList = mimeData->urls();
@@ -61,14 +66,20 @@ void QFileWidget::dropEvent(QDropEvent *event)
         }
         if (new_files.size() > 0) {
             event->acceptProposedAction();
-            addFiles(new_files);
+            asyncAddFiles(new_files);
             emit filesDropped(new_files);
         }
     }
 }
 
+void QFileWidget::asyncAddFiles(QStringList files)
+{
+    QtConcurrent::run(this, &QFileWidget::addFiles, files);
+}
+
 void QFileWidget::addFiles(QStringList files)
 {
+    QApplication::setOverrideCursor(Qt::WaitCursor);
     for (int i = 0; i < files.size(); ++i)
     {
         QFileInfo fileinfo(files[i]);
@@ -80,13 +91,14 @@ void QFileWidget::addFiles(QStringList files)
             new_item->setData(Qt::ToolTipRole, QVariant(fileinfo.absoluteFilePath()));
         }
     }
+    QApplication::restoreOverrideCursor();
 }
 
 void QFileWidget::selectAndAddFiles()
 {
     QString filter = "Images (*.png *.jpg *.bmp)";
     QStringList files = QFileDialog::getOpenFileNames(Q_NULLPTR, QString(), QString(), filter);
-    addFiles(files);
+    asyncAddFiles(files);
 }
 
 void QFileWidget::removeSelected()

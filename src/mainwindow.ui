@@ -45,9 +45,6 @@
           <property name="resizeMode">
            <enum>QListView::Adjust</enum>
           </property>
-          <property name="layoutMode">
-           <enum>QListView::Batched</enum>
-          </property>
           <property name="gridSize">
            <size>
             <width>210</width>
@@ -57,10 +54,10 @@
           <property name="viewMode">
            <enum>QListView::IconMode</enum>
           </property>
-          <property name="batchSize">
-           <number>1</number>
-          </property>
           <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+          <property name="sortingEnabled">
            <bool>true</bool>
           </property>
          </widget>
@@ -747,6 +744,13 @@
        <widget class="QPushButton" name="buttonMakePanorama">
         <property name="text">
          <string>Make panorama</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="selectedOnly_checkbox">
+        <property name="text">
+         <string>Selected files only</string>
         </property>
        </widget>
       </item>
