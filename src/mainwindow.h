@@ -3,6 +3,8 @@
 
 #include "panoramamaker.h"
 
+#include <opencv2/stitching.hpp>
+
 #include <QMainWindow>
 #include <QFileSystemModel>
 #include <QTimer>
@@ -18,13 +20,24 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+    int getNbQueued();
+    int getNbDone();
+    int getNbFailed();
+    int getNbFinished() { return getNbDone() + getNbFailed(); }
+    int getNbTotal() { return workers.size(); }
+    int getCurrentProgress();
 
 private:
     Ui::MainWindow *ui;
     void createWorkerUi(PanoramaMaker *worker);
     void configureWorker(PanoramaMaker *worker);
+    int getWorkerIndex(PanoramaMaker* worker);
 
     QList<PanoramaMaker*> workers;
+    QList<QProgressBar*> progress_bars;
+    int worker_index;
+
+    Stitcher stitcher;
 
 public slots:
     void onMakePanoramaClicked();
@@ -32,6 +45,9 @@ public slots:
     void onBlenderTypeChange();
     void onExposureCompensatorChange();
     void onWorkerFailed(QString msg);
+    void onWorkerDone();
+    void updateInfos();
+    void updateStatusBar();
 };
 
 #endif // MAINWINDOW_H
