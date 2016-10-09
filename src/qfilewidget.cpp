@@ -61,7 +61,7 @@ void QFileWidget::dropEvent(QDropEvent *event)
             QUrl &url = urlList[i];
             if (url.isLocalFile())
             {
-                new_files << url.path();
+                new_files << url.toLocalFile();
             }
         }
         if (new_files.size() > 0) {

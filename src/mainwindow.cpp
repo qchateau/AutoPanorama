@@ -255,7 +255,7 @@ int MainWindow::getNbFailed()
 
 int MainWindow::getCurrentProgress()
 {
-    if (!workers[worker_index])
+    if (workers.size() < (worker_index+1) || !workers[worker_index])
         return 0;
 
     if (workers[worker_index]->getStatus() == PanoramaMaker::WORKING)
