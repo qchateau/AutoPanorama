@@ -17,17 +17,35 @@ INCLUDEPATH += $$PWD/opencv/install/include/
 DEPENDPATH += $$PWD/opencv/install/include/
 
 win32 {
-    LIBS += -L$$PWD/opencv/install/x86/mingw/bin/ -L$$PWD/opencv/install/x86/mingw/lib/ \
-            -lopencv_stitching310.dll \
-            -lopencv_features2d310.dll \
-            -lopencv_imgcodecs310.dll \
-            -lopencv_imgproc310.dll \
-            -lopencv_core310.dll
+    LIBS += -Wl,-Bstatic \
+            -L$$PWD/opencv/install/x86/mingw/staticlib/ \
+            #-lopencv_shape310 \
+            -lopencv_stitching310 \
+            #-lopencv_objdetect310 \
+            #-lopencv_superres310 \
+            #-lopencv_videostab310 \
+            -lopencv_calib3d310 \
+            -lopencv_features2d310 \
+            #-lopencv_highgui310 \
+            #-lopencv_videoio310 \
+            -lopencv_imgcodecs310 \
+            #-lopencv_video310 \
+            #-lopencv_photo310 \
+            #-lopencv_ml310 \
+            -lopencv_imgproc310 \
+            -lopencv_flann310 \
+            -lopencv_core310 \
+            -llibwebp \
+            -llibtiff \
+            -llibjasper \
+            -lIlmImf \
+            -llibjpeg \
+            -llibpng \
+            -lz
 
     QMAKE_LFLAGS += -Wl,--large-address-aware
 } else {
     LIBS += -Wl,-Bstatic \
-            #-L/usr/local/lib -L/usr/local/share/OpenCV/3rdparty/lib \
             -L$$PWD/opencv/install/lib -L$$PWD/opencv/install/share/OpenCV/3rdparty/lib \
             #-lopencv_shape \
             -lopencv_stitching \
@@ -63,14 +81,16 @@ win32 {
 SOURCES +=  src/main.cpp \
             src/mainwindow.cpp \
             src/panoramamaker.cpp \
-    src/qfilewidget.cpp
+            src/qfilewidget.cpp
 
 HEADERS  += src/mainwindow.h \
             src/panoramamaker.h \
-    src/qfilewidget.h
+            src/qfilewidget.h
 
 FORMS    += src/mainwindow.ui
 
 DISTFILES += res/autopanorama.ico \
-             res/autopanorama.rc
+             res/autopanorama.rc \
+             scripts/compile_opencv.sh \
+             README
 

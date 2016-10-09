@@ -1,23 +1,18 @@
 TODO:
-- static linking on win32
-- opencv submodule build win32 script
 - mingw on linux (cross compile ?)
 - inner cut ? how ?
+- linux check dependencies
+- linux deployment script (.deb gen)
 
 This build needs the opencv sumodule to be built correctly :
     Linux :
         Use script in the script folder
     Win32 :
-        Build as dynamic lib
-        Install localy in opencv/install/
+        Build as static lib
+        Install localy in ./opencv/install/
 
 To deploy the windows executable :
-    Copy dependant opencv dlls
     Copy the content of lib_for_windows
     Copy the executable
-    Deployment script
 
-Before deplaying the linux executable :
-    Check dependencies
-    Deployment script (.deb)
 
