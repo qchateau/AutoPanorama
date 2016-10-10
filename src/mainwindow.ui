@@ -238,6 +238,26 @@
           </property>
           <item>
            <property name="text">
+            <string>Blocks BGR</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Blocks SV</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>BGR</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>SV</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
             <string>Blocks Gain</string>
            </property>
           </item>
@@ -622,7 +642,7 @@
            <number>8</number>
           </property>
           <property name="maximum">
-           <number>128</number>
+           <number>8096</number>
           </property>
           <property name="value">
            <number>32</number>
@@ -655,8 +675,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>898</width>
-             <height>524</height>
+             <width>896</width>
+             <height>545</height>
             </rect>
            </property>
            <property name="sizePolicy">
@@ -818,7 +838,7 @@
      <x>0</x>
      <y>0</y>
      <width>940</width>
-     <height>25</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -843,6 +863,7 @@
    <extends>QListWidget</extends>
    <header>src/qfilewidget.h</header>
    <slots>
+    <signal>updatedIcon()</signal>
     <slot>selectAndAddFiles()</slot>
     <slot>removeSelected()</slot>
    </slots>

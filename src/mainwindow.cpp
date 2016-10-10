@@ -199,10 +199,15 @@ void MainWindow::onBlenderTypeChange() {
 
 void MainWindow::onExposureCompensatorChange() {
     QString type = ui->expcomp_combobox->currentText();
-    if (type == QString("Blocks Gain")) {
+    if (type == QString("Blocks Gain") ||
+        type == QString("Blocks BGR") ||
+        type == QString("Blocks SV"))
+    {
         ui->blocksize_label->show();
         ui->blocksize_spinbox->show();
-    } else {
+    }
+    else
+    {
         ui->blocksize_label->hide();
         ui->blocksize_spinbox->hide();
     }

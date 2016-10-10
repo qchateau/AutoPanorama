@@ -212,7 +212,9 @@ QString PanoramaMaker::getStitcherConfString() {
     conf += QString("\n\n");
 
     conf += QString("Exposure compensator mode : %1").arg(exposure_compensator_mode);
-    if (exposure_compensator_mode == QString("Blocks Gain"))
+    if (exposure_compensator_mode == QString("Blocks Gain") ||
+        exposure_compensator_mode == QString("Blocks BGR") ||
+        exposure_compensator_mode == QString("Blocks SV"))
     {
         conf += QString("\n");
         conf += QString("Exposure compensator blocks size : %1").arg(exposure_compensator_param);
@@ -301,7 +303,16 @@ bool PanoramaMaker::configureStitcher()
     } else if (exposure_compensator_mode == QString("Blocks Gain")) {
         int bs = exposure_compensator_param;
         exp_comp = makePtr<detail::BlocksGainCompensator>(bs, bs);
-        exposure_compensator_param = bs;
+    } else if (exposure_compensator_mode == QString("BGR")) {
+        exp_comp = makePtr<detail::ChannelsCompensator>(detail::ChannelsCompensator::BGR);
+    } else if (exposure_compensator_mode == QString("SV")) {
+        exp_comp = makePtr<detail::ChannelsCompensator>(detail::ChannelsCompensator::SV);
+    } else if (exposure_compensator_mode == QString("Blocks BGR")) {
+        int bs = exposure_compensator_param;
+        exp_comp = makePtr<detail::BlocksChannelsCompensator>(detail::ChannelsCompensator::BGR, bs, bs);
+    } else if (exposure_compensator_mode == QString("Blocks SV")) {
+        int bs = exposure_compensator_param;
+        exp_comp = makePtr<detail::BlocksChannelsCompensator>(detail::ChannelsCompensator::SV, bs, bs);
     } else {
         return false;
     }
