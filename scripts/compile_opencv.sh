@@ -8,8 +8,6 @@ CMAKE_OPTIONS="-DBUILD_DOCS=OFF \
 -DBUILD_SHARED_LIBS=OFF \
 -DBUILD_opencv_apps=OFF \
 -DBUILD_opencv_highgui=OFF \
--DBUILD_opencv_ml=OFF \
--DBUILD_opencv_objdetect=OFF \
 -DBUILD_opencv_photo=OFF \
 -DBUILD_opencv_shape=OFF \
 -DBUILD_opencv_superres=OFF \
