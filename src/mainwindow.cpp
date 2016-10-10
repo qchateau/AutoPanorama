@@ -10,6 +10,7 @@
 #include <QToolTip>
 #include <QPoint>
 #include <QString>
+#include <QCloseEvent>
 
 #include <opencv2/core/ocl.hpp>
 
@@ -29,6 +30,25 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    int nb = getNbQueued();
+    if (nb == 0)
+        close();
+    else
+    {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, "Quit ?",
+                                      QString("All panoramas are not done yet. \nAre you sure you want to quit ?"),
+                                      QMessageBox::Yes | QMessageBox::No);
+        if (reply == QMessageBox::Yes)
+            close();
+        else
+            event->ignore();
+    }
+
 }
 
 void MainWindow::onMakePanoramaClicked() {
@@ -200,8 +220,7 @@ void MainWindow::onBlenderTypeChange() {
 void MainWindow::onExposureCompensatorChange() {
     QString type = ui->expcomp_combobox->currentText();
     if (type == QString("Blocks Gain") ||
-        type == QString("Blocks BGR") ||
-        type == QString("Blocks SV"))
+        type == QString("Blocks BGR"))
     {
         ui->blocksize_label->show();
         ui->blocksize_spinbox->show();

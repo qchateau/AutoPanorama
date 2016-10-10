@@ -243,22 +243,12 @@
           </item>
           <item>
            <property name="text">
-            <string>Blocks SV</string>
+            <string>Blocks Gain</string>
            </property>
           </item>
           <item>
            <property name="text">
             <string>BGR</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>SV</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Blocks Gain</string>
            </property>
           </item>
           <item>
@@ -680,8 +670,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>896</width>
-             <height>545</height>
+             <width>898</width>
+             <height>549</height>
             </rect>
            </property>
            <property name="sizePolicy">
@@ -837,29 +827,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QMenuBar" name="menuBar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>940</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <widget class="QMenu" name="menuFile">
-    <property name="title">
-     <string>File</string>
-    </property>
-    <addaction name="actionQuit"/>
-   </widget>
-   <addaction name="menuFile"/>
-  </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <action name="actionQuit">
-   <property name="text">
-    <string>Quit</string>
-   </property>
-  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -876,22 +844,6 @@
  </customwidgets>
  <resources/>
  <connections>
-  <connection>
-   <sender>actionQuit</sender>
-   <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>close()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>199</x>
-     <y>149</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>buttonMakePanorama</sender>
    <signal>clicked()</signal>

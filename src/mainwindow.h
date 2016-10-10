@@ -27,6 +27,9 @@ public:
     int getNbTotal() { return workers.size(); }
     int getCurrentProgress();
 
+protected:
+    void closeEvent(QCloseEvent *event);
+
 private:
     Ui::MainWindow *ui;
     void createWorkerUi(PanoramaMaker *worker);

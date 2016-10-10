@@ -3,9 +3,8 @@ TODO:
 - inner cut ? how ?
 - linux check dependencies
 - linux deployment script (.deb gen)
-- confirm quit if jobs left
-- compensate exposure before finding seams
-- multifeed for gains
+- multifeed for gains (+ get ref)
+- adaptive block size -> check ref for ideal size
 
 This build needs the opencv sumodule to be built correctly :
     Linux :
