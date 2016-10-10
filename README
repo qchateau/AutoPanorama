@@ -3,6 +3,9 @@ TODO:
 - inner cut ? how ?
 - linux check dependencies
 - linux deployment script (.deb gen)
+- confirm quit if jobs left
+- compensate exposure before finding seams
+- multifeed for gains
 
 This build needs the opencv sumodule to be built correctly :
     Linux :
