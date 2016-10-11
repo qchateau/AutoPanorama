@@ -35,7 +35,7 @@ public:
     Status getStatus() { return status; }
     int getProgress() { return progress; }
 
-    void unsafeRun();
+    Stitcher::Status unsafeRun();
     void run();
 
     QString getStitcherConfString();

@@ -38,10 +38,17 @@ void PanoramaMaker::run() {
     try {
         status = WORKING;
         timer.start();
-        unsafeRun();
+        Stitcher::Status stitcher_status = unsafeRun();
         total_time = timer.elapsed();
-        status = DONE;
-        emit done();
+        if (stitcher_status == Stitcher::OK)
+        {
+            status = DONE;
+            emit done();
+        }
+        else
+        {
+            fail(stitcher_status);
+        }
     }
     catch (cv::Exception& e) {
         qDebug() << "OpenCV error during stitching : " << QString(e.what());
@@ -57,7 +64,7 @@ void PanoramaMaker::run() {
     }
 }
 
-void PanoramaMaker::unsafeRun() {
+Stitcher::Status PanoramaMaker::unsafeRun() {
     int N = images_path.size();
 
     vector<Mat> images;
@@ -70,8 +77,7 @@ void PanoramaMaker::unsafeRun() {
     Stitcher::Status stitcher_status;
     stitcher_status = stitcher.estimateTransform(images);
     if (stitcher_status != Stitcher::OK) {
-        fail(stitcher_status);
-        return;
+        return stitcher_status;
     } else {
         setProgress(30);
     }
@@ -79,8 +85,7 @@ void PanoramaMaker::unsafeRun() {
     Mat pano;
     stitcher_status = stitcher.composePanorama(pano);
     if (stitcher_status != Stitcher::OK) {
-        fail(stitcher_status);
-        return;
+        return stitcher_status;
     } else {
         setProgress(90);
     }
@@ -100,6 +105,7 @@ void PanoramaMaker::unsafeRun() {
     qDebug() << "Writing to " << QString::fromStdString(out);
     imwrite(out, pano);
     setProgress(100);
+    return stitcher_status;
 }
 
 void PanoramaMaker::fail(Stitcher::Status status) {
