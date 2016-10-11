@@ -185,7 +185,7 @@
            <double>0.100000000000000</double>
           </property>
           <property name="maximum">
-           <double>10.000000000000000</double>
+           <double>50.000000000000000</double>
           </property>
           <property name="singleStep">
            <double>0.050000000000000</double>
@@ -402,6 +402,9 @@
           </property>
           <property name="minimum">
            <double>0.100000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>50.000000000000000</double>
           </property>
           <property name="singleStep">
            <double>0.100000000000000</double>
@@ -623,6 +626,9 @@
           <property name="enabled">
            <bool>true</bool>
           </property>
+          <property name="toolTip">
+           <string>Blocks are used on seam finding resolution</string>
+          </property>
           <property name="text">
            <string>Block size</string>
           </property>
@@ -634,13 +640,13 @@
            <bool>true</bool>
           </property>
           <property name="minimum">
-           <number>8</number>
+           <number>1</number>
           </property>
           <property name="maximum">
-           <number>8096</number>
+           <number>1024</number>
           </property>
           <property name="value">
-           <number>32</number>
+           <number>24</number>
           </property>
          </widget>
         </item>
@@ -671,7 +677,7 @@
              <x>0</x>
              <y>0</y>
              <width>898</width>
-             <height>549</height>
+             <height>564</height>
             </rect>
            </property>
            <property name="sizePolicy">
