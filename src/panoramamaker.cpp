@@ -284,7 +284,8 @@ bool PanoramaMaker::configureStitcher()
     if (blender_mode.mode == QString("Feather")) {
         blender = makePtr<detail::FeatherBlender>(blender_mode.sharpness);
     } else if (blender_mode.mode == QString("Multiband")) {
-        blender = makePtr<detail::MultiBandBlender>(try_use_gpu, blender_mode.bands);
+        blender = makePtr<detail::MultiBandBlender>(try_use_gpu, blender_mode.bands, CV_32F);
+        //blender = makePtr<detail::MultiBandBlender>(try_use_gpu, blender_mode.bands, CV_16S);
     } else if (blender_mode.mode == QString("None")) {
             blender = makePtr<detail::Blender>();
     } else {

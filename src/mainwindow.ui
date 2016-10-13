@@ -671,17 +671,17 @@
          <widget class="QComboBox" name="interp_combobox">
           <item>
            <property name="text">
-            <string>Lanczos4</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
             <string>Cubic</string>
            </property>
           </item>
           <item>
            <property name="text">
             <string>Linear</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Lanczos4</string>
            </property>
           </item>
           <item>

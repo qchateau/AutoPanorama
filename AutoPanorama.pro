@@ -87,10 +87,6 @@ CONFIG(dynamic) {
                 -lpng \
                 -lz \
                 -lippicv \
-                #-lgtk-x11-2.0 -lgdk-x11-2.0 -lpangocairo-1.0 \
-                #-lcairo -lgio-2.0 -lpangoft2-1.0 -lpango-1.0 -lgobject-2.0 -lfontconfig \
-                #-lfreetype -lgthread-2.0 -lglib-2.0 -lavcodec-ffmpeg -lavformat-ffmpeg -lavutil-ffmpeg \
-                #-lswscale-ffmpeg -lbz2 -lstdc++ -lm -lpthread -lrt \
                 -Wl,-Bdynamic -ldl
     }
 }
