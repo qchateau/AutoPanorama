@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>autopanorama.ico</file>
+        <file>icon_loading.png</file>
+    </qresource>
+</RCC>

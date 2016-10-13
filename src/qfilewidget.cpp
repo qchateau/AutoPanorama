@@ -15,11 +15,20 @@
 #include <QDrag>
 #include <QApplication>
 #include <QtConcurrent/QtConcurrentRun>
+#include <QIcon>
+#include <QPixmap>
+#include "ui_mainwindow.h"
 
 QFileWidget::QFileWidget(QWidget *parent) :
-    QListWidget(parent)
+    QListWidget(parent),
+    items_cleaner(this)
 {
     installEventFilter(this);
+
+    default_icon = QIcon(":/icon_loading.png");
+    items_cleaner.moveToThread(QApplication::instance()->thread());
+    connect(&items_cleaner, SIGNAL(timeout()), this, SLOT(clean_items()));
+    items_cleaner.start(5000);
 }
 
 void QFileWidget::dragEnterEvent(QDragEnterEvent *event)
@@ -79,19 +88,60 @@ void QFileWidget::asyncAddFiles(QStringList files)
 
 void QFileWidget::addFiles(QStringList files)
 {
+    QList<QListWidgetItem*> added_items;
     QApplication::setOverrideCursor(Qt::WaitCursor);
     for (int i = 0; i < files.size(); ++i)
     {
         QFileInfo fileinfo(files[i]);
         if (fileinfo.exists() && fileinfo.isFile() && (!getFilesList().contains(fileinfo.absoluteFilePath())))
         {
-            QIcon small_icon, big_icon(fileinfo.absoluteFilePath());
-            small_icon = QIcon(big_icon.pixmap(iconSize()));
-            QListWidgetItem *new_item = new QListWidgetItem(small_icon, fileinfo.fileName(), this);
-            new_item->setData(Qt::ToolTipRole, QVariant(fileinfo.absoluteFilePath()));
+            QListWidgetItem *new_item = new QListWidgetItem(default_icon, fileinfo.fileName(), this);
+            new_item->setToolTip(fileinfo.absoluteFilePath());
+            added_items << new_item;
         }
     }
     QApplication::restoreOverrideCursor();
+
+    // Delayed icon set
+    for (int i = 0; i < added_items.size(); ++i)
+    {
+        if (items_to_delete.contains(added_items[i]))
+        {
+            // Change the icon so item will be deleted
+            // but don't spend time loading the full image
+            added_items[i]->setIcon(QIcon());
+        }
+        else
+        {
+            QIcon small_icon, big_icon(added_items[i]->toolTip());
+            small_icon = QIcon(big_icon.pixmap(iconSize()));
+            added_items[i]->setIcon(small_icon);
+            scheduleDelayedItemsLayout();
+        }
+    }
+}
+
+void QFileWidget::clean_items()
+{
+    if (thread() != QApplication::instance()->thread())
+    {
+        qDebug() << "WARNING : clean_item must be called in the GUI thread. Skipping.";
+        return;
+    }
+
+    QList<QListWidgetItem*> items_not_deleted;
+    while (items_to_delete.size() > 0)
+    {
+        QListWidgetItem* item = items_to_delete.takeFirst();
+        if (item)
+        {
+            if (item->icon().cacheKey() == default_icon.cacheKey())
+                items_not_deleted << item;
+            else
+                delete item;
+        }
+    }
+    items_to_delete = items_not_deleted;
 }
 
 void QFileWidget::selectAndAddFiles()
@@ -104,9 +154,27 @@ void QFileWidget::selectAndAddFiles()
 void QFileWidget::removeSelected()
 {
     QList<QListWidgetItem*> selected = selectedItems();
+    clearSelection();
     for (int i = 0; i < selected.size(); ++i)
-    {
-        delete selected[i];
+        remove(selected[i]);
+}
+
+void QFileWidget::remove(QListWidgetItem* item)
+{
+    item->setHidden(true);
+    items_to_delete << item;
+}
+
+void QFileWidget::remove(int row)
+{
+    remove(item(row));
+}
+
+void QFileWidget::clear()
+{
+    QList<QListWidgetItem*> items;
+    for (int i = 0; i < count(); ++i) {
+        remove(i);
     }
 }
 
@@ -115,6 +183,8 @@ QStringList QFileWidget::getFilesList()
     QStringList files_list;
     for (int i = 0; i < count(); ++i)
     {
+        if (item(i)->isHidden())
+            continue;
         files_list << item(i)->data(Qt::ToolTipRole).toString();
     }
     return files_list;
@@ -126,6 +196,8 @@ QStringList QFileWidget::getSelectedFilesList()
     QList<QListWidgetItem*> selected = selectedItems();
     for (int i = 0; i < selected.size(); ++i)
     {
+        if (selected[i]->isHidden())
+            continue;
         files_list << selected[i]->data(Qt::ToolTipRole).toString();
     }
     return files_list;

@@ -4,7 +4,6 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = AutoPanorama
 TEMPLATE = app
-RC_FILE = res/autopanorama.rc
 
 #CONFIG += dynamic
 
@@ -102,8 +101,10 @@ HEADERS  += src/mainwindow.h \
 
 FORMS    += src/mainwindow.ui
 
-DISTFILES += res/autopanorama.ico \
-             res/autopanorama.rc \
+DISTFILES += res/autopanorama.rc \
              scripts/compile_opencv.sh \
              README.md
 
+RESOURCES += res/application.qrc
+
+RC_FILE = res/autopanorama.rc

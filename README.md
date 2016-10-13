@@ -3,6 +3,7 @@
 * inner cut ? how ?
 * linux check dependencies
 * linux deployment script (.deb gen)
+* check supported images format (opencv <-> qt)
 
 ## TODO OpenCV : ##
 * linear instead of affine model for exposure compensation

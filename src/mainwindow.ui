@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>AutoPanorama</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../res/application.qrc">
+    <normaloff>:/autopanorama.ico</normaloff>:/autopanorama.ico</iconset>
+  </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout_6">
     <item>
@@ -170,7 +174,7 @@
              <number>100</number>
             </property>
             <property name="value">
-             <number>5</number>
+             <number>2</number>
             </property>
            </widget>
           </item>
@@ -889,7 +893,9 @@
    </slots>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="../res/application.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonMakePanorama</sender>
