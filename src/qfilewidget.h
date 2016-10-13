@@ -27,7 +27,8 @@ public slots:
     void removeSelected();
 
 signals:
-    void filesDropped(QStringList files);
+    void itemsAdded();
+    void itemsRemoved();
 
 protected:
     void remove(int i);

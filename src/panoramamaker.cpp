@@ -91,7 +91,7 @@ Stitcher::Status PanoramaMaker::unsafeRun() {
             final_filename += "_"+QString::number(nr);
         }
         final_filename += output_ext;
-        output_fileinfo = QFileInfo(QDir(QFileInfo(images_path[0]).absoluteDir()).filePath(final_filename));
+        output_fileinfo = QFileInfo(QDir(output_dir).filePath(final_filename));
     } while (output_fileinfo.exists());
 
     string out = output_fileinfo.absoluteFilePath().toUtf8().constData();
@@ -141,10 +141,13 @@ void PanoramaMaker::clean()
     }
 }
 
-void PanoramaMaker::setImages(QStringList files, QString output_filename, QString output_ext) {
+void PanoramaMaker::setImages(QStringList files, QString output_filename_,
+                              QString output_ext_, QString output_dir_)
+{
     images_path = files;
-    this->output_filename = output_filename;
-    this->output_ext = output_ext;
+    output_filename = output_filename_;
+    output_ext = output_ext_;
+    output_dir = output_dir_;
 }
 
 QString PanoramaMaker::getStitcherConfString() {

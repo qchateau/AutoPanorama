@@ -41,16 +41,24 @@ private:
     int worker_index;
 
     Stitcher stitcher;
+    bool manual_output_filename, manual_output_dir;
+    int max_filename_length;
 
 public slots:
     void onMakePanoramaClicked();
     void runWorkers();
     void onBlenderTypeChange();
     void onExposureCompensatorChange();
-    void onWorkerFailed(QString msg);
+    void onWorkerFailed(QString msg=QString());
     void onWorkerDone();
     void updateInfos();
     void updateStatusBar();
+    void updateOutputDirFilename();
+    void onOutputFilenameEdit(QString edit=QString());
+    void onOutputDirEdit(QString edit=QString());
+    void onOutputFilenameChanged(QString edit=QString());
+    void onOutputDirChanged(QString edit=QString());
+    void onSelectOutputDirClicked();
 };
 
 #endif // MAINWINDOW_H

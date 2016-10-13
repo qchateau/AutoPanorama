@@ -25,8 +25,9 @@ public:
 
     explicit PanoramaMaker(QObject *parent = 0);
     void setImages(QStringList files,
-                   QString output_filename,
-                   QString output_ext);
+                   QString output_filename_,
+                   QString output_ext_,
+                   QString output_dir_);
 
     void setBlenderMode(BlenderMode mode) { blender_mode = mode; }
     BlenderMode getBlenderMode() { return blender_mode; }
@@ -87,7 +88,7 @@ private:
     bool configureStitcher();
 
     QStringList images_path;
-    QString output_filename, output_ext;
+    QString output_filename, output_ext, output_dir;
 
     Ptr<Stitcher> stitcher;
 

@@ -76,7 +76,6 @@ void QFileWidget::dropEvent(QDropEvent *event)
         if (new_files.size() > 0) {
             event->acceptProposedAction();
             asyncAddFiles(new_files);
-            emit filesDropped(new_files);
         }
     }
 }
@@ -101,6 +100,7 @@ void QFileWidget::addFiles(QStringList files)
         }
     }
     QApplication::restoreOverrideCursor();
+    emit itemsAdded();
 
     // Delayed icon set
     for (int i = 0; i < added_items.size(); ++i)
@@ -163,6 +163,7 @@ void QFileWidget::remove(QListWidgetItem* item)
 {
     item->setHidden(true);
     items_to_delete << item;
+    emit itemsRemoved();
 }
 
 void QFileWidget::remove(int row)

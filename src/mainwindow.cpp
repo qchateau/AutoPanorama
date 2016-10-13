@@ -17,10 +17,14 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    worker_index(0)
+    worker_index(0),
+    manual_output_filename(false),
+    manual_output_dir(false),
+    max_filename_length(50)
 {
     ui->setupUi(this);
 
+    updateOutputDirFilename();
     onBlenderTypeChange();
     onExposureCompensatorChange();
     updateInfos();
@@ -68,7 +72,10 @@ void MainWindow::onMakePanoramaClicked() {
         QMessageBox::warning(this, "Not enough files", "Please select at least 2 files");
     } else {
         PanoramaMaker *worker = new PanoramaMaker;
-        worker->setImages(files, ui->output_filename_lineedit->text(), ui->extension_combobox->currentText());
+        worker->setImages(files,
+                          ui->output_filename_lineedit->text(),
+                          ui->extension_combobox->currentText(),
+                          ui->output_dir_lineedit->text());
         configureWorker(worker);
         createWorkerUi(worker);
         connect(worker, SIGNAL(finished()), this, SLOT(runWorkers()));
@@ -192,19 +199,25 @@ void MainWindow::onWorkerDone()
     pb->setFormat(QString("%1 : Done !").arg(sender->getOutputFilename()));
 }
 
-void MainWindow::onBlenderTypeChange() {
+void MainWindow::onBlenderTypeChange()
+{
     QString type = ui->blendertype_combobox->currentText();
-    if (type == QString("Multiband")) {
+    if (type == QString("Multiband"))
+    {
         ui->sharpness_label->hide();
         ui->sharpness_spinbox->hide();
         ui->nbands_label->show();
         ui->nbands_spinbox->show();
-    } else if (type == QString("Feather")) {
+    }
+    else if (type == QString("Feather"))
+    {
         ui->sharpness_label->show();
         ui->sharpness_spinbox->show();
         ui->nbands_label->hide();
         ui->nbands_spinbox->hide();
-    } else {
+    }
+    else
+    {
         ui->sharpness_label->hide();
         ui->sharpness_spinbox->hide();
         ui->nbands_label->hide();
@@ -212,7 +225,8 @@ void MainWindow::onBlenderTypeChange() {
     }
 }
 
-void MainWindow::onExposureCompensatorChange() {
+void MainWindow::onExposureCompensatorChange()
+{
     QString type = ui->expcomp_combobox->currentText();
     if (type == QString("Blocks Gain") ||
         type == QString("Blocks BGR") ||
@@ -229,10 +243,105 @@ void MainWindow::onExposureCompensatorChange() {
     }
 }
 
+void MainWindow::onOutputFilenameChanged(QString edit)
+{
+    if (edit.isEmpty())
+        ui->buttonMakePanorama->setEnabled(false);
+    else
+        ui->buttonMakePanorama->setEnabled(true);
+}
+
+void MainWindow::onOutputDirChanged(QString edit)
+{
+    QPalette palette;
+    QString tooltip;
+
+    if (edit.isEmpty() || !QDir(edit).exists())
+    {
+        ui->buttonMakePanorama->setEnabled(false);
+        palette.setColor(QPalette::Text,Qt::red);
+        tooltip = "This directory doesn't exists";
+    }
+    else
+    {
+        palette.setColor(QPalette::Text,Qt::black);
+        ui->buttonMakePanorama->setEnabled(true);
+    }
+    qobject_cast<QLineEdit*>(sender())->setPalette(palette);
+    qobject_cast<QLineEdit*>(sender())->setToolTip(tooltip);
+}
+
+void MainWindow::onOutputFilenameEdit(QString edit)
+{
+    if (edit.isEmpty())
+        manual_output_filename = false;
+    else
+        manual_output_filename = true;
+}
+
+void MainWindow::onOutputDirEdit(QString edit)
+{
+    if (edit.isEmpty())
+        manual_output_dir = false;
+    else
+        manual_output_dir = true;
+}
+
+void MainWindow::onSelectOutputDirClicked()
+{
+    QString dir = QFileDialog::getExistingDirectory(
+                this,
+                "Select output directory",
+                ui->output_dir_lineedit->text());
+    if (!dir.isEmpty())
+    {
+        ui->output_dir_lineedit->setText(dir);
+        manual_output_dir = true;
+    }
+    else
+    {
+        manual_output_dir = false;
+        updateOutputDirFilename();
+    }
+}
+
 void MainWindow::updateInfos()
 {
     QString yes("Yes"), no("No");
     ui->haveopencl_value->setText(cv::ocl::haveOpenCL() ? yes : no);
+}
+
+void MainWindow::updateOutputDirFilename()
+{
+    QStringList fl;
+    if (ui->selectedOnly_checkbox->isChecked())
+        fl = ui->filesListWidget->getSelectedFilesList();
+    else
+        fl = ui->filesListWidget->getFilesList();
+
+    if (!manual_output_dir)
+    {
+        if (fl.size() > 0)
+            ui->output_dir_lineedit->setText(QFileInfo(fl[0]).absoluteDir().path());
+        else
+            ui->output_dir_lineedit->setText("");
+    }
+
+    if (!manual_output_filename)
+    {
+        if (fl.size() > 0)
+        {
+            QStringList basenames;
+            QString new_name;
+            for (int i = 0; i < fl.size(); ++i)
+                basenames << QFileInfo(fl[i]).baseName();
+            new_name = basenames.join("_");
+            new_name.truncate(max_filename_length);
+            ui->output_filename_lineedit->setText(new_name);
+        }
+        else
+            ui->output_filename_lineedit->setText("");
+    }
 }
 
 int MainWindow::getNbQueued()

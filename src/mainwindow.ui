@@ -722,7 +722,7 @@
              <x>0</x>
              <y>0</y>
              <width>898</width>
-             <height>564</height>
+             <height>515</height>
             </rect>
            </property>
            <property name="sizePolicy">
@@ -828,6 +828,34 @@
      </widget>
     </item>
     <item>
+     <widget class="QLabel" name="output_dir_label">
+      <property name="text">
+       <string>Ouput directory</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="layout_output_dir">
+      <item>
+       <widget class="QLineEdit" name="output_dir_lineedit">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="readOnly">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="output_dir_button">
+        <property name="text">
+         <string>Select output directory</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
      <widget class="QLabel" name="output_label">
       <property name="text">
        <string>Output file name</string>
@@ -835,11 +863,11 @@
      </widget>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="layoutOutput">
+     <layout class="QHBoxLayout" name="layout_output_file">
       <item>
        <widget class="QLineEdit" name="output_filename_lineedit">
         <property name="text">
-         <string>panorama</string>
+         <string/>
         </property>
        </widget>
       </item>
@@ -887,7 +915,8 @@
    <extends>QListWidget</extends>
    <header>src/qfilewidget.h</header>
    <slots>
-    <signal>updatedIcon()</signal>
+    <signal>itemsAdded()</signal>
+    <signal>itemsRemoved()</signal>
     <slot>selectAndAddFiles()</slot>
     <slot>removeSelected()</slot>
    </slots>
@@ -977,11 +1006,160 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>filesListWidget</sender>
+   <signal>itemSelectionChanged()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>updateOutputDirFilename()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>469</x>
+     <y>286</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>469</x>
+     <y>349</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>selectedOnly_checkbox</sender>
+   <signal>stateChanged(int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>updateOutputDirFilename()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>874</x>
+     <y>656</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>469</x>
+     <y>349</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>filesListWidget</sender>
+   <signal>itemsAdded()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>updateOutputDirFilename()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>469</x>
+     <y>286</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>469</x>
+     <y>349</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>output_filename_lineedit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onOutputFilenameEdit(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>337</x>
+     <y>656</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>469</x>
+     <y>349</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>output_dir_button</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onSelectOutputDirClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>870</x>
+     <y>607</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>469</x>
+     <y>349</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>filesListWidget</sender>
+   <signal>itemsRemoved()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>updateOutputDirFilename()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>469</x>
+     <y>286</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>469</x>
+     <y>349</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>output_dir_lineedit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onOutputDirEdit(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>407</x>
+     <y>607</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>469</x>
+     <y>349</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>output_filename_lineedit</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onOutputFilenameChanged(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>337</x>
+     <y>656</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>469</x>
+     <y>349</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>output_dir_lineedit</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onOutputDirChanged(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>407</x>
+     <y>607</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>469</x>
+     <y>349</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
-  <slot>onSelectDirClicked()</slot>
   <slot>onMakePanoramaClicked()</slot>
   <slot>onBlenderTypeChange()</slot>
   <slot>onExposureCompensatorChange()</slot>
+  <slot>updateOutputDirFilename()</slot>
+  <slot>onOutputFilenameEdit(QString)</slot>
+  <slot>onSelectOutputDirClicked()</slot>
+  <slot>onOutputDirEdit(QString)</slot>
+  <slot>onOutputDirChanged(QString)</slot>
+  <slot>onOutputFilenameChanged(QString)</slot>
  </slots>
 </ui>
