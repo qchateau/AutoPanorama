@@ -85,61 +85,57 @@ void MainWindow::onMakePanoramaClicked() {
 
 void MainWindow::configureWorker(PanoramaMaker *worker) {
     // Registration resolution
-    worker->getStitcher()->setRegistrationResol(ui->regres_spinbox->value());
+    worker->setRegistrationResol(ui->regres_spinbox->value());
 
     // Feature finder mode
     worker->setFeaturesFinderMode(ui->featuresfinder_combobox->currentText());
 
     // Feature matching mode and confidence
-    worker->setFeaturesMatchingMode(ui->featuresmatcher_combobox->currentText(),
-                                    ui->featuresmatcherconf_spinbox->value());
+    PanoramaMaker::FeaturesMatchingMode f_matching_mode;
+    f_matching_mode.mode = ui->featuresmatcher_combobox->currentText();
+    f_matching_mode.conf = ui->featuresmatcherconf_spinbox->value();
+    worker->setFeaturesMatchingMode(f_matching_mode);
 
     // Warp mode
     worker->setWarpMode(ui->warpmode_combobox->currentText());
 
     // Wave correction
-    QString wave_cor_kind_txt = ui->wavecorkind_combobox->currentText();
-    if (wave_cor_kind_txt == QString("Horizontal")) {
-        worker->getStitcher()->setWaveCorrection(true);
-        worker->getStitcher()->setWaveCorrectKind(detail::WAVE_CORRECT_HORIZ);
-    } else if (wave_cor_kind_txt == QString("Vertical")) {
-        worker->getStitcher()->setWaveCorrection(true);
-        worker->getStitcher()->setWaveCorrectKind(detail::WAVE_CORRECT_VERT);
-    } else {
-        worker->getStitcher()->setWaveCorrection(false);
-    }
+    worker->setWaveCorrectionMode(ui->wavecorkind_combobox->currentText());
 
     // Bundle adjuster
     worker->setBundleAdjusterMode(ui->bundleadj_combobox->currentText());
 
     // Panorama confidence
-    worker->getStitcher()->setPanoConfidenceThresh(ui->confth_spinbox->value());
+    worker->setPanoConfidenceThresh(ui->confth_spinbox->value());
 
     // Exposure compensator mode
-    worker->setExposureCompensatorMode(ui->expcomp_combobox->currentText(), ui->blocksize_spinbox->value());
+    PanoramaMaker::ExposureComensatorMode exp_comp_mode;
+    exp_comp_mode.mode = ui->expcomp_combobox->currentText();
+    exp_comp_mode.block_size = ui->blocksize_spinbox->value();
+    worker->setExposureCompensatorMode(exp_comp_mode);
 
     // Seam estimation resolution
-    worker->getStitcher()->setSeamEstimationResol(ui->seamfinderres_spinbox->value());
+    worker->setSeamEstimationResol(ui->seamfinderres_spinbox->value());
 
     // Seam finder mode
     worker->setSeamFinderMode(ui->seamfindermode_combobox->currentText());
 
     // Blender
-    QString blender_type = ui->blendertype_combobox->currentText();
-    double blender_param = -1;
-    if (blender_type == QString("Feather")) {
-        blender_param = ui->sharpness_spinbox->value();
-    } else if (blender_type == QString("Multiband")) {
-        blender_param = ui->nbands_spinbox->value();
-    }
-    worker->setBlenderMode(blender_type, blender_param);
+    PanoramaMaker::BlenderMode blender_mode;
+    blender_mode.mode = ui->blendertype_combobox->currentText();
+    blender_mode.sharpness = ui->sharpness_spinbox->value();
+    blender_mode.bands = ui->nbands_spinbox->value();
+    worker->setBlenderMode(blender_mode);
 
     // Compositing resolution
     double compositing_res = ui->compositingres_spinbox->value();
     if (compositing_res <= 0) {
         compositing_res = Stitcher::ORIG_RESOL;
     }
-    worker->getStitcher()->setCompositingResol(compositing_res);
+    worker->setCompositingResol(compositing_res);
+
+    // Interpolation
+    worker->setInterpolationMode(ui->interp_combobox->currentText());
 }
 
 void MainWindow::runWorkers() {
@@ -165,11 +161,10 @@ void MainWindow::createWorkerUi(PanoramaMaker *worker) {
     progress_bar->setToolTip(worker->getStitcherConfString());
     progress_bars << progress_bar;
     connect(worker, SIGNAL(percentage(int)), progress_bar, SLOT(setValue(int)));
-    connect(worker, SIGNAL(failed(QString)), this, SLOT(onWorkerFailed(QString)));
-    connect(worker, SIGNAL(done()), this, SLOT(onWorkerDone()));
     connect(worker, SIGNAL(percentage(int)), this, SLOT(updateStatusBar()));
-    connect(worker, SIGNAL(failed(QString)), this, SLOT(updateStatusBar()));
-    connect(worker, SIGNAL(done()), this, SLOT(updateStatusBar()));
+    connect(worker, SIGNAL(is_failed(QString)), this, SLOT(onWorkerFailed(QString)));
+    connect(worker, SIGNAL(is_done()), this, SLOT(onWorkerDone()));
+    connect(worker, SIGNAL(finished()), this, SLOT(updateStatusBar()));
     ui->tabProgressLayout->addWidget(progress_bar);
 }
 
@@ -220,7 +215,9 @@ void MainWindow::onBlenderTypeChange() {
 void MainWindow::onExposureCompensatorChange() {
     QString type = ui->expcomp_combobox->currentText();
     if (type == QString("Blocks Gain") ||
-        type == QString("Blocks BGR"))
+        type == QString("Blocks BGR") ||
+        type == QString("Combined BGR") ||
+        type == QString("Combined Gain"))
     {
         ui->blocksize_label->show();
         ui->blocksize_spinbox->show();

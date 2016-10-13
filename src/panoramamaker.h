@@ -19,46 +19,89 @@ class PanoramaMaker : public QThread
     Q_OBJECT
 public:
     enum Status { STOPPED, WORKING, DONE, FAILED };
+    struct BlenderMode { QString mode; double sharpness; int bands; };
+    struct ExposureComensatorMode { QString mode; int block_size; };
+    struct FeaturesMatchingMode { QString mode; double conf; };
+
     explicit PanoramaMaker(QObject *parent = 0);
     void setImages(QStringList files,
                    QString output_filename,
                    QString output_ext);
 
-    void setWarpMode(QString mode);
-    void setSeamFinderMode(QString mode);
-    void setBlenderMode(QString mode, double param=-1);
-    void setExposureCompensatorMode(QString mode, double bs=32);
-    void setBundleAdjusterMode(QString mode);
-    void setFeaturesFinderMode(QString mode);
-    void setFeaturesMatchingMode(QString mode, double param=0.65);
+    void setBlenderMode(BlenderMode mode) { blender_mode = mode; }
+    BlenderMode getBlenderMode() { return blender_mode; }
+
+    void setExposureCompensatorMode(ExposureComensatorMode mode) { exposure_compensator_mode = mode; }
+    ExposureComensatorMode getExposureCompensatorMode() { return exposure_compensator_mode; }
+
+    void setFeaturesMatchingMode(FeaturesMatchingMode mode) { features_matching_mode = mode; }
+    FeaturesMatchingMode getFeaturesMatchingMode() { return features_matching_mode; }
+
+    void setWarpMode(QString mode) { warp_mode = mode; }
+    QString getWarpMode() { return warp_mode; }
+
+    void setSeamFinderMode(QString mode) { seam_finder_mode = mode; }
+    QString getSeamFinderMode() { return seam_finder_mode; }
+
+    void setBundleAdjusterMode(QString mode) { bundle_adjuster_mode = mode; }
+    QString getBunderAdjusterMode() { return bundle_adjuster_mode; }
+
+    void setFeaturesFinderMode(QString mode) { features_finder_mode = mode; }
+    QString getFeaturesFinderMode() { return features_finder_mode; }
+
+    void setWaveCorrectionMode(QString mode) { wave_correction_mode = mode; }
+    QString getWaveCorrectionMode() { return wave_correction_mode; }
+
+    void setInterpolationMode(QString mode) { interp_mode = mode; }
+    QString getInterpolationMode() { return interp_mode; }
+
+    void setRegistrationResol(double res) { registration_resol = res; }
+    double getRegistrationResol() { return registration_resol; }
+
+    void setSeamEstimationResol(double res) { seam_est_resol = res; }
+    double getSeamEstimationResol() { return seam_est_resol; }
+
+    void setCompositingResol(double res) { compositing_resol = res; }
+    double getCompositingResol() { return compositing_resol; }
+
+    void setPanoConfidenceThresh(double conf) { pano_conf_threshold = conf; }
+    double getPanoConfidenceThresh() { return pano_conf_threshold; }
+
 
     Status getStatus() { return status; }
+    QString getStatusMsg() { return status_msg; }
     int getProgress() { return progress; }
+
+    QString getStitcherConfString();
+    QString getOutputFilename() { return output_filename; }
 
     Stitcher::Status unsafeRun();
     void run();
 
-    QString getStitcherConfString();
-    Stitcher* getStitcher() { return &stitcher; }
-    QString getOutputFilename() { return output_filename; }
-
 private:
+    void clean();
     void setProgress(int prog);
-    void fail(Stitcher::Status status);
-    void fail(QString msg=QString("Unknown error"));
+    void failed(Stitcher::Status status);
+    void failed(QString msg=QString("Unknown error"));
+    void done();
     bool configureStitcher();
 
     QStringList images_path;
     QString output_filename, output_ext;
 
-    Stitcher &stitcher;
+    Ptr<Stitcher> stitcher;
 
     QString status_msg;
     Status status;
 
-    QString seam_finder_mode, warp_mode, blender_mode, exposure_compensator_mode;
-    QString bundle_adjuster_mode, features_finder_mode, features_matcher_mode;
-    double blender_param, features_matcher_param, exposure_compensator_param;
+    QString seam_finder_mode, warp_mode, bundle_adjuster_mode, interp_mode;
+    QString wave_correction_mode, features_finder_mode;
+    ExposureComensatorMode exposure_compensator_mode;
+    BlenderMode blender_mode;
+    FeaturesMatchingMode features_matching_mode;
+
+    double seam_est_resol, registration_resol, compositing_resol;
+    double pano_conf_threshold;
 
     QElapsedTimer timer;
     long total_time;
@@ -67,8 +110,8 @@ private:
 
 signals:
     void percentage(int);
-    void failed(QString msg=QString());
-    void done();
+    void is_failed(QString msg=QString());
+    void is_done();
 
 public slots:
 };

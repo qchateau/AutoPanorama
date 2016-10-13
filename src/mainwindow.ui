@@ -87,32 +87,71 @@
         <string>Settings</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_2">
-        <item row="18" column="0">
-         <layout class="QVBoxLayout" name="verticalLayout_2">
-          <property name="spacing">
-           <number>0</number>
-          </property>
-          <property name="sizeConstraint">
-           <enum>QLayout::SetMinimumSize</enum>
-          </property>
+        <item row="14" column="1">
+         <widget class="QComboBox" name="seamfindermode_combobox">
           <item>
-           <widget class="QLabel" name="nbands_label">
-            <property name="text">
-             <string>Bands</string>
-            </property>
-           </widget>
+           <property name="text">
+            <string>Graph cut color</string>
+           </property>
           </item>
           <item>
-           <widget class="QLabel" name="sharpness_label">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="text">
-             <string>Sharpness</string>
-            </property>
-           </widget>
+           <property name="text">
+            <string>Graph cut gradient</string>
+           </property>
           </item>
-         </layout>
+          <item>
+           <property name="text">
+            <string>Voronoi</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>None</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="10" column="5">
+         <widget class="QSpinBox" name="blocksize_spinbox">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="minimum">
+           <number>1</number>
+          </property>
+          <property name="maximum">
+           <number>1024</number>
+          </property>
+          <property name="value">
+           <number>24</number>
+          </property>
+         </widget>
+        </item>
+        <item row="10" column="4">
+         <widget class="QLabel" name="blocksize_label">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="toolTip">
+           <string>Blocks are used on seam finding resolution</string>
+          </property>
+          <property name="text">
+           <string>Block size</string>
+          </property>
+         </widget>
+        </item>
+        <item row="12" column="0">
+         <widget class="QLabel" name="seaming_label">
+          <property name="font">
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Seaming</string>
+          </property>
+         </widget>
         </item>
         <item row="18" column="1">
          <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -153,26 +192,6 @@
           </item>
          </layout>
         </item>
-        <item row="13" column="0">
-         <widget class="QLabel" name="seamfinderres_label">
-          <property name="text">
-           <string>Seam finder resolution</string>
-          </property>
-         </widget>
-        </item>
-        <item row="15" column="0">
-         <spacer name="verticalSpacer_4">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
         <item row="13" column="1">
          <widget class="QDoubleSpinBox" name="seamfinderres_spinbox">
           <property name="suffix">
@@ -212,22 +231,23 @@
           </item>
          </widget>
         </item>
-        <item row="25" column="1">
-         <widget class="QDoubleSpinBox" name="compositingres_spinbox">
-          <property name="prefix">
-           <string/>
+        <item row="15" column="0">
+         <spacer name="verticalSpacer_4">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
           </property>
-          <property name="suffix">
-           <string> Mpx (zero for full resolution)</string>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
           </property>
-          <property name="decimals">
-           <number>1</number>
-          </property>
-          <property name="maximum">
-           <double>100.000000000000000</double>
-          </property>
-          <property name="singleStep">
-           <double>0.500000000000000</double>
+         </spacer>
+        </item>
+        <item row="13" column="0">
+         <widget class="QLabel" name="seamfinderres_label">
+          <property name="text">
+           <string>Seam finder resolution</string>
           </property>
          </widget>
         </item>
@@ -236,6 +256,16 @@
           <property name="enabled">
            <bool>true</bool>
           </property>
+          <item>
+           <property name="text">
+            <string>Combined BGR</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Combined Gain</string>
+           </property>
+          </item>
           <item>
            <property name="text">
             <string>Blocks BGR</string>
@@ -261,6 +291,25 @@
             <string>None</string>
            </property>
           </item>
+         </widget>
+        </item>
+        <item row="25" column="1">
+         <widget class="QDoubleSpinBox" name="compositingres_spinbox">
+          <property name="prefix">
+           <string/>
+          </property>
+          <property name="suffix">
+           <string> Mpx (zero for full resolution)</string>
+          </property>
+          <property name="decimals">
+           <number>1</number>
+          </property>
+          <property name="maximum">
+           <double>100.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.500000000000000</double>
+          </property>
          </widget>
         </item>
         <item row="6" column="0">
@@ -308,17 +357,17 @@
           </item>
          </widget>
         </item>
+        <item row="4" column="0">
+         <widget class="QLabel" name="featuresfinder_label">
+          <property name="text">
+           <string>Features finder</string>
+          </property>
+         </widget>
+        </item>
         <item row="6" column="4">
          <widget class="QLabel" name="wavecorkind_label">
           <property name="text">
            <string>Wave correction</string>
-          </property>
-         </widget>
-        </item>
-        <item row="10" column="0">
-         <widget class="QLabel" name="expcom_label">
-          <property name="text">
-           <string>Exposure compensator</string>
           </property>
          </widget>
         </item>
@@ -352,17 +401,10 @@
           </item>
          </widget>
         </item>
-        <item row="4" column="0">
-         <widget class="QLabel" name="featuresfinder_label">
+        <item row="10" column="0">
+         <widget class="QLabel" name="expcom_label">
           <property name="text">
-           <string>Features finder</string>
-          </property>
-         </widget>
-        </item>
-        <item row="17" column="0">
-         <widget class="QLabel" name="blendertype_label">
-          <property name="text">
-           <string>Blender type</string>
+           <string>Exposure compensator</string>
           </property>
          </widget>
         </item>
@@ -383,13 +425,6 @@
             <string>None</string>
            </property>
           </item>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="regres_label">
-          <property name="text">
-           <string>Registration resolution</string>
-          </property>
          </widget>
         </item>
         <item row="1" column="1">
@@ -414,10 +449,17 @@
           </property>
          </widget>
         </item>
-        <item row="7" column="4">
-         <widget class="QLabel" name="confth_label">
+        <item row="17" column="0">
+         <widget class="QLabel" name="blendertype_label">
           <property name="text">
-           <string>Confidence threshold</string>
+           <string>Blender type</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="regres_label">
+          <property name="text">
+           <string>Registration resolution</string>
           </property>
          </widget>
         </item>
@@ -434,10 +476,10 @@
           </property>
          </widget>
         </item>
-        <item row="5" column="0">
-         <widget class="QLabel" name="featuresmatcher_label">
+        <item row="7" column="4">
+         <widget class="QLabel" name="confth_label">
           <property name="text">
-           <string>Features matcher</string>
+           <string>Confidence threshold</string>
           </property>
          </widget>
         </item>
@@ -453,19 +495,6 @@
            <string>Blending</string>
           </property>
          </widget>
-        </item>
-        <item row="8" column="0">
-         <spacer name="verticalSpacer_3">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
         </item>
         <item row="5" column="1">
          <widget class="QComboBox" name="featuresmatcher_combobox">
@@ -492,6 +521,19 @@
           </property>
          </spacer>
         </item>
+        <item row="8" column="0">
+         <spacer name="verticalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
         <item row="24" column="0">
          <widget class="QLabel" name="compositing_label">
           <property name="font">
@@ -505,36 +547,10 @@
           </property>
          </widget>
         </item>
-        <item row="7" column="5">
-         <widget class="QDoubleSpinBox" name="confth_spinbox">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="decimals">
-           <number>1</number>
-          </property>
-          <property name="minimum">
-           <double>0.100000000000000</double>
-          </property>
-          <property name="singleStep">
-           <double>0.100000000000000</double>
-          </property>
-          <property name="value">
-           <double>1.000000000000000</double>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="4">
-         <widget class="QLabel" name="featuresmatcherconf_label">
+        <item row="5" column="0">
+         <widget class="QLabel" name="featuresmatcher_label">
           <property name="text">
-           <string>Match confidence</string>
-          </property>
-         </widget>
-        </item>
-        <item row="14" column="0">
-         <widget class="QLabel" name="seamfindermode_label">
-          <property name="text">
-           <string>Seam finder type</string>
+           <string>Features matcher</string>
           </property>
          </widget>
         </item>
@@ -558,10 +574,36 @@
           </property>
          </widget>
         </item>
-        <item row="7" column="0">
-         <widget class="QLabel" name="bundleadj_label">
+        <item row="7" column="5">
+         <widget class="QDoubleSpinBox" name="confth_spinbox">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="decimals">
+           <number>1</number>
+          </property>
+          <property name="minimum">
+           <double>0.100000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.100000000000000</double>
+          </property>
+          <property name="value">
+           <double>1.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="14" column="0">
+         <widget class="QLabel" name="seamfindermode_label">
           <property name="text">
-           <string>Bundle Adjuster type</string>
+           <string>Seam finder type</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="4">
+         <widget class="QLabel" name="featuresmatcherconf_label">
+          <property name="text">
+           <string>Match confidence</string>
           </property>
          </widget>
         </item>
@@ -584,70 +626,69 @@
           </property>
          </widget>
         </item>
-        <item row="12" column="0">
-         <widget class="QLabel" name="seaming_label">
-          <property name="font">
-           <font>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
-          </property>
+        <item row="7" column="0">
+         <widget class="QLabel" name="bundleadj_label">
           <property name="text">
-           <string>Seaming</string>
+           <string>Bundle Adjuster type</string>
           </property>
          </widget>
         </item>
-        <item row="14" column="1">
-         <widget class="QComboBox" name="seamfindermode_combobox">
+        <item row="18" column="0">
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <property name="sizeConstraint">
+           <enum>QLayout::SetMinimumSize</enum>
+          </property>
           <item>
-           <property name="text">
-            <string>Graph cut color</string>
-           </property>
+           <widget class="QLabel" name="nbands_label">
+            <property name="text">
+             <string>Bands</string>
+            </property>
+           </widget>
           </item>
           <item>
-           <property name="text">
-            <string>Graph cut gradient</string>
-           </property>
+           <widget class="QLabel" name="sharpness_label">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="text">
+             <string>Sharpness</string>
+            </property>
+           </widget>
           </item>
-          <item>
-           <property name="text">
-            <string>Voronoi</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>None</string>
-           </property>
-          </item>
-         </widget>
+         </layout>
         </item>
-        <item row="10" column="4">
-         <widget class="QLabel" name="blocksize_label">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="toolTip">
-           <string>Blocks are used on seam finding resolution</string>
-          </property>
+        <item row="26" column="0">
+         <widget class="QLabel" name="interp_label">
           <property name="text">
-           <string>Block size</string>
+           <string>Interpolation mode</string>
           </property>
          </widget>
         </item>
-        <item row="10" column="5">
-         <widget class="QSpinBox" name="blocksize_spinbox">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="minimum">
-           <number>1</number>
-          </property>
-          <property name="maximum">
-           <number>1024</number>
-          </property>
-          <property name="value">
-           <number>24</number>
-          </property>
+        <item row="26" column="1">
+         <widget class="QComboBox" name="interp_combobox">
+          <item>
+           <property name="text">
+            <string>Lanczos4</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Cubic</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Linear</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Nearest</string>
+           </property>
+          </item>
          </widget>
         </item>
        </layout>

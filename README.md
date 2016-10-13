@@ -6,7 +6,7 @@
 
 ## TODO OpenCV : ##
 * linear instead of affine model for exposure compensation
-* split commits on openCV repo
+* Blender uses 16bits signed pixels : why ?
 
 ## This build needs the opencv submodule to be built correctly : ##
 * Linux :
@@ -32,7 +32,7 @@ page 4
 M. Uyttendaele, A. Eden, and R. Szeliski. Eliminating ghosting and exposure artifacts in image mosaics. In Proc. CVPR’01, volume 2, pages 509–516, 2001
 page 4
 
-#### Removed the blocks gains filtering : ####
+#### Removed the blocks gains filtering (?) : ####
 M. Uyttendaele, A. Eden, and R. Szeliski. Eliminating ghosting and exposure artifacts in image mosaics. In Proc. CVPR’01, volume 2, pages 509–516, 2001
 Describes the optimal block size as 32 for full-sizes images. In the OpenCV implementation, blocks are calculated on
 a decimated image. Therefore they are much "bigger" than 32 pixels once the gain map have been resized.

@@ -109,5 +109,5 @@ FORMS    += src/mainwindow.ui
 DISTFILES += res/autopanorama.ico \
              res/autopanorama.rc \
              scripts/compile_opencv.sh \
-             README
+             README.md
 

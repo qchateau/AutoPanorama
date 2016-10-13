@@ -17,11 +17,8 @@
 using namespace cv;
 using namespace std;
 
-static Stitcher unique_stitcher = Stitcher::createDefault(false);
-
 PanoramaMaker::PanoramaMaker(QObject *parent) :
     QThread(parent),
-    stitcher(unique_stitcher),
     status(STOPPED),
     total_time(-1),
     progress(0),
@@ -31,37 +28,33 @@ PanoramaMaker::PanoramaMaker(QObject *parent) :
 
 void PanoramaMaker::run() {
     if (!configureStitcher())
+        failed("Configuration error");
+    else
     {
-        fail("Configuration error");
-        return;
-    }
-    try {
-        status = WORKING;
-        timer.start();
-        Stitcher::Status stitcher_status = unsafeRun();
-        total_time = timer.elapsed();
-        if (stitcher_status == Stitcher::OK)
-        {
-            status = DONE;
-            emit done();
+        try {
+            status = WORKING;
+            timer.start();
+            Stitcher::Status stitcher_status = unsafeRun();
+            total_time = timer.elapsed();
+            if (stitcher_status == Stitcher::OK)
+                done();
+            else
+                failed(stitcher_status);
         }
-        else
-        {
-            fail(stitcher_status);
+        catch (cv::Exception& e) {
+            qDebug() << "OpenCV error during stitching : " << QString(e.what());
+            failed("OpenCV error during stitching");
+        }
+        catch(std::bad_alloc& e) {
+            failed("Bad alloc error");
+            qDebug() << "Bad alloc error : " << QString(e.what());
+        }
+        catch(...) {
+            failed();
+            qDebug() << "setUnknown exception";
         }
     }
-    catch (cv::Exception& e) {
-        qDebug() << "OpenCV error during stitching : " << QString(e.what());
-        fail("OpenCV error during stitching");
-    }
-    catch(std::bad_alloc& e) {
-        fail("Bad alloc error");
-        qDebug() << "Bad alloc error : " << QString(e.what());
-    }
-    catch(...) {
-        fail();
-        qDebug() << "setUnknown exception";
-    }
+    clean();
 }
 
 Stitcher::Status PanoramaMaker::unsafeRun() {
@@ -75,7 +68,7 @@ Stitcher::Status PanoramaMaker::unsafeRun() {
     }
 
     Stitcher::Status stitcher_status;
-    stitcher_status = stitcher.estimateTransform(images);
+    stitcher_status = stitcher->estimateTransform(images);
     if (stitcher_status != Stitcher::OK) {
         return stitcher_status;
     } else {
@@ -83,7 +76,7 @@ Stitcher::Status PanoramaMaker::unsafeRun() {
     }
 
     Mat pano;
-    stitcher_status = stitcher.composePanorama(pano);
+    stitcher_status = stitcher->composePanorama(pano);
     if (stitcher_status != Stitcher::OK) {
         return stitcher_status;
     } else {
@@ -108,7 +101,7 @@ Stitcher::Status PanoramaMaker::unsafeRun() {
     return stitcher_status;
 }
 
-void PanoramaMaker::fail(Stitcher::Status status) {
+void PanoramaMaker::failed(Stitcher::Status status) {
     QString msg;
     switch(status) {
     case Stitcher::ERR_NEED_MORE_IMGS:
@@ -123,58 +116,35 @@ void PanoramaMaker::fail(Stitcher::Status status) {
     default:
         msg = "Unknown error";
     }
-    fail(msg);
+    failed(msg);
 }
 
-void PanoramaMaker::fail(QString msg) {
-    emit failed(msg);
+void PanoramaMaker::failed(QString msg) {
     status = FAILED;
+    status_msg = msg;
+    emit is_failed(msg);
+}
+
+void PanoramaMaker::done()
+{
+    status = DONE;
+    status_msg = "Done";
+    emit is_done();
+}
+
+void PanoramaMaker::clean()
+{
+    if (!stitcher.empty())
+    {
+        stitcher.release();
+        qDebug() << "Released sticher. Stitcher empty : " << stitcher.empty();
+    }
 }
 
 void PanoramaMaker::setImages(QStringList files, QString output_filename, QString output_ext) {
     images_path = files;
     this->output_filename = output_filename;
     this->output_ext = output_ext;
-}
-
-void PanoramaMaker::setWarpMode(QString mode) {
-    warp_mode = mode;
-}
-
-void PanoramaMaker::setSeamFinderMode(QString mode) {
-    seam_finder_mode = mode;
-}
-
-void PanoramaMaker::setBlenderMode(QString mode, double param) {
-    if (mode == QString("Feather")) {
-        if (param < 0) {
-            param = 0.02f;
-        }
-    } else if (mode == QString("Multiband")) {
-        if (param < 0) {
-            param = 5;
-        }
-    }
-    blender_mode = mode;
-    blender_param = param;
-}
-
-void PanoramaMaker::setExposureCompensatorMode(QString mode, double bs) {
-    exposure_compensator_param = bs;
-    exposure_compensator_mode = mode;
-}
-
-void PanoramaMaker::setBundleAdjusterMode(QString mode) {
-    bundle_adjuster_mode = mode;
-}
-
-void PanoramaMaker::setFeaturesFinderMode(QString mode) {
-    features_finder_mode = mode;
-}
-
-void PanoramaMaker::setFeaturesMatchingMode(QString mode, double param) {
-    features_matcher_mode = mode;
-    features_matcher_param = param;
 }
 
 QString PanoramaMaker::getStitcherConfString() {
@@ -195,54 +165,56 @@ QString PanoramaMaker::getStitcherConfString() {
         conf += QString("\n\n");
     }
 
-    conf += QString("Registration Resolution : %1 Mpx").arg(stitcher.registrationResol());
+    conf += QString("Registration Resolution : %1 Mpx").arg(getRegistrationResol());
     conf += QString("\n\n");
 
-    conf += QString("Features finder : %1").arg(features_finder_mode);
+    conf += QString("Features finder : %1").arg(getFeaturesFinderMode());
     conf += QString("\n");
-    conf += QString("Features matcher : %1").arg(features_matcher_mode);
+    conf += QString("Features matcher : %1").arg(getFeaturesMatchingMode().mode);
     conf += QString("\n");
-    conf += QString("Features matcher confidence : %1").arg(features_matcher_param);
+    conf += QString("Features matcher confidence : %1").arg(getFeaturesMatchingMode().conf);
     conf += QString("\n\n");
 
-    conf += QString("Warp Mode : %1").arg(warp_mode);
+    conf += QString("Warp Mode : %1").arg(getWarpMode());
     conf += QString("\n");
-    conf += QString("Wave Correction : %1").arg(stitcher.waveCorrection() ?
-                    stitcher.waveCorrectKind() == detail::WAVE_CORRECT_HORIZ ? "Horizontal" : "Vertical"
-                    : "No");
+    conf += QString("Wave Correction : %1").arg(getWaveCorrectionMode());
+    conf += QString("\n");
+    conf += QString("Interpolation mode : %1").arg(getInterpolationMode());
     conf += QString("\n\n");
 
-    conf += QString("Bundle adjuster : %1").arg(bundle_adjuster_mode);
+    conf += QString("Bundle adjuster : %1").arg(getBunderAdjusterMode());
     conf += QString("\n");
-    conf += QString("Panorama Confidence threshold : %1").arg(stitcher.panoConfidenceThresh());
+    conf += QString("Panorama Confidence threshold : %1").arg(getPanoConfidenceThresh());
     conf += QString("\n\n");
 
-    conf += QString("Exposure compensator mode : %1").arg(exposure_compensator_mode);
-    if (exposure_compensator_mode == QString("Blocks Gain") ||
-        exposure_compensator_mode == QString("Blocks BGR"))
+    conf += QString("Exposure compensator mode : %1").arg(getExposureCompensatorMode().mode);
+    if (getExposureCompensatorMode().mode == QString("Blocks Gain") ||
+        getExposureCompensatorMode().mode == QString("Blocks BGR") ||
+        getExposureCompensatorMode().mode == QString("Combined Gain") ||
+        getExposureCompensatorMode().mode == QString("Combined BGR"))
     {
         conf += QString("\n");
-        conf += QString("Exposure compensator blocks size : %1").arg(exposure_compensator_param);
+        conf += QString("Exposure compensator blocks size : %1").arg(getExposureCompensatorMode().block_size);
     }
     conf += QString("\n\n");
 
     conf += QString("Seam Finder : %1").arg(seam_finder_mode);
     conf += QString("\n");
-    conf += QString("Seam Estimation Resolution : %1 Mpx").arg(stitcher.seamEstimationResol());
+    conf += QString("Seam Estimation Resolution : %1 Mpx").arg(getSeamEstimationResol());
     conf += QString("\n\n");
 
-    conf += QString("Blender type : %1").arg(blender_mode);
+    conf += QString("Blender type : %1").arg(getBlenderMode().mode);
     conf += QString("\n");
-    if (blender_mode == QString("Feather")) {
-        conf += QString("Blender sharpness : %1").arg(blender_param);
-    } else if (blender_mode == QString("Multiband")) {
-        conf += QString("Blender bands : %1").arg(int(blender_param));
+    if (getBlenderMode().mode == QString("Feather")) {
+        conf += QString("Blender sharpness : %1").arg(getBlenderMode().sharpness);
+    } else if (getBlenderMode().mode == QString("Multiband")) {
+        conf += QString("Blender bands : %1").arg(getBlenderMode().bands);
     }
     conf += QString("\n\n");
 
-    conf += QString("Compositing Resolution : %1").arg(stitcher.compositingResol() == Stitcher::ORIG_RESOL ?
+    conf += QString("Compositing Resolution : %1").arg(getCompositingResol() == Stitcher::ORIG_RESOL ?
                  "Original" :
-                 QString("%1  Mpx").arg(stitcher.compositingResol()));
+                 QString("%1  Mpx").arg(getCompositingResol()));
     conf += QString("\n\n");
 
     conf += QString("Try to use GPU : %1").arg(try_use_gpu ? "Yes" : "No");
@@ -259,6 +231,9 @@ void PanoramaMaker::setProgress(int prog)
 bool PanoramaMaker::configureStitcher()
 {
     ocl::setUseOpenCL(try_use_gpu);
+    stitcher = createStitcher(try_use_gpu);
+    if (stitcher.empty())
+        return false;
 
     // Warper
     Ptr<WarperCreator> warper;
@@ -271,7 +246,22 @@ bool PanoramaMaker::configureStitcher()
     } else {
         return false;
     }
-    stitcher.setWarper(warper);
+    stitcher->setWarper(warper);
+
+    // Interpolation
+    int interp;
+    if (interp_mode == QString("Nearest")) {
+        interp = INTER_NEAREST;
+    } else if (interp_mode == QString("Linear")) {
+        interp = INTER_LINEAR;
+    } else if (interp_mode == QString("Cubic")) {
+        interp = INTER_CUBIC;
+    } else if (interp_mode == QString("Lanczos4")) {
+        interp = INTER_LANCZOS4;
+    } else {
+        return false;
+    }
+    stitcher->setInterpolation(interp);
 
     // Seam finder
     Ptr<detail::SeamFinder> seamfinder;
@@ -286,39 +276,46 @@ bool PanoramaMaker::configureStitcher()
     } else {
         return false;
     }
-    stitcher.setSeamFinder(seamfinder);
+    stitcher->setSeamFinder(seamfinder);
+    stitcher->setSeamEstimationResol(seam_est_resol);
 
     // Blender
     Ptr<detail::Blender> blender;
-    if (blender_mode == QString("Feather")) {
-        blender = makePtr<detail::FeatherBlender>(blender_param);
-    } else if (blender_mode == QString("Multiband")) {
-        blender = makePtr<detail::MultiBandBlender>(try_use_gpu, blender_param);
-    } else if (blender_mode == QString("None")) {
+    if (blender_mode.mode == QString("Feather")) {
+        blender = makePtr<detail::FeatherBlender>(blender_mode.sharpness);
+    } else if (blender_mode.mode == QString("Multiband")) {
+        blender = makePtr<detail::MultiBandBlender>(try_use_gpu, blender_mode.bands);
+    } else if (blender_mode.mode == QString("None")) {
             blender = makePtr<detail::Blender>();
     } else {
         return false;
     }
-    stitcher.setBlender(blender);
+    stitcher->setBlender(blender);
 
     // Exposure
     Ptr<detail::ExposureCompensator> exp_comp;
-    if (exposure_compensator_mode == QString("None")) {
+    if (exposure_compensator_mode.mode == QString("None")) {
         exp_comp = makePtr<detail::NoExposureCompensator>();
-    } else if (exposure_compensator_mode == QString("Gain")) {
+    } else if (exposure_compensator_mode.mode == QString("Gain")) {
         exp_comp = makePtr<detail::GainCompensator>();
-    } else if (exposure_compensator_mode == QString("Blocks Gain")) {
-        int bs = exposure_compensator_param;
+    } else if (exposure_compensator_mode.mode == QString("Blocks Gain")) {
+        int bs = exposure_compensator_mode.block_size;
         exp_comp = makePtr<detail::BlocksGainCompensator>(bs, bs);
-    } else if (exposure_compensator_mode == QString("BGR")) {
+    } else if (exposure_compensator_mode.mode == QString("Combined Gain")) {
+        int bs = exposure_compensator_mode.block_size;
+        exp_comp = makePtr<detail::CombinedGainCompensator>(bs, bs);
+    } else if (exposure_compensator_mode.mode == QString("BGR")) {
         exp_comp = makePtr<detail::ChannelsCompensator>();
-    } else if (exposure_compensator_mode == QString("Blocks BGR")) {
-        int bs = exposure_compensator_param;
+    } else if (exposure_compensator_mode.mode == QString("Blocks BGR")) {
+        int bs = exposure_compensator_mode.block_size;
         exp_comp = makePtr<detail::BlocksChannelsCompensator>(bs, bs);
+    } else if (exposure_compensator_mode.mode == QString("Combined BGR")) {
+        int bs = exposure_compensator_mode.block_size;
+        exp_comp = makePtr<detail::CombinedChannelsCompensator>(bs, bs);
     } else {
         return false;
     }
-    stitcher.setExposureCompensator(exp_comp);
+    stitcher->setExposureCompensator(exp_comp);
 
     // Bundle adjuster
     Ptr<detail::BundleAdjusterBase> bundle_adj;
@@ -329,7 +326,7 @@ bool PanoramaMaker::configureStitcher()
     } else {
         return false;
     }
-    stitcher.setBundleAdjuster(bundle_adj);
+    stitcher->setBundleAdjuster(bundle_adj);
 
     // Features finder
     Ptr<detail::FeaturesFinder> ffinder;
@@ -340,16 +337,36 @@ bool PanoramaMaker::configureStitcher()
     } else {
         return false;
     }
-    stitcher.setFeaturesFinder(ffinder);
+    stitcher->setFeaturesFinder(ffinder);
 
     // Matcher
     Ptr<detail::FeaturesMatcher> matcher;
-    if (features_matcher_mode == QString("Best of 2 nearest")) {
-        matcher = makePtr<detail::BestOf2NearestMatcher>(try_use_gpu, features_matcher_param);
+    if (features_matching_mode.mode == QString("Best of 2 nearest")) {
+        matcher = makePtr<detail::BestOf2NearestMatcher>(try_use_gpu, features_matching_mode.conf);
     } else {
         return false;
     }
-    stitcher.setFeaturesMatcher(matcher);
+    stitcher->setFeaturesMatcher(matcher);
+
+    // Wave correction
+    if (wave_correction_mode == QString("Horizontal")) {
+        stitcher->setWaveCorrection(true);
+        stitcher->setWaveCorrectKind(detail::WAVE_CORRECT_HORIZ);
+    } else if (wave_correction_mode == QString("Vertical")) {
+        stitcher->setWaveCorrection(true);
+        stitcher->setWaveCorrectKind(detail::WAVE_CORRECT_VERT);
+    } else {
+        stitcher->setWaveCorrection(false);
+    }
+
+    // Pano conf
+    stitcher->setPanoConfidenceThresh(pano_conf_threshold);
+
+    // Registration
+    stitcher->setRegistrationResol(registration_resol);
+
+    // Compositing
+    stitcher->setCompositingResol(compositing_resol);
 
     return true;
 }
