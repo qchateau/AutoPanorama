@@ -31,60 +31,6 @@ QFileWidget::QFileWidget(QWidget *parent) :
     items_cleaner.start(5000);
 }
 
-void QFileWidget::dragEnterEvent(QDragEnterEvent *event)
-{
-    QListWidget::dragEnterEvent(event);
-
-    const QMimeData *mimeData = event->mimeData();
-    if (event->source() == this)
-    {
-        event->ignore();
-    }
-    else if (mimeData->hasUrls() && (event->source() == 0))
-    {
-        event->acceptProposedAction();
-    }
-}
-
-void QFileWidget::dragMoveEvent(QDragMoveEvent *event)
-{
-    QListWidget::dragMoveEvent(event);
-
-    if (event->mimeData()->hasUrls() && (event->source() == 0))
-    {
-        event->acceptProposedAction();
-    }
-}
-
-void QFileWidget::dropEvent(QDropEvent *event)
-{
-    QListWidget::dropEvent(event);
-
-    const QMimeData *mimeData = event->mimeData();
-    if (mimeData->hasUrls() && (event->source() == 0))
-    {
-        QStringList new_files;
-        QList<QUrl> urlList = mimeData->urls();
-        for (int i = 0; i < urlList.size() && i < 32; ++i)
-        {
-            QUrl &url = urlList[i];
-            if (url.isLocalFile())
-            {
-                new_files << url.toLocalFile();
-            }
-        }
-        if (new_files.size() > 0) {
-            event->acceptProposedAction();
-            asyncAddFiles(new_files);
-        }
-    }
-}
-
-void QFileWidget::asyncAddFiles(QStringList files)
-{
-    QtConcurrent::run(this, &QFileWidget::addFiles, files);
-}
-
 void QFileWidget::addFiles(QStringList files)
 {
     QList<QListWidgetItem*> added_items;
@@ -121,62 +67,9 @@ void QFileWidget::addFiles(QStringList files)
     }
 }
 
-void QFileWidget::clean_items()
+void QFileWidget::asyncAddFiles(QStringList files)
 {
-    if (thread() != QApplication::instance()->thread())
-    {
-        qDebug() << "WARNING : clean_item must be called in the GUI thread. Skipping.";
-        return;
-    }
-
-    QList<QListWidgetItem*> items_not_deleted;
-    while (items_to_delete.size() > 0)
-    {
-        QListWidgetItem* item = items_to_delete.takeFirst();
-        if (item)
-        {
-            if (item->icon().cacheKey() == default_icon.cacheKey())
-                items_not_deleted << item;
-            else
-                delete item;
-        }
-    }
-    items_to_delete = items_not_deleted;
-}
-
-void QFileWidget::selectAndAddFiles()
-{
-    QString filter = "Images (*.png *.jpg *.bmp)";
-    QStringList files = QFileDialog::getOpenFileNames(Q_NULLPTR, QString(), QString(), filter);
-    asyncAddFiles(files);
-}
-
-void QFileWidget::removeSelected()
-{
-    QList<QListWidgetItem*> selected = selectedItems();
-    clearSelection();
-    for (int i = 0; i < selected.size(); ++i)
-        remove(selected[i]);
-}
-
-void QFileWidget::remove(QListWidgetItem* item)
-{
-    item->setHidden(true);
-    items_to_delete << item;
-    emit itemsRemoved();
-}
-
-void QFileWidget::remove(int row)
-{
-    remove(item(row));
-}
-
-void QFileWidget::clear()
-{
-    QList<QListWidgetItem*> items;
-    for (int i = 0; i < count(); ++i) {
-        remove(i);
-    }
+    QtConcurrent::run(this, &QFileWidget::addFiles, files);
 }
 
 QStringList QFileWidget::getFilesList()
@@ -204,24 +97,131 @@ QStringList QFileWidget::getSelectedFilesList()
     return files_list;
 }
 
+
+
+
+
+
+
+
+void QFileWidget::clean_items()
+{
+    if (thread() != QApplication::instance()->thread())
+    {
+        qDebug() << "WARNING : clean_item must be called in the GUI thread. Skipping.";
+        return;
+    }
+
+    QList<QListWidgetItem*> items_not_deleted;
+    while (items_to_delete.size() > 0)
+    {
+        QListWidgetItem* item = items_to_delete.takeFirst();
+        if (item)
+        {
+            if (item->icon().cacheKey() == default_icon.cacheKey())
+                items_not_deleted << item;
+            else
+                delete item;
+        }
+    }
+    items_to_delete = items_not_deleted;
+}
+
+void QFileWidget::clear()
+{
+    for (int i = 0; i < count(); ++i)
+        remove(i);
+}
+
+void QFileWidget::removeSelected()
+{
+    QList<QListWidgetItem*> selected = selectedItems();
+    clearSelection();
+    for (int i = 0; i < selected.size(); ++i)
+        remove(selected[i]);
+}
+
+void QFileWidget::selectAndAddFiles()
+{
+    QString filter = "Images (*.png *.jpg *.bmp)";
+    QStringList files = QFileDialog::getOpenFileNames(Q_NULLPTR, QString(), QString(), filter);
+    asyncAddFiles(files);
+}
+
+
+
+
+
+
+
+void QFileWidget::dragEnterEvent(QDragEnterEvent *event)
+{
+    QListWidget::dragEnterEvent(event);
+
+    const QMimeData *mimeData = event->mimeData();
+    if (event->source() == this)
+        event->ignore();
+    else if (mimeData->hasUrls() && (event->source() == 0))
+        event->acceptProposedAction();
+}
+
+void QFileWidget::dragMoveEvent(QDragMoveEvent *event)
+{
+    QListWidget::dragMoveEvent(event);
+
+    if (event->mimeData()->hasUrls() && (event->source() == 0))
+        event->acceptProposedAction();
+}
+
+void QFileWidget::dropEvent(QDropEvent *event)
+{
+    QListWidget::dropEvent(event);
+
+    const QMimeData *mimeData = event->mimeData();
+    if (mimeData->hasUrls() && (event->source() == 0))
+    {
+        QStringList new_files;
+        QList<QUrl> urlList = mimeData->urls();
+        for (int i = 0; i < urlList.size() && i < 32; ++i)
+        {
+            QUrl &url = urlList[i];
+            if (url.isLocalFile())
+                new_files << url.toLocalFile();
+        }
+        if (new_files.size() > 0)
+        {
+            event->acceptProposedAction();
+            asyncAddFiles(new_files);
+        }
+    }
+}
+
 bool QFileWidget::eventFilter(QObject* obj, QEvent* event)
 {
     if (event->type()==QEvent::KeyPress)
     {
         QKeyEvent* key = static_cast<QKeyEvent*>(event);
         if (key->key()==Qt::Key_Delete)
-        {
             removeSelected();
-        }
         else
-        {
             return QListWidget::eventFilter(obj, event);
-        }
+
         return true;
-        }
-    else
-    {
-        return QListWidget::eventFilter(obj, event);
     }
+    else
+        return QListWidget::eventFilter(obj, event);
+
     return false;
+}
+
+void QFileWidget::remove(int row)
+{
+    remove(item(row));
+}
+
+void QFileWidget::remove(QListWidgetItem* item)
+{
+    item->setHidden(true);
+    items_to_delete << item;
+    emit itemsRemoved();
 }

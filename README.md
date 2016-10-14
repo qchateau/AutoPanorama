@@ -4,6 +4,7 @@
 * linux check dependencies
 * linux deployment script (.deb gen)
 * check supported images format (opencv <-> qt)
+* check files and output in panoramamaker
 
 ## TODO OpenCV : ##
 * linear instead of affine model for exposure compensation

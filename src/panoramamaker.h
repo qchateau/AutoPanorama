@@ -6,9 +6,6 @@
 #include <opencv2/opencv.hpp>
 
 #include <QThread>
-#include <QFileInfo>
-#include <vector>
-#include <QProgressBar>
 #include <QElapsedTimer>
 
 using namespace cv;
@@ -24,8 +21,9 @@ public:
     struct FeaturesMatchingMode { QString mode; double conf; };
 
     explicit PanoramaMaker(QObject *parent = 0);
-    void setImages(QStringList files,
-                   QString output_filename_,
+
+    void setImages(QStringList files);
+    void setOutput(QString output_filename_,
                    QString output_ext_,
                    QString output_dir_);
 
@@ -80,11 +78,11 @@ public:
     void run();
 
 private:
-    void clean();
-    void setProgress(int prog);
     void failed(Stitcher::Status status);
     void failed(QString msg=QString("Unknown error"));
     void done();
+    void clean();
+    void setProgress(int prog);
     bool configureStitcher();
 
     QStringList images_path;

@@ -16,24 +16,20 @@ public:
     QStringList getFilesList();
     QStringList getSelectedFilesList();
 
-    void dragEnterEvent(QDragEnterEvent *);
-    void dragMoveEvent(QDragMoveEvent *);
-    void dropEvent(QDropEvent *);
-
 public slots:
     void clean_items();
     void clear();
-    void selectAndAddFiles();
     void removeSelected();
-
-signals:
-    void itemsAdded();
-    void itemsRemoved();
+    void selectAndAddFiles();
 
 protected:
+    void dragEnterEvent(QDragEnterEvent *);
+    void dragMoveEvent(QDragMoveEvent *);
+    void dropEvent(QDropEvent *);
+    bool eventFilter(QObject* obj, QEvent* event);
+
     void remove(int i);
     void remove(QListWidgetItem* item);
-    bool eventFilter(QObject* obj, QEvent* event);
 
 private:
     QIcon default_icon;
@@ -41,6 +37,10 @@ private:
     QPoint drag_start_position;
     QDrag *drag;
     QList<QListWidgetItem*> items_to_delete;
+
+signals:
+    void itemsAdded();
+    void itemsRemoved();
 };
 
 #endif // QFILEWIDGET_H

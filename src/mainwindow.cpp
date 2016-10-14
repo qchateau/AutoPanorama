@@ -6,9 +6,8 @@
 #include <QFileDialog>
 #include <QProgressBar>
 #include <QLineEdit>
-#include <QFile>
+#include <QFileInfo>
 #include <QToolTip>
-#include <QPoint>
 #include <QString>
 #include <QCloseEvent>
 
@@ -29,6 +28,7 @@ MainWindow::MainWindow(QWidget *parent) :
     onExposureCompensatorChange();
     updateInfos();
     updateStatusBar();
+    updateMakeEnabled();
 }
 
 MainWindow::~MainWindow()
@@ -36,26 +36,59 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::closeEvent(QCloseEvent *event)
+int MainWindow::getNbQueued()
 {
-    int nb = getNbQueued();
-    if (nb == 0)
-        close();
-    else
+    int nb = 0;
+    for (int i = 0; i < workers.size(); ++i)
     {
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(this, "Quit ?",
-                                      QString("All panoramas are not done yet. \nAre you sure you want to quit ?"),
-                                      QMessageBox::Yes | QMessageBox::No);
-        if (reply == QMessageBox::Yes)
-            close();
-        else
-            event->ignore();
+        if (!workers[i]) continue;
+        PanoramaMaker::Status status = workers[i]->getStatus();
+        if (status == PanoramaMaker::STOPPED || status == PanoramaMaker::WORKING)
+                ++nb;
     }
-
+    return nb;
 }
 
-void MainWindow::onMakePanoramaClicked() {
+int MainWindow::getNbDone()
+{
+    int nb = 0;
+    for (int i = 0; i < workers.size(); ++i)
+    {
+        if (!workers[i]) continue;
+        PanoramaMaker::Status status = workers[i]->getStatus();
+        if (status == PanoramaMaker::DONE)
+                ++nb;
+    }
+    return nb;
+}
+
+int MainWindow::getNbFailed()
+{
+    int nb = 0;
+    for (int i = 0; i < workers.size(); ++i)
+    {
+        if (!workers[i]) continue;
+        PanoramaMaker::Status status = workers[i]->getStatus();
+        if (status == PanoramaMaker::FAILED)
+                ++nb;
+    }
+    return nb;
+}
+
+int MainWindow::getCurrentProgress()
+{
+    if (workers.size() < (worker_index+1) || !workers[worker_index])
+        return 0;
+
+    if (workers[worker_index]->getStatus() == PanoramaMaker::WORKING)
+    {
+        return workers[worker_index]->getProgress();
+    }
+    return 0;
+}
+
+void MainWindow::onMakePanoramaClicked()
+{
     QStringList files;
     bool clear_files = false;
     if (ui->selectedOnly_checkbox->isChecked())
@@ -68,12 +101,13 @@ void MainWindow::onMakePanoramaClicked() {
         clear_files = true;
     }
 
-    if (files.size() < 2) {
+    if (files.size() < 2)
         QMessageBox::warning(this, "Not enough files", "Please select at least 2 files");
-    } else {
+    else
+    {
         PanoramaMaker *worker = new PanoramaMaker;
-        worker->setImages(files,
-                          ui->output_filename_lineedit->text(),
+        worker->setImages(files);
+        worker->setOutput(ui->output_filename_lineedit->text(),
                           ui->extension_combobox->currentText(),
                           ui->output_dir_lineedit->text());
         configureWorker(worker);
@@ -90,89 +124,22 @@ void MainWindow::onMakePanoramaClicked() {
     updateStatusBar();
 }
 
-void MainWindow::configureWorker(PanoramaMaker *worker) {
-    // Registration resolution
-    worker->setRegistrationResol(ui->regres_spinbox->value());
-
-    // Feature finder mode
-    worker->setFeaturesFinderMode(ui->featuresfinder_combobox->currentText());
-
-    // Feature matching mode and confidence
-    PanoramaMaker::FeaturesMatchingMode f_matching_mode;
-    f_matching_mode.mode = ui->featuresmatcher_combobox->currentText();
-    f_matching_mode.conf = ui->featuresmatcherconf_spinbox->value();
-    worker->setFeaturesMatchingMode(f_matching_mode);
-
-    // Warp mode
-    worker->setWarpMode(ui->warpmode_combobox->currentText());
-
-    // Wave correction
-    worker->setWaveCorrectionMode(ui->wavecorkind_combobox->currentText());
-
-    // Bundle adjuster
-    worker->setBundleAdjusterMode(ui->bundleadj_combobox->currentText());
-
-    // Panorama confidence
-    worker->setPanoConfidenceThresh(ui->confth_spinbox->value());
-
-    // Exposure compensator mode
-    PanoramaMaker::ExposureComensatorMode exp_comp_mode;
-    exp_comp_mode.mode = ui->expcomp_combobox->currentText();
-    exp_comp_mode.block_size = ui->blocksize_spinbox->value();
-    worker->setExposureCompensatorMode(exp_comp_mode);
-
-    // Seam estimation resolution
-    worker->setSeamEstimationResol(ui->seamfinderres_spinbox->value());
-
-    // Seam finder mode
-    worker->setSeamFinderMode(ui->seamfindermode_combobox->currentText());
-
-    // Blender
-    PanoramaMaker::BlenderMode blender_mode;
-    blender_mode.mode = ui->blendertype_combobox->currentText();
-    blender_mode.sharpness = ui->sharpness_spinbox->value();
-    blender_mode.bands = ui->nbands_spinbox->value();
-    worker->setBlenderMode(blender_mode);
-
-    // Compositing resolution
-    double compositing_res = ui->compositingres_spinbox->value();
-    if (compositing_res <= 0) {
-        compositing_res = Stitcher::ORIG_RESOL;
-    }
-    worker->setCompositingResol(compositing_res);
-
-    // Interpolation
-    worker->setInterpolationMode(ui->interp_combobox->currentText());
-}
-
-void MainWindow::runWorkers() {
+void MainWindow::runWorkers()
+{
     if (workers.size() < (worker_index+1))
         return;
     PanoramaMaker *worker = workers[worker_index];
-    if (worker->isFinished()) {
+    if (worker->isFinished())
+    {
         qDebug() << "Finished worker";
         ++worker_index;
         runWorkers();
-    } else if (!worker->isRunning()) {
+    }
+    else if (!worker->isRunning())
+    {
         qDebug() << "Starting worker";
         worker->start();
     }
-}
-
-void MainWindow::createWorkerUi(PanoramaMaker *worker) {
-    QProgressBar *progress_bar = new QProgressBar;
-    progress_bar->setRange(0,100);
-    progress_bar->setFormat(worker->getOutputFilename()+" : %p%");
-    progress_bar->setAlignment(Qt::AlignCenter);
-    progress_bar->setValue(0);
-    progress_bar->setToolTip(worker->getStitcherConfString());
-    progress_bars << progress_bar;
-    connect(worker, SIGNAL(percentage(int)), progress_bar, SLOT(setValue(int)));
-    connect(worker, SIGNAL(percentage(int)), this, SLOT(updateStatusBar()));
-    connect(worker, SIGNAL(is_failed(QString)), this, SLOT(onWorkerFailed(QString)));
-    connect(worker, SIGNAL(is_done()), this, SLOT(onWorkerDone()));
-    connect(worker, SIGNAL(finished()), this, SLOT(updateStatusBar()));
-    ui->tabProgressLayout->addWidget(progress_bar);
 }
 
 void MainWindow::onWorkerFailed(QString msg)
@@ -245,10 +212,7 @@ void MainWindow::onExposureCompensatorChange()
 
 void MainWindow::onOutputFilenameChanged(QString edit)
 {
-    if (edit.isEmpty())
-        ui->buttonMakePanorama->setEnabled(false);
-    else
-        ui->buttonMakePanorama->setEnabled(true);
+    updateMakeEnabled();
 }
 
 void MainWindow::onOutputDirChanged(QString edit)
@@ -258,17 +222,16 @@ void MainWindow::onOutputDirChanged(QString edit)
 
     if (edit.isEmpty() || !QDir(edit).exists())
     {
-        ui->buttonMakePanorama->setEnabled(false);
         palette.setColor(QPalette::Text,Qt::red);
         tooltip = "This directory doesn't exists";
     }
     else
     {
         palette.setColor(QPalette::Text,Qt::black);
-        ui->buttonMakePanorama->setEnabled(true);
     }
     qobject_cast<QLineEdit*>(sender())->setPalette(palette);
     qobject_cast<QLineEdit*>(sender())->setToolTip(tooltip);
+    updateMakeEnabled();
 }
 
 void MainWindow::onOutputFilenameEdit(QString edit)
@@ -303,6 +266,30 @@ void MainWindow::onSelectOutputDirClicked()
         manual_output_dir = false;
         updateOutputDirFilename();
     }
+}
+
+void MainWindow::updateMakeEnabled()
+{
+    QString filename = ui->output_filename_lineedit->text();
+    QString dir = ui->output_dir_lineedit->text();
+    bool enabled = ui->buttonMakePanorama->isEnabled();
+
+    if (enabled)
+    {
+        if (filename.isEmpty())
+        {
+            ui->buttonMakePanorama->setEnabled(false);
+            return;
+        }
+
+        if (dir.isEmpty() || !QDir(dir).exists())
+        {
+            ui->buttonMakePanorama->setEnabled(false);
+            return;
+        }
+    }
+    else if (!filename.isEmpty() && !dir.isEmpty() && QDir(dir).exists())
+        ui->buttonMakePanorama->setEnabled(true);
 }
 
 void MainWindow::updateInfos()
@@ -344,62 +331,116 @@ void MainWindow::updateOutputDirFilename()
     }
 }
 
-int MainWindow::getNbQueued()
-{
-    int nb = 0;
-    for (int i = 0; i < workers.size(); ++i)
-    {
-        if (!workers[i]) continue;
-        PanoramaMaker::Status status = workers[i]->getStatus();
-        if (status == PanoramaMaker::STOPPED || status == PanoramaMaker::WORKING)
-                ++nb;
-    }
-    return nb;
-}
-
-int MainWindow::getNbDone()
-{
-    int nb = 0;
-    for (int i = 0; i < workers.size(); ++i)
-    {
-        if (!workers[i]) continue;
-        PanoramaMaker::Status status = workers[i]->getStatus();
-        if (status == PanoramaMaker::DONE)
-                ++nb;
-    }
-    return nb;
-}
-
-int MainWindow::getNbFailed()
-{
-    int nb = 0;
-    for (int i = 0; i < workers.size(); ++i)
-    {
-        if (!workers[i]) continue;
-        PanoramaMaker::Status status = workers[i]->getStatus();
-        if (status == PanoramaMaker::FAILED)
-                ++nb;
-    }
-    return nb;
-}
-
-int MainWindow::getCurrentProgress()
-{
-    if (workers.size() < (worker_index+1) || !workers[worker_index])
-        return 0;
-
-    if (workers[worker_index]->getStatus() == PanoramaMaker::WORKING)
-    {
-        return workers[worker_index]->getProgress();
-    }
-    return 0;
-}
-
 void MainWindow::updateStatusBar()
 {
     QString text = QString("Current job : %1%       Jobs left : %2      Jobs done : %3      Jobs failed : %4")
             .arg(getCurrentProgress()).arg(getNbQueued()).arg(getNbDone()).arg(getNbFailed());
     ui->statusBar->showMessage(text);
+}
+
+
+
+
+
+
+
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    int nb = getNbQueued();
+    if (nb == 0)
+        close();
+    else
+    {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, "Quit ?",
+                                      QString("All panoramas are not done yet. \nAre you sure you want to quit ?"),
+                                      QMessageBox::Yes | QMessageBox::No);
+        if (reply == QMessageBox::Yes)
+            close();
+        else
+            event->ignore();
+    }
+
+}
+
+
+
+
+
+
+
+
+void MainWindow::createWorkerUi(PanoramaMaker *worker) {
+    QProgressBar *progress_bar = new QProgressBar;
+    progress_bar->setRange(0,100);
+    progress_bar->setFormat(worker->getOutputFilename()+" : %p%");
+    progress_bar->setAlignment(Qt::AlignCenter);
+    progress_bar->setValue(0);
+    progress_bar->setToolTip(worker->getStitcherConfString());
+    progress_bars << progress_bar;
+    connect(worker, SIGNAL(percentage(int)), progress_bar, SLOT(setValue(int)));
+    connect(worker, SIGNAL(percentage(int)), this, SLOT(updateStatusBar()));
+    connect(worker, SIGNAL(is_failed(QString)), this, SLOT(onWorkerFailed(QString)));
+    connect(worker, SIGNAL(is_done()), this, SLOT(onWorkerDone()));
+    connect(worker, SIGNAL(finished()), this, SLOT(updateStatusBar()));
+    ui->tabProgressLayout->addWidget(progress_bar);
+}
+
+void MainWindow::configureWorker(PanoramaMaker *worker)
+{
+    // Registration resolution
+    worker->setRegistrationResol(ui->regres_spinbox->value());
+
+    // Feature finder mode
+    worker->setFeaturesFinderMode(ui->featuresfinder_combobox->currentText());
+
+    // Feature matching mode and confidence
+    PanoramaMaker::FeaturesMatchingMode f_matching_mode;
+    f_matching_mode.mode = ui->featuresmatcher_combobox->currentText();
+    f_matching_mode.conf = ui->featuresmatcherconf_spinbox->value();
+    worker->setFeaturesMatchingMode(f_matching_mode);
+
+    // Warp mode
+    worker->setWarpMode(ui->warpmode_combobox->currentText());
+
+    // Wave correction
+    worker->setWaveCorrectionMode(ui->wavecorkind_combobox->currentText());
+
+    // Bundle adjuster
+    worker->setBundleAdjusterMode(ui->bundleadj_combobox->currentText());
+
+    // Panorama confidence
+    worker->setPanoConfidenceThresh(ui->confth_spinbox->value());
+
+    // Exposure compensator mode
+    PanoramaMaker::ExposureComensatorMode exp_comp_mode;
+    exp_comp_mode.mode = ui->expcomp_combobox->currentText();
+    exp_comp_mode.block_size = ui->blocksize_spinbox->value();
+    worker->setExposureCompensatorMode(exp_comp_mode);
+
+    // Seam estimation resolution
+    worker->setSeamEstimationResol(ui->seamfinderres_spinbox->value());
+
+    // Seam finder mode
+    worker->setSeamFinderMode(ui->seamfindermode_combobox->currentText());
+
+    // Blender
+    PanoramaMaker::BlenderMode blender_mode;
+    blender_mode.mode = ui->blendertype_combobox->currentText();
+    blender_mode.sharpness = ui->sharpness_spinbox->value();
+    blender_mode.bands = ui->nbands_spinbox->value();
+    worker->setBlenderMode(blender_mode);
+
+    // Compositing resolution
+    double compositing_res = ui->compositingres_spinbox->value();
+    if (compositing_res <= 0)
+        compositing_res = Stitcher::ORIG_RESOL;
+
+    worker->setCompositingResol(compositing_res);
+
+    // Interpolation
+    worker->setInterpolationMode(ui->interp_combobox->currentText());
 }
 
 int MainWindow::getWorkerIndex(PanoramaMaker *worker)

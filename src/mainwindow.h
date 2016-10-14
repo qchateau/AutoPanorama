@@ -6,8 +6,8 @@
 #include <opencv2/stitching.hpp>
 
 #include <QMainWindow>
-#include <QFileSystemModel>
 #include <QTimer>
+#include <QProgressBar>
 
 namespace Ui {
 class MainWindow;
@@ -27,14 +27,32 @@ public:
     int getNbTotal() { return workers.size(); }
     int getCurrentProgress();
 
+public slots:
+    void onMakePanoramaClicked();
+    void runWorkers();
+    void onWorkerFailed(QString msg=QString());
+    void onWorkerDone();
+    void onBlenderTypeChange();
+    void onExposureCompensatorChange();
+    void onOutputFilenameChanged(QString edit=QString());
+    void onOutputDirChanged(QString edit=QString());
+    void onOutputFilenameEdit(QString edit=QString());
+    void onOutputDirEdit(QString edit=QString());
+    void onSelectOutputDirClicked();
+    void updateMakeEnabled();
+    void updateInfos();
+    void updateOutputDirFilename();
+    void updateStatusBar();
+
 protected:
     void closeEvent(QCloseEvent *event);
 
 private:
-    Ui::MainWindow *ui;
     void createWorkerUi(PanoramaMaker *worker);
     void configureWorker(PanoramaMaker *worker);
     int getWorkerIndex(PanoramaMaker* worker);
+
+    Ui::MainWindow *ui;
 
     QList<PanoramaMaker*> workers;
     QList<QProgressBar*> progress_bars;
@@ -43,22 +61,6 @@ private:
     Stitcher stitcher;
     bool manual_output_filename, manual_output_dir;
     int max_filename_length;
-
-public slots:
-    void onMakePanoramaClicked();
-    void runWorkers();
-    void onBlenderTypeChange();
-    void onExposureCompensatorChange();
-    void onWorkerFailed(QString msg=QString());
-    void onWorkerDone();
-    void updateInfos();
-    void updateStatusBar();
-    void updateOutputDirFilename();
-    void onOutputFilenameEdit(QString edit=QString());
-    void onOutputDirEdit(QString edit=QString());
-    void onOutputFilenameChanged(QString edit=QString());
-    void onOutputDirChanged(QString edit=QString());
-    void onSelectOutputDirClicked();
 };
 
 #endif // MAINWINDOW_H
