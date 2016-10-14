@@ -1,5 +1,6 @@
 #include "panoramamaker.h"
 #include "akazefeaturesfinder.h"
+#include "innercutfinder.h"
 
 #include <opencv2/stitching.hpp>
 #include <opencv2/imgcodecs.hpp>
@@ -40,7 +41,8 @@ PanoramaMaker::PanoramaMaker(QObject *parent) :
     status(STOPPED),
     total_time(-1),
     progress(0),
-    try_use_gpu(false)
+    try_use_gpu(false),
+    generate_inner_cut(false)
 {
 }
 
@@ -127,6 +129,8 @@ QString PanoramaMaker::getStitcherConfString() {
     conf += QString("\n\n");
 
     conf += QString("Try to use GPU : %1").arg(try_use_gpu ? "Yes" : "No");
+    conf += QString("\n");
+    conf += QString("Generate inner cut panorama : %1").arg(generate_inner_cut ?  "Yes" : "No");
 
     return conf;
 }
@@ -134,8 +138,9 @@ QString PanoramaMaker::getStitcherConfString() {
 Stitcher::Status PanoramaMaker::unsafeRun()
 {
     int N = images_path.size();
-
     vector<Mat> images;
+    Rect inner_roi;
+
     for (int i=0; i<N; ++i)
     {
         Mat image = imread(images_path[i].toUtf8().constData());
@@ -150,29 +155,35 @@ Stitcher::Status PanoramaMaker::unsafeRun()
     else
         setProgress(30);
 
-    Mat pano;
-    stitcher_status = stitcher->composePanorama(pano);
+    UMat pano, pano_mask;
+    stitcher_status = stitcher->composePanorama(pano, pano_mask);
     if (stitcher_status != Stitcher::OK)
         return stitcher_status;
     else
-        setProgress(90);
+        setProgress(80);
 
-    int nr = 0;
-    QFileInfo output_fileinfo;
-    do
+    if (generate_inner_cut)
     {
-        QString final_filename = output_filename;
-        if (nr++ > 0)
-            final_filename += "_"+QString::number(nr);
-
-        final_filename += output_ext;
-        output_fileinfo = QFileInfo(QDir(output_dir).filePath(final_filename));
+        InnerCutFinder cutter(pano_mask);
+        inner_roi = cutter.getROI();
+        if (inner_roi.area() == 0)
+            generate_inner_cut = false;
     }
-    while (output_fileinfo.exists());
+    setProgress(90);
 
-    string out = output_fileinfo.absoluteFilePath().toUtf8().constData();
-    qDebug() << "Writing to " << QString::fromStdString(out);
+    string out = genOutputFileInfo().absoluteFilePath().toUtf8().constData();
+    string inner_cut_out = genInnerCutOutputFileInfo().absoluteFilePath().toUtf8().constData();
+
+    qDebug() << "Writing full panorama to " << QString::fromStdString(out);
     imwrite(out, pano);
+    setProgress(95);
+
+    if (generate_inner_cut)
+    {
+        qDebug() << "Writing cut panorama to " << QString::fromStdString(out);
+        imwrite(inner_cut_out, pano(inner_roi));
+    }
+
     setProgress(100);
     return stitcher_status;
 }
@@ -439,4 +450,42 @@ bool PanoramaMaker::configureStitcher()
     stitcher->setCompositingResol(compositing_resol);
 
     return true;
+}
+
+
+QFileInfo PanoramaMaker::genOutputFileInfo()
+{
+    int nr = 0;
+    QFileInfo output_fileinfo;
+    QString final_filename;
+    do
+    {
+        final_filename = output_filename;
+        if (nr++ > 0)
+            final_filename += "_"+QString::number(nr);
+
+        final_filename += output_ext;
+        output_fileinfo = QFileInfo(QDir(output_dir).filePath(final_filename));
+    }
+    while (output_fileinfo.exists());
+    return output_fileinfo;
+}
+
+QFileInfo PanoramaMaker::genInnerCutOutputFileInfo()
+{
+    int nr = 0;
+    QFileInfo output_fileinfo = genOutputFileInfo();
+    QFileInfo innner_cut_output_fileinfo;
+    QString final_filename;
+    do
+    {
+        final_filename = "inner_"+output_fileinfo.completeBaseName();
+        if (nr++ > 0)
+            final_filename += "_"+QString::number(nr);
+
+        final_filename += output_ext;
+        innner_cut_output_fileinfo = QFileInfo(QDir(output_dir).filePath(final_filename));
+    }
+    while (innner_cut_output_fileinfo.exists());
+    return innner_cut_output_fileinfo;
 }

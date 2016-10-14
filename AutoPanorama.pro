@@ -90,21 +90,29 @@ CONFIG(dynamic) {
     }
 }
 
-SOURCES +=  src/main.cpp \
-            src/mainwindow.cpp \
-            src/panoramamaker.cpp \
-            src/qfilewidget.cpp
+SOURCES += \
+    src/main.cpp \
+    src/mainwindow.cpp \
+    src/panoramamaker.cpp \
+    src/qfilewidget.cpp \
+    src/innercutfinder.cpp
 
-HEADERS  += src/mainwindow.h \
-            src/panoramamaker.h \
-            src/qfilewidget.h
+HEADERS  += \
+    src/mainwindow.h \
+    src/panoramamaker.h \
+    src/qfilewidget.h \
+    src/innercutfinder.h
 
-FORMS    += src/mainwindow.ui
+FORMS    += \
+    src/mainwindow.ui
 
-DISTFILES += res/autopanorama.rc \
-             scripts/compile_opencv.sh \
-             README.md
+DISTFILES += \
+    res/autopanorama.rc \
+    scripts/compile_opencv.sh \
+    README.md
 
-RESOURCES += res/application.qrc
+RESOURCES += \
+    res/application.qrc
 
-RC_FILE = res/autopanorama.rc
+RC_FILE = \
+    res/autopanorama.rc

@@ -16,7 +16,6 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    worker_index(0),
     manual_output_filename(false),
     manual_output_dir(false),
     max_filename_length(50)
@@ -81,12 +80,10 @@ int MainWindow::getNbFailed()
 
 int MainWindow::getCurrentProgress()
 {
-    if (workers.size() < (worker_index+1) || !workers[worker_index])
-        return 0;
-
-    if (workers[worker_index]->getStatus() == PanoramaMaker::WORKING)
+    for (int i = 0; i < workers.size(); ++i)
     {
-        return workers[worker_index]->getProgress();
+        if (workers[i]->getStatus() == PanoramaMaker::WORKING)
+            return workers[i]->getProgress();
     }
     return 0;
 }
@@ -130,29 +127,25 @@ void MainWindow::onMakePanoramaClicked()
 
 void MainWindow::runWorkers()
 {
-    if (workers.size() < (worker_index+1))
-        return;
-    PanoramaMaker *worker = workers[worker_index];
-    if (worker->isFinished())
+    for (int i = 0; i < workers.size(); ++i)
     {
-        qDebug() << "Finished worker";
-        ++worker_index;
-        runWorkers();
-    }
-    else if (!worker->isRunning())
-    {
-        qDebug() << "Starting worker";
-        worker->start();
+        if (workers[i]->isRunning())
+            break;
+        if (workers[i]->getStatus() == PanoramaMaker::STOPPED)
+        {
+            qDebug() << "Starting worker";
+            workers[i]->start();
+            break;
+        }
     }
 }
 
 void MainWindow::onWorkerFailed(QString msg)
 {
     PanoramaMaker* sender = qobject_cast<PanoramaMaker*>(QObject::sender());
-    int idx = getWorkerIndex(sender);
-    if (idx < 0 || idx > (progress_bars.size() - 1))
+    QProgressBar *pb = progress_bars[sender].pb;
+    if (!pb)
         return;
-    QProgressBar *pb = progress_bars[idx];
     pb->setFormat(QString("%1 : Failed (%2)").arg(sender->getOutputFilename()).arg(msg));
     pb->setValue(100);
     pb->setStyleSheet("QProgressBar::chunk{background-color:red}");
@@ -161,10 +154,9 @@ void MainWindow::onWorkerFailed(QString msg)
 void MainWindow::onWorkerDone()
 {
     PanoramaMaker* sender = qobject_cast<PanoramaMaker*>(QObject::sender());
-    int idx = getWorkerIndex(sender);
-    if (idx < 0 || idx > (progress_bars.size() - 1))
+    QProgressBar *pb = progress_bars[sender].pb;
+    if (!pb)
         return;
-    QProgressBar *pb = progress_bars[idx];
     pb->setStyleSheet("QProgressBar::chunk{background-color:green}");
     pb->setToolTip(sender->getStitcherConfString());
     pb->setFormat(QString("%1 : Done !").arg(sender->getOutputFilename()));
@@ -326,7 +318,7 @@ void MainWindow::updateOutputDirFilename()
             QString new_name;
             for (int i = 0; i < fl.size(); ++i)
                 basenames << QFileInfo(fl[i]).baseName();
-            new_name = basenames.join("_");
+            new_name = "pano_"+basenames.join("_");
             new_name.truncate(max_filename_length);
             ui->output_filename_lineedit->setText(new_name);
         }
@@ -377,18 +369,41 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::createWorkerUi(PanoramaMaker *worker) {
     QProgressBar *progress_bar = new QProgressBar;
+    QHBoxLayout *hbox = new QHBoxLayout;
+    QPushButton *hide, *close;
+    hide = new QPushButton("Hide");
+    close = new QPushButton("Close");
+
     progress_bar->setRange(0,100);
     progress_bar->setFormat(worker->getOutputFilename()+" : %p%");
     progress_bar->setAlignment(Qt::AlignCenter);
     progress_bar->setValue(0);
     progress_bar->setToolTip(worker->getStitcherConfString());
-    progress_bars << progress_bar;
+
+    ProgressBarContent pb_struct;
+    pb_struct.pb = progress_bar;
+    pb_struct.close = close;
+    pb_struct.hide = hide;
+    pb_struct.worker = worker;
+    pb_struct.layout = hbox;
+
+    progress_bars[worker] = pb_struct;
+    progress_bars[hide] = pb_struct;
+    progress_bars[close] = pb_struct;
+
     connect(worker, SIGNAL(percentage(int)), progress_bar, SLOT(setValue(int)));
     connect(worker, SIGNAL(percentage(int)), this, SLOT(updateStatusBar()));
     connect(worker, SIGNAL(is_failed(QString)), this, SLOT(onWorkerFailed(QString)));
     connect(worker, SIGNAL(is_done()), this, SLOT(onWorkerDone()));
     connect(worker, SIGNAL(finished()), this, SLOT(updateStatusBar()));
-    ui->tabProgressLayout->addWidget(progress_bar);
+
+    connect(hide, SIGNAL(clicked(bool)), this, SLOT(hideSenderWorker()));
+    connect(close, SIGNAL(clicked(bool)), this, SLOT(closeSenderWorker()));
+
+    hbox->addWidget(progress_bar);
+    hbox->addWidget(hide);
+    hbox->addWidget(close);
+    ui->tabProgressLayout->addLayout(hbox);
 }
 
 void MainWindow::configureWorker(PanoramaMaker *worker)
@@ -445,14 +460,38 @@ void MainWindow::configureWorker(PanoramaMaker *worker)
 
     // Interpolation
     worker->setInterpolationMode(ui->interp_combobox->currentText());
+
+    // Inner cut
+    worker->setGenerateInnerCut(ui->inner_cut_checkbox->isChecked());
 }
 
-int MainWindow::getWorkerIndex(PanoramaMaker *worker)
+void MainWindow::hideSenderWorker()
 {
-    for (int i = 0; i < workers.size(); ++i)
+    ProgressBarContent pb_struct = progress_bars[QObject::sender()];
+    progress_bars.erase(pb_struct.close);
+    progress_bars.erase(pb_struct.hide);
+    progress_bars.erase(pb_struct.worker);
+    delete pb_struct.pb;
+    delete pb_struct.close;
+    delete pb_struct.hide;
+    delete pb_struct.layout;
+}
+
+void MainWindow::closeSenderWorker()
+{
+    ProgressBarContent pb_struct = progress_bars[QObject::sender()];
+    progress_bars.erase(pb_struct.close);
+    progress_bars.erase(pb_struct.hide);
+    progress_bars.erase(pb_struct.worker);
+    delete pb_struct.pb;
+    delete pb_struct.close;
+    delete pb_struct.hide;
+    delete pb_struct.layout;
+    workers.removeAll(pb_struct.worker);
+    if (pb_struct.worker)
     {
-        if (workers[i] == worker)
-            return i;
+        pb_struct.worker->terminate();
+        delete pb_struct.worker;
     }
-    return -1;
+    updateStatusBar();
 }

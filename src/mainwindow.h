@@ -4,10 +4,13 @@
 #include "panoramamaker.h"
 
 #include <opencv2/stitching.hpp>
+#include <map>
 
 #include <QMainWindow>
 #include <QTimer>
 #include <QProgressBar>
+#include <QPushButton>
+#include <QHBoxLayout>
 
 namespace Ui {
 class MainWindow;
@@ -50,17 +53,27 @@ protected:
 private:
     void createWorkerUi(PanoramaMaker *worker);
     void configureWorker(PanoramaMaker *worker);
-    int getWorkerIndex(PanoramaMaker* worker);
+
+    struct ProgressBarContent {
+        QProgressBar *pb;
+        QPushButton *hide, *close;
+        PanoramaMaker *worker;
+        QHBoxLayout *layout;
+    };
 
     Ui::MainWindow *ui;
 
     QList<PanoramaMaker*> workers;
-    QList<QProgressBar*> progress_bars;
+    std::map<QObject*, ProgressBarContent> progress_bars;
     int worker_index;
 
     Stitcher stitcher;
     bool manual_output_filename, manual_output_dir;
     int max_filename_length;
+
+private slots:
+    void hideSenderWorker();
+    void closeSenderWorker();
 };
 
 #endif // MAINWINDOW_H

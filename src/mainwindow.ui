@@ -722,7 +722,7 @@
              <x>0</x>
              <y>0</y>
              <width>898</width>
-             <height>515</height>
+             <height>511</height>
             </rect>
            </property>
            <property name="sizePolicy">
@@ -828,15 +828,43 @@
      </widget>
     </item>
     <item>
-     <widget class="QLabel" name="output_dir_label">
-      <property name="text">
-       <string>Ouput directory</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="layout_output_dir">
-      <item>
+     <layout class="QGridLayout" name="gridLayout_3">
+      <item row="3" column="3">
+       <widget class="QPushButton" name="buttonMakePanorama">
+        <property name="text">
+         <string>Make panorama</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="output_dir_label">
+        <property name="text">
+         <string>Ouput directory</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="3">
+       <widget class="QPushButton" name="output_dir_button">
+        <property name="text">
+         <string>Select output directory</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLineEdit" name="output_filename_lineedit">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="output_label">
+        <property name="text">
+         <string>Output file name</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
        <widget class="QLineEdit" name="output_dir_lineedit">
         <property name="enabled">
          <bool>true</bool>
@@ -846,32 +874,7 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QPushButton" name="output_dir_button">
-        <property name="text">
-         <string>Select output directory</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <widget class="QLabel" name="output_label">
-      <property name="text">
-       <string>Output file name</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="layout_output_file">
-      <item>
-       <widget class="QLineEdit" name="output_filename_lineedit">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item>
+      <item row="3" column="1">
        <widget class="QComboBox" name="extension_combobox">
         <property name="editable">
          <bool>false</bool>
@@ -888,17 +891,23 @@
         </item>
        </widget>
       </item>
-      <item>
-       <widget class="QPushButton" name="buttonMakePanorama">
-        <property name="text">
-         <string>Make panorama</string>
-        </property>
-       </widget>
-      </item>
-      <item>
+      <item row="3" column="2">
        <widget class="QCheckBox" name="selectedOnly_checkbox">
         <property name="text">
          <string>Selected files only</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QCheckBox" name="inner_cut_checkbox">
+        <property name="toolTip">
+         <string>The inner cut panorama will be save in the same directory and prefixed with &quot;inner_&quot;</string>
+        </property>
+        <property name="text">
+         <string>Generate an inner cut</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
         </property>
        </widget>
       </item>

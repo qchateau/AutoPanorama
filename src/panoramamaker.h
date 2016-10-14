@@ -7,6 +7,7 @@
 
 #include <QThread>
 #include <QElapsedTimer>
+#include <QFileInfo>
 
 using namespace cv;
 using namespace std;
@@ -28,6 +29,8 @@ public:
     void setOutput(QString output_filename_,
                    QString output_ext_,
                    QString output_dir_);
+
+    void setGenerateInnerCut(bool gen) { generate_inner_cut = gen; }
 
     void setBlenderMode(BlenderMode mode) { blender_mode = mode; }
     BlenderMode getBlenderMode() { return blender_mode; }
@@ -87,6 +90,9 @@ private:
     void setProgress(int prog);
     bool configureStitcher();
 
+    QFileInfo genOutputFileInfo();
+    QFileInfo genInnerCutOutputFileInfo();
+
     QStringList images_path;
     QString output_filename, output_ext, output_dir;
 
@@ -107,7 +113,7 @@ private:
     QElapsedTimer timer;
     long total_time;
     int progress;
-    bool try_use_gpu;
+    bool try_use_gpu, generate_inner_cut;
 
 signals:
     void percentage(int);
