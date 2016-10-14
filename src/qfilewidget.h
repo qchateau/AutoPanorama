@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QListWidget>
 #include <QTimer>
+#include <QStringList>
 
 class QFileWidget : public QListWidget
 {
@@ -11,6 +12,7 @@ class QFileWidget : public QListWidget
 public:
     QFileWidget(QWidget *parent=0);
 
+    void addSupportedExtension(QString ext) { supported_extensions << ext.toLower(); }
     void addFiles(QStringList files);
     void asyncAddFiles(QStringList files);
     QStringList getFilesList();
@@ -37,6 +39,7 @@ private:
     QPoint drag_start_position;
     QDrag *drag;
     QList<QListWidgetItem*> items_to_delete;
+    QStringList supported_extensions;
 
 signals:
     void itemsAdded();

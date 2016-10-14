@@ -20,6 +20,8 @@ public:
     struct ExposureComensatorMode { QString mode; int block_size; };
     struct FeaturesMatchingMode { QString mode; double conf; };
 
+    static QStringList getSupportedExtension();
+
     explicit PanoramaMaker(QObject *parent = 0);
 
     void setImages(QStringList files);

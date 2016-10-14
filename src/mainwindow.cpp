@@ -29,6 +29,10 @@ MainWindow::MainWindow(QWidget *parent) :
     updateInfos();
     updateStatusBar();
     updateMakeEnabled();
+
+    QStringList supported_extensions = PanoramaMaker::getSupportedExtension();
+    for (int i = 0; i < supported_extensions.size(); ++i)
+        ui->filesListWidget->addSupportedExtension(supported_extensions[i]);
 }
 
 MainWindow::~MainWindow()
@@ -210,7 +214,7 @@ void MainWindow::onExposureCompensatorChange()
     }
 }
 
-void MainWindow::onOutputFilenameChanged(QString edit)
+void MainWindow::onOutputFilenameChanged(QString /*edit*/)
 {
     updateMakeEnabled();
 }

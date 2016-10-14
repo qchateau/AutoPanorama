@@ -7,6 +7,7 @@
 #include <opencv2/core/ocl.hpp>
 
 #include <QtDebug>
+#include <QStringList>
 #include <QFileInfo>
 #include <QDir>
 #include <exception>
@@ -14,6 +15,25 @@
 
 using namespace cv;
 using namespace std;
+
+QStringList PanoramaMaker::getSupportedExtension()
+{
+    QStringList supported_extensions;
+    supported_extensions << "jpg";
+    supported_extensions << "jpeg";
+    supported_extensions << "png";
+    supported_extensions << "bmp";
+    supported_extensions << "tiff";
+    supported_extensions << "tif";
+    supported_extensions << "webp";
+    return supported_extensions;
+}
+
+
+
+
+
+
 
 PanoramaMaker::PanoramaMaker(QObject *parent) :
     QThread(parent),
@@ -159,7 +179,11 @@ Stitcher::Status PanoramaMaker::unsafeRun()
 
 void PanoramaMaker::run()
 {
-    if (!configureStitcher())
+    if (images_path.size() < 2)
+        failed("Need at least 2 compatible images");
+    else if (!QDir(output_dir).exists())
+        failed("Destination directory doesn't exists");
+    else if (!configureStitcher())
         failed("Configuration error");
     else
     {

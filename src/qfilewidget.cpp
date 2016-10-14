@@ -38,7 +38,9 @@ void QFileWidget::addFiles(QStringList files)
     for (int i = 0; i < files.size(); ++i)
     {
         QFileInfo fileinfo(files[i]);
-        if (fileinfo.exists() && fileinfo.isFile() && (!getFilesList().contains(fileinfo.absoluteFilePath())))
+        if (fileinfo.exists() && fileinfo.isFile() &&
+                (supported_extensions.contains(fileinfo.suffix().toLower())) &&
+                (!getFilesList().contains(fileinfo.absoluteFilePath())))
         {
             QListWidgetItem *new_item = new QListWidgetItem(default_icon, fileinfo.fileName(), this);
             new_item->setToolTip(fileinfo.absoluteFilePath());
@@ -143,7 +145,10 @@ void QFileWidget::removeSelected()
 
 void QFileWidget::selectAndAddFiles()
 {
-    QString filter = "Images (*.png *.jpg *.bmp)";
+    QStringList filters;
+    for (int i = 0; i < supported_extensions.size(); ++i)
+        filters << "*."+supported_extensions[i];
+    QString filter = QString("Images (%1)").arg(filters.join(' '));
     QStringList files = QFileDialog::getOpenFileNames(Q_NULLPTR, QString(), QString(), filter);
     asyncAddFiles(files);
 }
