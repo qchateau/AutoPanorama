@@ -15,8 +15,8 @@
     * Install localy in ./opencv/install/
 
 ## To deploy the windows executable : ##
-* Copy the content of lib_for_windows
-* Copy the executable
+* Copy the executable to the folder "windows"
+* Run the script "win_installer" with Inno Installer
 
 ## References : ##
 #### Exposure compensation on all channels : ####

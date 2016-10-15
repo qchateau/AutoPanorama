@@ -1,11 +1,9 @@
 *.pro.user*
-release
-debug
-deployed
 *.PNG
-*png
+*.png
 *.jpg
 *.JPG
+*.exe
 
 # Windows image file caches
 Thumbs.db
