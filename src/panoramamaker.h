@@ -30,7 +30,11 @@ public:
                    QString output_ext_,
                    QString output_dir_);
 
+    void setUseOpenCL(bool use) { try_use_opencl = use; }
+    bool getUseOpenCL() { return try_use_opencl; }
+
     void setGenerateInnerCut(bool gen) { generate_inner_cut = gen; }
+    bool getGenerateInnerCut() { return generate_inner_cut; }
 
     void setBlenderMode(BlenderMode mode) { blender_mode = mode; }
     BlenderMode getBlenderMode() { return blender_mode; }
@@ -113,7 +117,7 @@ private:
     QElapsedTimer timer;
     long total_time;
     int progress;
-    bool try_use_gpu, generate_inner_cut;
+    bool try_use_cuda, try_use_opencl, generate_inner_cut;
 
 signals:
     void percentage(int);

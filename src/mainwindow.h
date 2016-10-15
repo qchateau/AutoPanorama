@@ -43,7 +43,7 @@ public slots:
     void onOutputDirEdit(QString edit=QString());
     void onSelectOutputDirClicked();
     void updateMakeEnabled();
-    void updateInfos();
+    void updateOCL();
     void updateOutputDirFilename();
     void updateStatusBar();
 

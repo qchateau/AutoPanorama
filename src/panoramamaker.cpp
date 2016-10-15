@@ -41,7 +41,8 @@ PanoramaMaker::PanoramaMaker(QObject *parent) :
     status(STOPPED),
     total_time(-1),
     progress(0),
-    try_use_gpu(false),
+    try_use_cuda(false),
+    try_use_opencl(false),
     generate_inner_cut(false)
 {
 }
@@ -128,7 +129,7 @@ QString PanoramaMaker::getStitcherConfString() {
                  QString("%1  Mpx").arg(getCompositingResol()));
     conf += QString("\n\n");
 
-    conf += QString("Try to use GPU : %1").arg(try_use_gpu ? "Yes" : "No");
+    conf += QString("Try to use OpenCL : %1").arg(try_use_opencl ? "Yes" : "No");
     conf += QString("\n");
     conf += QString("Generate inner cut panorama : %1").arg(generate_inner_cut ?  "Yes" : "No");
 
@@ -286,8 +287,8 @@ void PanoramaMaker::setProgress(int prog)
 
 bool PanoramaMaker::configureStitcher()
 {
-    ocl::setUseOpenCL(try_use_gpu);
-    stitcher = createStitcher(try_use_gpu);
+    ocl::setUseOpenCL(try_use_opencl);
+    stitcher = createStitcher();
     if (stitcher.empty())
         return false;
 
@@ -340,8 +341,8 @@ bool PanoramaMaker::configureStitcher()
     if (blender_mode.mode == QString("Feather"))
         blender = makePtr<detail::FeatherBlender>(blender_mode.sharpness);
     else if (blender_mode.mode == QString("Multiband"))
-        blender = makePtr<detail::MultiBandBlender>(try_use_gpu, blender_mode.bands, CV_32F);
-        //blender = makePtr<detail::MultiBandBlender>(try_use_gpu, blender_mode.bands, CV_16S);
+        blender = makePtr<detail::MultiBandBlender>(try_use_cuda, blender_mode.bands, CV_32F);
+        //blender = makePtr<detail::MultiBandBlender>(try_use_cuda, blender_mode.bands, CV_16S);
     else if (blender_mode.mode == QString("None"))
             blender = makePtr<detail::Blender>();
     else
@@ -418,7 +419,7 @@ bool PanoramaMaker::configureStitcher()
     // Matcher
     Ptr<detail::FeaturesMatcher> matcher;
     if (features_matching_mode.mode == QString("Best of 2 nearest"))
-        matcher = makePtr<detail::BestOf2NearestMatcher>(try_use_gpu, features_matching_mode.conf);
+        matcher = makePtr<detail::BestOf2NearestMatcher>(try_use_cuda, features_matching_mode.conf);
     else
         return false;
 

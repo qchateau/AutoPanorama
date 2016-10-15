@@ -8,17 +8,18 @@ InnerCutFinder::InnerCutFinder(InputArray mask) :
 {
     CV_Assert(mask.type() == CV_8U);
 
-    pyramid.push_back(mask.getUMat());
+    LOGLN("Creating the mask pyramid ...");
+    pyramid.push_back(mask.getMat());
     while (long(pyramid.back().total()) > min_search_res)
     {
-        UMat down;
+        Mat down;
         resize(pyramid.back(), down, Size(0,0), step_down_scale, step_down_scale, INTER_NEAREST);
         pyramid.push_back(down);
     }
     pyramid_roi.resize(pyramid.size());
     roi_min_area = (min_search_res/2)*0.10;
-    LOG("Pyramid has " << pyramid.size() << " levels.");
-    LOG("The smallest is " << pyramid.back().cols << "x" << pyramid.back().rows);
+    LOGLN("  pyramid has " << pyramid.size() << " levels.");
+    LOGLN("  the smallest is " << pyramid.back().cols << "x" << pyramid.back().rows);
 }
 
 Rect InnerCutFinder::getROI()
@@ -33,6 +34,10 @@ Rect InnerCutFinder::getROI()
 
 void InnerCutFinder::process()
 {
+    LOGLN("Processing pyramid ...");
+#if ENABLE_LOG
+    int64_t t = getTickCount();
+#endif
     for (int level = pyramid.size()-1; level >= 0; --level)
         if (!processLevel(level))
         {
@@ -40,6 +45,7 @@ void InnerCutFinder::process()
             break;
         }
     done = true;
+    LOGLN("Processing pyramid, time: " << ((getTickCount() - t) / getTickFrequency()) << " sec");
 }
 
 Rect InnerCutFinder::processFirst()
@@ -54,7 +60,8 @@ Rect InnerCutFinder::processFirst()
                     Rect roi(Point(tl_x, tl_y), Point(br_x, br_y));
                     if (roi.area() < roi_min_area)
                         continue;
-                    if (countNonZero(pyramid.back()(roi)) == long(roi.area()) &&
+                    Mat pyr_roi = pyramid.back()(roi);
+                    if (countNonZero(pyr_roi) == long(roi.area()) &&
                             roi.area() > best_roi.area())
                         best_roi = roi;
                 }
@@ -63,8 +70,6 @@ Rect InnerCutFinder::processFirst()
 
 bool InnerCutFinder::processLevel(int level)
 {
-    LOG("Level " << level);
-    int64 t = getTickCount();
     Rect roi;
     if (level == long(pyramid.size()-1))
     {
@@ -89,7 +94,7 @@ bool InnerCutFinder::processLevel(int level)
             y_inc = 1;
         }
 
-        UMat mask = pyramid[level];
+        Mat mask = pyramid[level];
         Rect best_roi = roi;
         for (int inc = 1;; ++inc)
         {
@@ -106,7 +111,5 @@ bool InnerCutFinder::processLevel(int level)
     bool ret = (roi.area() >= roi_min_area);
     roi = Rect(roi.tl() + Point(1,1), roi.br() - Point(1,1));
     pyramid_roi[level] = roi;
-    LOG("Level " << level << ", time: " << ((getTickCount() - t) / getTickFrequency()) << " sec");
-    LOG("ROI is : " << roi);
     return ret;
 }

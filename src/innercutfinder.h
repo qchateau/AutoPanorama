@@ -7,7 +7,14 @@
 
 using namespace cv;
 
-#define LOG(x) std::cout << x << std::endl
+#define ENABLE_LOG 1
+#if ENABLE_LOG
+#define LOG(x) std::cout << x
+#define LOGLN(x) std::cout << x << std::endl
+#else
+#define LOG(x)
+#define LOGLN(x)
+#endif
 
 class InnerCutFinder
 {
@@ -19,7 +26,7 @@ public:
 private:
     Rect processFirst();
     bool processLevel(int level);
-    std::vector<UMat> pyramid;
+    std::vector<Mat> pyramid;
     std::vector<Rect> pyramid_roi;
     int min_search_res;
     float step_down_scale;

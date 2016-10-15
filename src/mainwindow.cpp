@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
     updateOutputDirFilename();
     onBlenderTypeChange();
     onExposureCompensatorChange();
-    updateInfos();
+    updateOCL();
     updateStatusBar();
     updateMakeEnabled();
 
@@ -288,10 +288,13 @@ void MainWindow::updateMakeEnabled()
         ui->buttonMakePanorama->setEnabled(true);
 }
 
-void MainWindow::updateInfos()
+void MainWindow::updateOCL()
 {
     QString yes("Yes"), no("No");
-    ui->haveopencl_value->setText(cv::ocl::haveOpenCL() ? yes : no);
+    bool have_opencl = cv::ocl::haveOpenCL();
+    ui->haveopencl_value->setText(have_opencl ? yes : no);
+    ui->use_opencl_checkbox->setEnabled(have_opencl);
+    ui->use_opencl_checkbox->setChecked(have_opencl);
 }
 
 void MainWindow::updateOutputDirFilename()
@@ -408,6 +411,9 @@ void MainWindow::createWorkerUi(PanoramaMaker *worker) {
 
 void MainWindow::configureWorker(PanoramaMaker *worker)
 {
+    // OpenCL
+    worker->setUseOpenCL(ui->use_opencl_checkbox->isChecked());
+
     // Registration resolution
     worker->setRegistrationResol(ui->regres_spinbox->value());
 

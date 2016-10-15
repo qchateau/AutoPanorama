@@ -106,7 +106,7 @@
       </widget>
       <widget class="QWidget" name="tabSettings">
        <attribute name="title">
-        <string>Settings</string>
+        <string>Algorithm Settings</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_2">
         <item row="14" column="1">
@@ -192,7 +192,7 @@
              <number>100</number>
             </property>
             <property name="value">
-             <number>2</number>
+             <number>3</number>
             </property>
            </widget>
           </item>
@@ -798,7 +798,7 @@
       </widget>
       <widget class="QWidget" name="tab">
        <attribute name="title">
-        <string>Infos</string>
+        <string>Advanced</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout">
         <item row="0" column="3">
@@ -838,6 +838,23 @@
          <widget class="QLabel" name="haveopencl_label">
           <property name="text">
            <string>Have OpenCL :</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="use_opencl_label">
+          <property name="text">
+           <string>Use OpenCL :</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="QCheckBox" name="use_opencl_checkbox">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -903,7 +920,7 @@
          <string>Generate an inner cut</string>
         </property>
         <property name="checked">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
        </widget>
       </item>
