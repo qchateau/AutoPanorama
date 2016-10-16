@@ -12,6 +12,7 @@
 #include <QCloseEvent>
 
 #include <opencv2/core/ocl.hpp>
+#include <opencv2/core.hpp>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -26,6 +27,7 @@ MainWindow::MainWindow(QWidget *parent) :
     onBlenderTypeChange();
     onExposureCompensatorChange();
     updateOCL();
+    updateEigen();
     updateStatusBar();
     updateMakeEnabled();
 
@@ -295,6 +297,17 @@ void MainWindow::updateOCL()
     ui->haveopencl_value->setText(have_opencl ? yes : no);
     ui->use_opencl_checkbox->setEnabled(have_opencl);
     ui->use_opencl_checkbox->setChecked(have_opencl);
+}
+
+void MainWindow::updateEigen()
+{
+    QRegExp regex("Use Eigen:[ \t]*YES");
+    QString value;
+    if (regex.indexIn(cv::getBuildInformation().c_str()) >= 0)
+        value = "Yes";
+    else
+        value = "No";
+    ui->have_eigen_value->setText(value);
 }
 
 void MainWindow::updateOutputDirFilename()

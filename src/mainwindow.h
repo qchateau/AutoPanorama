@@ -44,6 +44,7 @@ public slots:
     void onSelectOutputDirClicked();
     void updateMakeEnabled();
     void updateOCL();
+    void updateEigen();
     void updateOutputDirFilename();
     void updateStatusBar();
 
