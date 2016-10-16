@@ -5,6 +5,9 @@
 *.JPG
 *.exe
 
+build
+install
+
 # Windows image file caches
 Thumbs.db
 ehthumbs.db

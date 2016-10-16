@@ -7,13 +7,13 @@ TEMPLATE = app
 
 #CONFIG += dynamic
 
-INCLUDEPATH += $$PWD/opencv/install/include/
-DEPENDPATH += $$PWD/opencv/install/include/
+INCLUDEPATH += $$PWD/install/include/
+DEPENDPATH += $$PWD/install/include/
 
 CONFIG(dynamic) {
     message(Dynamic linking of OpenCV)
     win32 {
-        LIBS +=  -L$$PWD/opencv/install/x86/mingw/bin/ -L$$PWD/opencv/install/x86/mingw/lib/ \
+        LIBS +=  -L$$PWD/install/x86/mingw/bin/ -L$$PWD/install/x86/mingw/lib/ \
                  -lopencv_stitching310.dll \
                  -lopencv_features2d310.dll \
                  -lopencv_imgcodecs310.dll \
@@ -22,7 +22,7 @@ CONFIG(dynamic) {
 
         QMAKE_LFLAGS += -Wl,--large-address-aware
     } else {
-        LIBS += -L/usr/local/lib \
+        LIBS += -L$$PWD/install/lib -L$$PWD/install/share/OpenCV/3rdparty/lib \
                 -lopencv_core \
                 -lopencv_imgcodecs \
                 -lopencv_stitching \
@@ -33,7 +33,7 @@ CONFIG(dynamic) {
     message(Static linking of OpenCV)
     win32 {
         LIBS += -Wl,-Bstatic \
-                -L$$PWD/opencv/install/x86/mingw/staticlib/ \
+                -L$$PWD/install/x86/mingw/staticlib/ \
                 #-lopencv_shape310 \
                 -lopencv_stitching310 \
                 #-lopencv_objdetect310 \
@@ -61,7 +61,8 @@ CONFIG(dynamic) {
         QMAKE_LFLAGS += -Wl,--large-address-aware
     } else {
         LIBS += -Wl,-Bstatic \
-                -L$$PWD/opencv/install/lib -L$$PWD/opencv/install/share/OpenCV/3rdparty/lib \
+                -L$$PWD/install/lib \
+                -L$$PWD/install/share/OpenCV/3rdparty/lib \
                 #-lopencv_shape \
                 -lopencv_stitching \
                 #-lopencv_objdetect \
@@ -86,7 +87,8 @@ CONFIG(dynamic) {
                 -lpng \
                 -lz \
                 -lippicv \
-                -Wl,-Bdynamic -ldl
+                -Wl,-Bdynamic \
+                -ldl
     }
 }
 

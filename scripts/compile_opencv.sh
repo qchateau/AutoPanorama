@@ -1,6 +1,8 @@
 #!/bin/bash
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+BUILD_DIR="$DIR/../build/opencv/"
+INSTALL_DIR="$DIR/../install/"
 OPENCV_SRC="$DIR/../opencv"
 CORES=`nproc --all`
 
@@ -15,9 +17,12 @@ CMAKE_OPTIONS="-DBUILD_DOCS=OFF \
 -DBUILD_opencv_video=OFF \
 -DBUILD_opencv_videoio=OFF \
 -DBUILD_opencv_videostab=OFF \
--DCMAKE_INSTALL_PREFIX=$OPENCV_SRC/install" \
+-DWITH_LAPACK=OFF \
+-DWITH_EIGEN=ON \
+-DCMAKE_INSTALL_PREFIX=$INSTALL_DIR" \
 
-cd "$OPENCV_SRC"
-cmake . $CMAKE_OPTIONS
+mkdir -p "$BUILD_DIR"
+cd "$BUILD_DIR"
+cmake "$OPENCV_SRC" $CMAKE_OPTIONS
 make -j$CORES
 make install
