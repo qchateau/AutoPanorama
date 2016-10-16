@@ -28,6 +28,7 @@ MainWindow::MainWindow(QWidget *parent) :
     onExposureCompensatorChange();
     updateOCL();
     updateEigen();
+    updateIPP();
     updateStatusBar();
     updateMakeEnabled();
 
@@ -305,13 +306,16 @@ void MainWindow::updateOCL()
 
 void MainWindow::updateEigen()
 {
-    QRegExp regex("Use Eigen:[ \t]*YES");
-    QString value;
-    if (regex.indexIn(cv::getBuildInformation().c_str()) >= 0)
-        value = "Yes";
-    else
-        value = "No";
-    ui->have_eigen_value->setText(value);
+    QRegExp regex("Use Eigen:([ \\t]*)([^\\n\\r]*)");
+    regex.indexIn(cv::getBuildInformation().c_str());
+    ui->have_eigen_value->setText(regex.cap(2).replace("YES", "Yes").replace("NO", "No"));
+}
+
+void MainWindow::updateIPP()
+{
+    QRegExp regex("Use IPP:([ \\t]*)([^\\n\\r]*)");
+    regex.indexIn(cv::getBuildInformation().c_str());
+    ui->have_ipp_value->setText(regex.cap(2).replace("YES", "Yes").replace("NO", "No"));
 }
 
 void MainWindow::updateOutputDirFilename()

@@ -1,6 +1,5 @@
 ## TODO : ##
 * mingw on linux (cross compile ?)
-* inner cut ? how ?
 * linux check dependencies
 * linux deployment script (.deb gen)
 
@@ -8,6 +7,7 @@
 * linear instead of affine model for exposure compensation
 
 ## This build needs the opencv submodule to be built correctly : ##
+* Install Eigen for faster computation
 * Linux :
     * Use script in the script folder
 * Win32 :
