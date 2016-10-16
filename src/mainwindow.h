@@ -57,7 +57,7 @@ private:
 
     struct ProgressBarContent {
         QProgressBar *pb;
-        QPushButton *hide, *close;
+        QPushButton *close;
         PanoramaMaker *worker;
         QHBoxLayout *layout;
     };
@@ -73,7 +73,6 @@ private:
     int max_filename_length;
 
 private slots:
-    void hideSenderWorker();
     void closeSenderWorker();
 };
 

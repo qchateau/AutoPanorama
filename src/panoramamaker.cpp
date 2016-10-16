@@ -40,6 +40,7 @@ PanoramaMaker::PanoramaMaker(QObject *parent) :
     QThread(parent),
     status(STOPPED),
     total_time(-1),
+    proc_time(-1),
     progress(0),
     try_use_cuda(false),
     try_use_opencl(false),
@@ -71,12 +72,6 @@ QString PanoramaMaker::getStitcherConfString() {
     conf += QString("\n");
     conf += files_filename.join(", ");
     conf += QString("\n\n");
-
-    if (total_time > 0)
-    {
-        conf += QString("Total time : %1s").arg(round(total_time/1000.));
-        conf += QString("\n\n");
-    }
 
     conf += QString("Registration Resolution : %1 Mpx").arg(getRegistrationResol());
     conf += QString("\n\n");
@@ -127,11 +122,11 @@ QString PanoramaMaker::getStitcherConfString() {
     conf += QString("Compositing Resolution : %1").arg(getCompositingResol() == Stitcher::ORIG_RESOL ?
                  "Original" :
                  QString("%1  Mpx").arg(getCompositingResol()));
+    conf += QString("\n");
+    conf += QString("Generate inner cut panorama : %1").arg(generate_inner_cut ?  "Yes" : "No");
     conf += QString("\n\n");
 
     conf += QString("Try to use OpenCL : %1").arg(try_use_opencl ? "Yes" : "No");
-    conf += QString("\n");
-    conf += QString("Generate inner cut panorama : %1").arg(generate_inner_cut ?  "Yes" : "No");
 
     return conf;
 }
@@ -149,6 +144,7 @@ Stitcher::Status PanoramaMaker::unsafeRun()
         setProgress(10*((i+1.0)/N));
     }
 
+    proc_timer.start();
     Stitcher::Status stitcher_status;
     stitcher_status = stitcher->estimateTransform(images);
     if (stitcher_status != Stitcher::OK)
@@ -171,6 +167,7 @@ Stitcher::Status PanoramaMaker::unsafeRun()
             generate_inner_cut = false;
     }
     setProgress(90);
+    proc_time = proc_timer.elapsed();
 
     string out = genOutputFileInfo().absoluteFilePath().toUtf8().constData();
     string inner_cut_out = genInnerCutOutputFileInfo().absoluteFilePath().toUtf8().constData();
@@ -202,9 +199,9 @@ void PanoramaMaker::run()
         try
         {
             status = WORKING;
-            timer.start();
+            total_timer.start();
             Stitcher::Status stitcher_status = unsafeRun();
-            total_time = timer.elapsed();
+            total_time = total_timer.elapsed();
             if (stitcher_status == Stitcher::OK)
                 done();
             else

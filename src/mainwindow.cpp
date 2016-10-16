@@ -151,6 +151,7 @@ void MainWindow::onWorkerFailed(QString msg)
     pb->setFormat(QString("%1 : Failed (%2)").arg(sender->getOutputFilename()).arg(msg));
     pb->setValue(100);
     pb->setStyleSheet("QProgressBar::chunk{background-color:red}");
+    progress_bars[sender].close->setText("Hide");
 }
 
 void MainWindow::onWorkerDone()
@@ -160,8 +161,11 @@ void MainWindow::onWorkerDone()
     if (!pb)
         return;
     pb->setStyleSheet("QProgressBar::chunk{background-color:green}");
-    pb->setToolTip(sender->getStitcherConfString());
-    pb->setFormat(QString("%1 : Done !").arg(sender->getOutputFilename()));
+    pb->setFormat(QString("%1 : Done ! (%2s total, %3s processing)")
+                  .arg(sender->getOutputFilename())
+                  .arg(QString::number(sender->getTotalTime(), 'f', 1))
+                  .arg(QString::number(sender->getProcTime(), 'f', 1)));
+    progress_bars[sender].close->setText("Hide");
 }
 
 void MainWindow::onBlenderTypeChange()
@@ -386,9 +390,8 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::createWorkerUi(PanoramaMaker *worker) {
     QProgressBar *progress_bar = new QProgressBar;
     QHBoxLayout *hbox = new QHBoxLayout;
-    QPushButton *hide, *close;
-    hide = new QPushButton("Hide");
-    close = new QPushButton("Close");
+    QPushButton *close;
+    close = new QPushButton("Cancel");
 
     progress_bar->setRange(0,100);
     progress_bar->setFormat(worker->getOutputFilename()+" : %p%");
@@ -399,12 +402,10 @@ void MainWindow::createWorkerUi(PanoramaMaker *worker) {
     ProgressBarContent pb_struct;
     pb_struct.pb = progress_bar;
     pb_struct.close = close;
-    pb_struct.hide = hide;
     pb_struct.worker = worker;
     pb_struct.layout = hbox;
 
     progress_bars[worker] = pb_struct;
-    progress_bars[hide] = pb_struct;
     progress_bars[close] = pb_struct;
 
     connect(worker, SIGNAL(percentage(int)), progress_bar, SLOT(setValue(int)));
@@ -413,11 +414,9 @@ void MainWindow::createWorkerUi(PanoramaMaker *worker) {
     connect(worker, SIGNAL(is_done()), this, SLOT(onWorkerDone()));
     connect(worker, SIGNAL(finished()), this, SLOT(updateStatusBar()));
 
-    connect(hide, SIGNAL(clicked(bool)), this, SLOT(hideSenderWorker()));
     connect(close, SIGNAL(clicked(bool)), this, SLOT(closeSenderWorker()));
 
     hbox->addWidget(progress_bar);
-    hbox->addWidget(hide);
     hbox->addWidget(close);
     ui->tabProgressLayout->addLayout(hbox);
 }
@@ -484,27 +483,13 @@ void MainWindow::configureWorker(PanoramaMaker *worker)
     worker->setGenerateInnerCut(ui->inner_cut_checkbox->isChecked());
 }
 
-void MainWindow::hideSenderWorker()
-{
-    ProgressBarContent pb_struct = progress_bars[QObject::sender()];
-    progress_bars.erase(pb_struct.close);
-    progress_bars.erase(pb_struct.hide);
-    progress_bars.erase(pb_struct.worker);
-    delete pb_struct.pb;
-    delete pb_struct.close;
-    delete pb_struct.hide;
-    delete pb_struct.layout;
-}
-
 void MainWindow::closeSenderWorker()
 {
     ProgressBarContent pb_struct = progress_bars[QObject::sender()];
     progress_bars.erase(pb_struct.close);
-    progress_bars.erase(pb_struct.hide);
     progress_bars.erase(pb_struct.worker);
     delete pb_struct.pb;
     delete pb_struct.close;
-    delete pb_struct.hide;
     delete pb_struct.layout;
     workers.removeAll(pb_struct.worker);
     if (pb_struct.worker)

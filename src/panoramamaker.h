@@ -75,7 +75,8 @@ public:
     void setPanoConfidenceThresh(double conf) { pano_conf_threshold = conf; }
     double getPanoConfidenceThresh() { return pano_conf_threshold; }
 
-
+    float getTotalTime() { return total_time/1000.; }
+    float getProcTime() { return proc_time/1000.; }
     Status getStatus() { return status; }
     QString getStatusMsg() { return status_msg; }
     int getProgress() { return progress; }
@@ -114,8 +115,8 @@ private:
     double seam_est_resol, registration_resol, compositing_resol;
     double pano_conf_threshold;
 
-    QElapsedTimer timer;
-    long total_time;
+    QElapsedTimer total_timer, proc_timer;
+    long total_time, proc_time;
     int progress;
     bool try_use_cuda, try_use_opencl, generate_inner_cut;
 
