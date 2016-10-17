@@ -15,7 +15,8 @@
     * Install localy in ./opencv/install/
 
 ## To deploy the windows executable : ##
-* Copy the executable to the folder "windows"
+* Install Inno Installer
+* Make install
 * Run the script "win_installer" with Inno Installer
 
 ## References : ##
