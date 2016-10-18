@@ -96,13 +96,20 @@ QString PanoramaMaker::getStitcherConfString() {
     conf += QString("\n\n");
 
     conf += QString("Exposure compensator mode : %1").arg(getExposureCompensatorMode().mode);
-    if (getExposureCompensatorMode().mode == QString("Blocks Gain") ||
-        getExposureCompensatorMode().mode == QString("Blocks BGR") ||
-        getExposureCompensatorMode().mode == QString("Combined Gain") ||
-        getExposureCompensatorMode().mode == QString("Combined BGR"))
+    if (getExposureCompensatorMode().mode == QString("Simple") ||
+        getExposureCompensatorMode().mode == QString("Blocks") ||
+        getExposureCompensatorMode().mode == QString("Combined"))
     {
-        conf += QString("\n");
-        conf += QString("Exposure compensator blocks size : %1").arg(getExposureCompensatorMode().block_size);
+        if (getExposureCompensatorMode().type == detail::GainCompensator::GAIN)
+            conf += QString(" Gain");
+        else if (getExposureCompensatorMode().type == detail::GainCompensator::CHANNELS)
+            conf += QString(" Channels");
+        if (getExposureCompensatorMode().mode == QString("Blocks") ||
+            getExposureCompensatorMode().mode == QString("Combined"))
+        {
+            conf += QString("\n");
+            conf += QString("Exposure compensator blocks size : %1").arg(getExposureCompensatorMode().block_size);
+        }
     }
     conf += QString("\n\n");
 
@@ -349,37 +356,25 @@ bool PanoramaMaker::configureStitcher()
 
     // Exposure
     Ptr<detail::ExposureCompensator> exp_comp;
+    int bs = exposure_compensator_mode.block_size;
+    int nfeed = exposure_compensator_mode.nfeed;
+    detail::GainCompensator::Mode exp_type = exposure_compensator_mode.type;
     if (exposure_compensator_mode.mode == QString("None"))
     {
         exp_comp = makePtr<detail::NoExposureCompensator>();
     }
-    else if (exposure_compensator_mode.mode == QString("Gain"))
+    else if (exposure_compensator_mode.mode == QString("Simple"))
     {
-        exp_comp = makePtr<detail::GainCompensator>();
+        exp_comp = makePtr<detail::GainCompensator>(exp_type, nfeed);
     }
-    else if (exposure_compensator_mode.mode == QString("Blocks Gain"))
+    else if (exposure_compensator_mode.mode == QString("Blocks"))
+    {
+        exp_comp = makePtr<detail::BlocksGainCompensator>(exp_type, nfeed, bs, bs);
+    }
+    else if (exposure_compensator_mode.mode == QString("Combined"))
     {
         int bs = exposure_compensator_mode.block_size;
-        exp_comp = makePtr<detail::BlocksGainCompensator>(bs, bs);
-    }
-    else if (exposure_compensator_mode.mode == QString("Combined Gain"))
-    {
-        int bs = exposure_compensator_mode.block_size;
-        exp_comp = makePtr<detail::CombinedGainCompensator>(bs, bs);
-    }
-    else if (exposure_compensator_mode.mode == QString("BGR"))
-    {
-        exp_comp = makePtr<detail::ChannelsCompensator>();
-    }
-    else if (exposure_compensator_mode.mode == QString("Blocks BGR"))
-    {
-        int bs = exposure_compensator_mode.block_size;
-        exp_comp = makePtr<detail::BlocksChannelsCompensator>(bs, bs);
-    }
-    else if (exposure_compensator_mode.mode == QString("Combined BGR"))
-    {
-        int bs = exposure_compensator_mode.block_size;
-        exp_comp = makePtr<detail::CombinedChannelsCompensator>(bs, bs);
+        exp_comp = makePtr<detail::CombinedGainCompensator>(exp_type, nfeed, bs, bs);
     }
     else
         return false;

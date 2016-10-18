@@ -18,7 +18,7 @@ class PanoramaMaker : public QThread
 public:
     enum Status { STOPPED, WORKING, DONE, FAILED };
     struct BlenderMode { QString mode; double sharpness; int bands; };
-    struct ExposureComensatorMode { QString mode; int block_size; };
+    struct ExposureComensatorMode { QString mode; detail::GainCompensator::Mode type; int block_size; int nfeed; };
     struct FeaturesMatchingMode { QString mode; double conf; };
 
     static QStringList getSupportedExtension();

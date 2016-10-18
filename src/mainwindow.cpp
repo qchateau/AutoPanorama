@@ -197,11 +197,9 @@ void MainWindow::onBlenderTypeChange()
 
 void MainWindow::onExposureCompensatorChange()
 {
-    QString type = ui->expcomp_combobox->currentText();
-    if (type == QString("Blocks Gain") ||
-        type == QString("Blocks BGR") ||
-        type == QString("Combined BGR") ||
-        type == QString("Combined Gain"))
+    QString mode = ui->expcomp_mode_combobox->currentText();
+    if (mode == QString("Blocks") ||
+        mode == QString("Combined"))
     {
         ui->blocksize_label->show();
         ui->blocksize_spinbox->show();
@@ -210,6 +208,20 @@ void MainWindow::onExposureCompensatorChange()
     {
         ui->blocksize_label->hide();
         ui->blocksize_spinbox->hide();
+    }
+    if (mode == QString("None"))
+    {
+        ui->nfeed_label->hide();
+        ui->nfeed_spinbox->hide();
+        ui->expcomp_type_combobox->hide();
+        ui->expcomp_type_label->hide();
+    }
+    else
+    {
+        ui->nfeed_label->show();
+        ui->nfeed_spinbox->show();
+        ui->expcomp_type_combobox->show();
+        ui->expcomp_type_label->show();
     }
 }
 
@@ -456,8 +468,17 @@ void MainWindow::configureWorker(PanoramaMaker *worker)
 
     // Exposure compensator mode
     PanoramaMaker::ExposureComensatorMode exp_comp_mode;
-    exp_comp_mode.mode = ui->expcomp_combobox->currentText();
+    exp_comp_mode.mode = ui->expcomp_mode_combobox->currentText();
+    if (ui->expcomp_type_combobox->currentText() == QString("Gain"))
+    {
+        exp_comp_mode.type = detail::GainCompensator::GAIN;
+    }
+    else if (ui->expcomp_type_combobox->currentText() == QString("BGR"))
+    {
+        exp_comp_mode.type = detail::GainCompensator::CHANNELS;
+    }
     exp_comp_mode.block_size = ui->blocksize_spinbox->value();
+    exp_comp_mode.nfeed = ui->nfeed_spinbox->value();
     worker->setExposureCompensatorMode(exp_comp_mode);
 
     // Seam estimation resolution
