@@ -17,6 +17,7 @@ public:
     void asyncAddFiles(QStringList files);
     QStringList getFilesList();
     QStringList getSelectedFilesList();
+    int countActive();
 
 public slots:
     void clean_items();
@@ -29,6 +30,7 @@ protected:
     void dragMoveEvent(QDragMoveEvent *);
     void dropEvent(QDropEvent *);
     bool eventFilter(QObject* obj, QEvent* event);
+    void paintEvent(QPaintEvent *e);
 
     void remove(int i);
     void remove(QListWidgetItem* item);

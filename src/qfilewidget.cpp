@@ -1,3 +1,4 @@
+#include "ui_mainwindow.h"
 #include "qfilewidget.h"
 
 #include <QtDebug>
@@ -17,7 +18,7 @@
 #include <QtConcurrent/QtConcurrentRun>
 #include <QIcon>
 #include <QPixmap>
-#include "ui_mainwindow.h"
+#include <QPainter>
 
 QFileWidget::QFileWidget(QWidget *parent) :
     QListWidget(parent),
@@ -153,6 +154,15 @@ void QFileWidget::selectAndAddFiles()
     asyncAddFiles(files);
 }
 
+int QFileWidget::countActive()
+{
+    int cnt = 0;
+    for (int i = 0; i < count(); ++i)
+        if (!item(i)->isHidden())
+            ++cnt;
+    return cnt;
+}
+
 
 
 
@@ -218,6 +228,14 @@ bool QFileWidget::eventFilter(QObject* obj, QEvent* event)
 
     return false;
 }
+
+void QFileWidget::paintEvent(QPaintEvent *e) {
+      QListWidget::paintEvent(e);
+      if (countActive() > 0) return;
+
+      QPainter p(this->viewport());
+      p.drawText(rect(), Qt::AlignCenter, "Drop images here");
+   }
 
 void QFileWidget::remove(int row)
 {
