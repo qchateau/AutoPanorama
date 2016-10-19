@@ -314,6 +314,51 @@ void MainWindow::updateOCL()
     ui->haveopencl_value->setText(have_opencl ? yes : no);
     ui->use_opencl_checkbox->setEnabled(have_opencl);
     ui->use_opencl_checkbox->setChecked(have_opencl);
+
+    if (!have_opencl)
+    {
+        ui->opencl_device_tree->hide();
+        ui->opencl_device_tree_label->hide();
+    }
+    else
+    {
+        ocl::Device default_device = ocl::Device::getDefault();
+        std::vector<cv::ocl::PlatformInfo> platforms;
+        cv::ocl::getPlatfomsInfo(platforms);
+        for (size_t i = 0; i < platforms.size(); i++)
+        {
+            const cv::ocl::PlatformInfo* platform = &platforms[i];
+
+            QString platform_txt = QString::fromStdString(platform->name());
+            QTreeWidgetItem *platform_item = new QTreeWidgetItem(QStringList(platform_txt));
+            ui->opencl_device_tree->insertTopLevelItem(i, platform_item);
+
+            cv::ocl::Device current_device;
+            for (int j = 0; j < platform->deviceNumber(); j++)
+            {
+                platform->getDevice(current_device, j);
+
+                QString device_txt;
+                device_txt = QString::fromStdString(current_device.name());
+                device_txt += " ("+oclDeviceTypeToString(current_device.type())+")";
+
+                QTreeWidgetItem *device_item = new QTreeWidgetItem(QStringList(device_txt));
+                platform_item->addChild(device_item);
+                if (!current_device.available())
+                {
+                    device_item->setDisabled(true);
+                }
+
+                if (current_device.addressBits() == default_device.addressBits())
+                {
+                    device_item->setForeground(0, QBrush(Qt::green));
+                }
+            }
+        }
+        ui->opencl_device_tree->expandAll();
+        ui->opencl_device_tree->show();
+        ui->opencl_device_tree_label->show();
+    }
 }
 
 void MainWindow::updateEigen()
@@ -523,4 +568,37 @@ void MainWindow::closeSenderWorker()
         delete pb_struct.worker;
     }
     updateStatusBar();
+}
+
+QString MainWindow::oclDeviceTypeToString(int type)
+{
+    QStringList strs;
+    if (type & ocl::Device::TYPE_CPU)
+        strs << "CPU";
+    if (type & ocl::Device::TYPE_GPU)
+    {
+        bool type_found = false;
+        if ((type-ocl::Device::TYPE_GPU) & ocl::Device::TYPE_DGPU)
+        {
+            type_found = true;
+            strs << "DGPU";
+        }
+        if ((type-ocl::Device::TYPE_GPU) & ocl::Device::TYPE_IGPU)
+        {
+            type_found = true;
+            strs << "IGPU";
+        }
+        if (!type_found)
+        {
+            strs << "GPU";
+        }
+    }
+    if (type & ocl::Device::TYPE_ACCELERATOR)
+        strs << "Accelerator";
+
+
+    if (strs.size() == 0)
+        return QString("Unknown type");
+
+    return strs.join(", ");
 }

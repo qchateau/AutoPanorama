@@ -822,32 +822,108 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab">
+      <widget class="QWidget" name="tabAdvanced">
        <attribute name="title">
         <string>Advanced</string>
        </attribute>
-       <layout class="QGridLayout" name="gridLayout">
-        <item row="0" column="0">
-         <widget class="QLabel" name="have_eigen_label">
+       <layout class="QVBoxLayout" name="verticalLayout_7">
+        <item>
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="3" column="0">
+           <widget class="QLabel" name="use_opencl_label">
+            <property name="text">
+             <string>Use OpenCL :</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="haveopencl_label">
+            <property name="text">
+             <string>Have OpenCL :</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="have_ipp_label">
+            <property name="text">
+             <string>Have IPP :</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLabel" name="have_ipp_value">
+            <property name="text">
+             <string>Unknown</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QCheckBox" name="use_opencl_checkbox">
+            <property name="text">
+             <string/>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="have_eigen_label">
+            <property name="text">
+             <string>Have Eigen :</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLabel" name="have_eigen_value">
+            <property name="text">
+             <string>Unknown</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLabel" name="haveopencl_value">
+            <property name="text">
+             <string>Unknown</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QLabel" name="opencl_device_tree_label">
           <property name="text">
-           <string>Have Eigen :</string>
+           <string>OpenCL platforms and devices :</string>
           </property>
          </widget>
         </item>
-        <item row="2" column="3">
-         <spacer name="horizontalSpacer">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+        <item>
+         <widget class="QTreeWidget" name="opencl_device_tree">
+          <property name="editTriggers">
+           <set>QAbstractItemView::NoEditTriggers</set>
           </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
+          <property name="selectionMode">
+           <enum>QAbstractItemView::NoSelection</enum>
           </property>
-         </spacer>
+          <property name="headerHidden">
+           <bool>true</bool>
+          </property>
+         </widget>
         </item>
-        <item row="4" column="0">
+        <item>
          <spacer name="verticalSpacer_2">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
@@ -859,58 +935,6 @@
            </size>
           </property>
          </spacer>
-        </item>
-        <item row="2" column="2">
-         <widget class="QLabel" name="haveopencl_value">
-          <property name="text">
-           <string>Unknown</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="2">
-         <widget class="QCheckBox" name="use_opencl_checkbox">
-          <property name="text">
-           <string/>
-          </property>
-          <property name="checked">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="haveopencl_label">
-          <property name="text">
-           <string>Have OpenCL :</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0">
-         <widget class="QLabel" name="use_opencl_label">
-          <property name="text">
-           <string>Use OpenCL :</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="2">
-         <widget class="QLabel" name="have_eigen_value">
-          <property name="text">
-           <string>Unknown</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="have_ipp_label">
-          <property name="text">
-           <string>Have IPP :</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="2">
-         <widget class="QLabel" name="have_ipp_value">
-          <property name="text">
-           <string>Unknown</string>
-          </property>
-         </widget>
         </item>
        </layout>
       </widget>
@@ -930,38 +954,10 @@
       <property name="bottomMargin">
        <number>3</number>
       </property>
-      <item row="1" column="3">
-       <widget class="QPushButton" name="output_dir_button">
+      <item row="3" column="2">
+       <widget class="QCheckBox" name="selectedOnly_checkbox">
         <property name="text">
-         <string>Select output directory</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="output_dir_label">
-        <property name="text">
-         <string>Ouput directory</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="3">
-       <widget class="QPushButton" name="buttonMakePanorama">
-        <property name="text">
-         <string>Make panorama</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="output_label">
-        <property name="text">
-         <string>Output file name</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLineEdit" name="output_filename_lineedit">
-        <property name="text">
-         <string/>
+         <string>Selected files only</string>
         </property>
        </widget>
       </item>
@@ -978,10 +974,17 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="2">
-       <widget class="QCheckBox" name="selectedOnly_checkbox">
+      <item row="3" column="0">
+       <widget class="QLineEdit" name="output_filename_lineedit">
         <property name="text">
-         <string>Selected files only</string>
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="output_dir_label">
+        <property name="text">
+         <string>Ouput directory</string>
         </property>
        </widget>
       </item>
@@ -1009,6 +1012,27 @@
         </property>
         <property name="readOnly">
          <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="output_label">
+        <property name="text">
+         <string>Output file name</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="3">
+       <widget class="QPushButton" name="buttonMakePanorama">
+        <property name="text">
+         <string>Make panorama</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="3">
+       <widget class="QPushButton" name="output_dir_button">
+        <property name="text">
+         <string>Select output directory</string>
         </property>
        </widget>
       </item>

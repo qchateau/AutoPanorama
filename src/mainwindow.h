@@ -55,6 +55,7 @@ protected:
 private:
     void createWorkerUi(PanoramaMaker *worker);
     void configureWorker(PanoramaMaker *worker);
+    QString oclDeviceTypeToString(int type);
 
     struct ProgressBarContent {
         QProgressBar *pb;
