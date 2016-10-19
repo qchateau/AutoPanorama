@@ -2,9 +2,11 @@
 * mingw on linux (cross compile ?)
 * linux check dependencies
 * linux deployment script (.deb gen)
+* disable cancel while processing
 
 ## TODO OpenCV : ##
 * linear instead of affine model for exposure compensation
+* slow opencl
 
 ## This build needs the opencv submodule to be built correctly : ##
 * Install Eigen for faster computation
