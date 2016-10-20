@@ -364,7 +364,7 @@ void MainWindow::updateOCL()
                 tooltip += QString("2D Image max size : %1x%2\n").arg(current_device.image2DMaxWidth()).arg(current_device.image2DMaxWidth());
                 tooltip += QString("Max mem alloc size : %1 MB\n").arg(current_device.maxMemAllocSize()/1000000);
                 tooltip += QString("Global mem size : %1 MB\n").arg(current_device.globalMemSize()/1000000);
-                tooltip += QString("Local mem type and size : %1 kB (%2)\n").arg(current_device.localMemSize()/1000).arg(mem_type);
+                tooltip += QString("Local mem type and size : %1 kB (%2)").arg(current_device.localMemSize()/1000).arg(mem_type);
                 device_item->setToolTip(0, tooltip);
             }
         }

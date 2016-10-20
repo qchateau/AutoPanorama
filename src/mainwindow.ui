@@ -137,7 +137,7 @@
            <double>100.000000000000000</double>
           </property>
           <property name="singleStep">
-           <double>0.500000000000000</double>
+           <double>1.000000000000000</double>
           </property>
          </widget>
         </item>
@@ -462,12 +462,12 @@
          <widget class="QComboBox" name="seamfindermode_combobox">
           <item>
            <property name="text">
-            <string>Graph cut gradient</string>
+            <string>Graph cut color</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Graph cut color</string>
+            <string>Graph cut gradient</string>
            </property>
           </item>
           <item>
@@ -715,7 +715,7 @@
            <number>1024</number>
           </property>
           <property name="value">
-           <number>24</number>
+           <number>32</number>
           </property>
          </widget>
         </item>
@@ -766,7 +766,7 @@
              <x>0</x>
              <y>0</y>
              <width>916</width>
-             <height>590</height>
+             <height>613</height>
             </rect>
            </property>
            <property name="sizePolicy">
