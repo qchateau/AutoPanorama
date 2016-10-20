@@ -830,34 +830,41 @@
         <item>
          <layout class="QGridLayout" name="gridLayout">
           <item row="3" column="0">
-           <widget class="QLabel" name="use_opencl_label">
-            <property name="text">
-             <string>Use OpenCL :</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
            <widget class="QLabel" name="haveopencl_label">
             <property name="text">
              <string>Have OpenCL :</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="0">
+          <item row="4" column="0">
+           <widget class="QLabel" name="use_opencl_label">
+            <property name="text">
+             <string>Use OpenCL :</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
            <widget class="QLabel" name="have_ipp_label">
             <property name="text">
              <string>Have IPP :</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
+          <item row="1" column="1">
            <widget class="QLabel" name="have_ipp_value">
             <property name="text">
              <string>Unknown</string>
             </property>
            </widget>
           </item>
-          <item row="3" column="1">
+          <item row="2" column="0">
+           <widget class="QLabel" name="have_eigen_label">
+            <property name="text">
+             <string>Have Eigen :</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
            <widget class="QCheckBox" name="use_opencl_checkbox">
             <property name="text">
              <string/>
@@ -867,28 +874,21 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="have_eigen_label">
-            <property name="text">
-             <string>Have Eigen :</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLabel" name="have_eigen_value">
-            <property name="text">
-             <string>Unknown</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
+          <item row="3" column="1">
            <widget class="QLabel" name="haveopencl_value">
             <property name="text">
              <string>Unknown</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="2">
+          <item row="2" column="1">
+           <widget class="QLabel" name="have_eigen_value">
+            <property name="text">
+             <string>Unknown</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
            <spacer name="horizontalSpacer">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -896,10 +896,24 @@
             <property name="sizeHint" stdset="0">
              <size>
               <width>40</width>
-              <height>20</height>
+              <height>5</height>
              </size>
             </property>
            </spacer>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="arch_label">
+            <property name="text">
+             <string>Arch :</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLabel" name="arch_value">
+            <property name="text">
+             <string>Unknown</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
@@ -921,6 +935,11 @@
           <property name="headerHidden">
            <bool>true</bool>
           </property>
+          <column>
+           <property name="text">
+            <string notr="true">1</string>
+           </property>
+          </column>
          </widget>
         </item>
         <item>

@@ -46,6 +46,7 @@ public slots:
     void updateOCL();
     void updateEigen();
     void updateIPP();
+    void updateArch();
     void updateOutputDirFilename();
     void updateStatusBar();
 

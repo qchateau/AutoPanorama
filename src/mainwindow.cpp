@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "env.h"
 
 #include <QtDebug>
 #include <QMessageBox>
@@ -29,6 +30,7 @@ MainWindow::MainWindow(QWidget *parent) :
     updateOCL();
     updateEigen();
     updateIPP();
+    updateArch();
     updateStatusBar();
     updateMakeEnabled();
 
@@ -386,6 +388,17 @@ void MainWindow::updateIPP()
     QRegExp regex("Use IPP:([ \\t]*)([^\\n\\r]*)");
     regex.indexIn(cv::getBuildInformation().c_str());
     ui->have_ipp_value->setText(regex.cap(2).replace("YES", "Yes").replace("NO", "No"));
+}
+
+void MainWindow::updateArch()
+{
+#ifdef ENVIRONMENT64
+    ui->arch_value->setText("64 bits");
+#else
+#ifdef ENVIRONMENT32
+    ui->arch_value->setText("32 bits");
+#endif
+#endif
 }
 
 void MainWindow::updateOutputDirFilename()

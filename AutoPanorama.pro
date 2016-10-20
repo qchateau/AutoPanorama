@@ -2,6 +2,7 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+VERSION = 1.0.1.1
 TARGET = AutoPanorama
 TEMPLATE = app
 
@@ -9,9 +10,18 @@ INCLUDEPATH += $$PWD/install/include/
 DEPENDPATH += $$PWD/install/include/
 
 win32 {
-    QMAKE_LFLAGS += -Wl,--large-address-aware
+    contains(QT_ARCH, i386) {
+        QMAKE_LFLAGS += -Wl,--large-address-aware
+        LIBS += -L$$PWD/install/x86/mingw/staticlib/
+            target.path = $$PWD/windows/x86
+    } else {
+        LIBS += -L$$PWD/install/x64/mingw/staticlib/
+            target.path = $$PWD/windows/x64
+    }
+    CONFIG(release, debug|release) {
+        INSTALLS += target
+    }
     LIBS += -Wl,-Bstatic \
-            -L$$PWD/install/x86/mingw/staticlib/ \
             #-lopencv_shape310 \
             -lopencv_stitching310 \
             #-lopencv_objdetect310 \
@@ -36,8 +46,8 @@ win32 {
             -llibpng \
             -lz
 
-    target.path = $$PWD/windows
-    INSTALLS += target
+    RC_ICONS = "$$PWD/res/autopanorama.ico"
+    QMAKE_TARGET_COPYRIGHT = "GNU GPL"
 } else {
     LIBS += -Wl,-Bstatic \
             -L$$PWD/install/lib \
@@ -81,7 +91,8 @@ HEADERS  += \
     src/mainwindow.h \
     src/panoramamaker.h \
     src/qfilewidget.h \
-    src/innercutfinder.h
+    src/innercutfinder.h \
+    src/env.h
 
 FORMS    += \
     src/mainwindow.ui
@@ -95,5 +106,3 @@ DISTFILES += \
 RESOURCES += \
     res/application.qrc
 
-RC_FILE = \
-    res/autopanorama.rc
