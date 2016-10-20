@@ -349,7 +349,7 @@ void MainWindow::updateOCL()
                     device_item->setDisabled(true);
                 }
 
-                if (current_device.addressBits() == default_device.addressBits())
+                if (current_device.name() == default_device.name())
                 {
                     device_item->setForeground(0, QBrush(Qt::green));
                 }
