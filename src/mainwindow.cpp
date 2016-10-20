@@ -353,6 +353,19 @@ void MainWindow::updateOCL()
                 {
                     device_item->setForeground(0, QBrush(Qt::green));
                 }
+                QString mem_type;
+                if (current_device.localMemType() == ocl::Device::LOCAL_IS_GLOBAL)
+                    mem_type = "global";
+                else if (current_device.localMemType() == ocl::Device::LOCAL_IS_LOCAL)
+                    mem_type = "local";
+                else if (current_device.localMemType() == ocl::Device::NO_LOCAL_MEM)
+                    mem_type = "none";
+                QString tooltip;
+                tooltip += QString("2D Image max size : %1x%2\n").arg(current_device.image2DMaxWidth()).arg(current_device.image2DMaxWidth());
+                tooltip += QString("Max mem alloc size : %1 MB\n").arg(current_device.maxMemAllocSize()/1000000);
+                tooltip += QString("Global mem size : %1 MB\n").arg(current_device.globalMemSize()/1000000);
+                tooltip += QString("Local mem type and size : %1 kB (%2)\n").arg(current_device.localMemSize()/1000).arg(mem_type);
+                device_item->setToolTip(0, tooltip);
             }
         }
         ui->opencl_device_tree->expandAll();
