@@ -42,6 +42,8 @@ public slots:
     void onOutputFilenameEdit(QString edit=QString());
     void onOutputDirEdit(QString edit=QString());
     void onSelectOutputDirClicked();
+    void onFastSettingsChanged();
+    void resetAlgoSetting();
     void updateMakeEnabled();
     void updateOCL();
     void updateEigen();

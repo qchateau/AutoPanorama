@@ -22,9 +22,6 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout_6">
-    <property name="spacing">
-     <number>0</number>
-    </property>
     <property name="leftMargin">
      <number>0</number>
     </property>
@@ -104,6 +101,352 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="tabFastSettings">
+       <attribute name="title">
+        <string>Fast settings</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_5">
+        <item row="4" column="1">
+         <widget class="Line" name="line">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="10" column="0">
+         <spacer name="verticalSpacer_7">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="8" column="1">
+         <widget class="Line" name="line_4">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0">
+         <widget class="Line" name="line_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="8" column="0">
+         <widget class="Line" name="line_3">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="9" column="1">
+         <layout class="QGridLayout" name="gridLayout_4">
+          <item row="1" column="0">
+           <widget class="QRadioButton" name="fast_proj_type_cyl">
+            <property name="text">
+             <string>Cylindrical</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../res/application.qrc">
+              <normaloff>:/cylindrical.png</normaloff>:/cylindrical.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>200</width>
+              <height>100</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QRadioButton" name="fast_proj_type_sph">
+            <property name="text">
+             <string>Spherical</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../res/application.qrc">
+              <normaloff>:/spherical.png</normaloff>:/spherical.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>200</width>
+              <height>100</height>
+             </size>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QRadioButton" name="fast_proj_type_pla">
+            <property name="text">
+             <string>Perspective</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../res/application.qrc">
+              <normaloff>:/perspective.png</normaloff>:/perspective.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>200</width>
+              <height>100</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="9" column="0">
+         <widget class="QLabel" name="fast_proj_type_label">
+          <property name="font">
+           <font>
+            <pointsize>12</pointsize>
+            <italic>false</italic>
+           </font>
+          </property>
+          <property name="text">
+           <string>Projection
+type</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="1">
+         <layout class="QVBoxLayout" name="verticalLayout_8">
+          <item>
+           <widget class="QSlider" name="fast_pan_size_value">
+            <property name="maximum">
+             <number>2</number>
+            </property>
+            <property name="pageStep">
+             <number>1</number>
+            </property>
+            <property name="value">
+             <number>2</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="fast_pan_size_values_labels">
+            <item>
+             <widget class="QLabel" name="fast_pan_size_l">
+              <property name="text">
+               <string>Small</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_6">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="fast_pan_size_s">
+              <property name="text">
+               <string>Medium</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_5">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="fast_pan_size_m">
+              <property name="text">
+               <string>Full Size</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item row="5" column="0">
+         <widget class="QLabel" name="fast_pan_size_label">
+          <property name="font">
+           <font>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Panorama size</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <layout class="QVBoxLayout" name="verticalLayout_9">
+          <item>
+           <widget class="QSlider" name="fast_excomp_value">
+            <property name="maximum">
+             <number>3</number>
+            </property>
+            <property name="singleStep">
+             <number>1</number>
+            </property>
+            <property name="pageStep">
+             <number>1</number>
+            </property>
+            <property name="value">
+             <number>3</number>
+            </property>
+            <property name="sliderPosition">
+             <number>3</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="tickPosition">
+             <enum>QSlider::NoTicks</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="fast_expcom_value_labels">
+            <item>
+             <widget class="QLabel" name="fast_expcom_vf">
+              <property name="text">
+               <string>Very fast</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_4">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="fast_expcom_f">
+              <property name="text">
+               <string>Fast</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_3">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="fast_expcom_s">
+              <property name="text">
+               <string>Slow</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="fast_expcom_vs">
+              <property name="text">
+               <string>Very Slow</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="fast_expcomp_label">
+          <property name="font">
+           <font>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Exposure 
+compensation</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
       <widget class="QWidget" name="tabSettings">
        <attribute name="title">
         <string>Algorithm Settings</string>
@@ -155,7 +498,7 @@
           </item>
           <item>
            <property name="text">
-            <string>Plane</string>
+            <string>Perspective</string>
            </property>
           </item>
          </widget>
@@ -766,7 +1109,7 @@
              <x>0</x>
              <y>0</y>
              <width>916</width>
-             <height>613</height>
+             <height>607</height>
             </rect>
            </property>
            <property name="sizePolicy">
@@ -1000,10 +1343,34 @@
         </property>
        </widget>
       </item>
+      <item row="3" column="3">
+       <widget class="QPushButton" name="buttonMakePanorama">
+        <property name="text">
+         <string>Make panorama</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLineEdit" name="output_dir_lineedit">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="readOnly">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="0">
        <widget class="QLabel" name="output_dir_label">
         <property name="text">
          <string>Ouput directory</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="output_label">
+        <property name="text">
+         <string>Output file name</string>
         </property>
        </widget>
       </item>
@@ -1022,30 +1389,6 @@
           <string>.png</string>
          </property>
         </item>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLineEdit" name="output_dir_lineedit">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="readOnly">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="output_label">
-        <property name="text">
-         <string>Output file name</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="3">
-       <widget class="QPushButton" name="buttonMakePanorama">
-        <property name="text">
-         <string>Make panorama</string>
-        </property>
        </widget>
       </item>
       <item row="1" column="3">
@@ -1303,6 +1646,86 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>fast_excomp_value</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onFastSettingsChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>523</x>
+     <y>42</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>469</x>
+     <y>390</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>fast_pan_size_value</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onFastSettingsChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>523</x>
+     <y>102</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>469</x>
+     <y>390</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>fast_proj_type_cyl</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onFastSettingsChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>320</x>
+     <y>318</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>469</x>
+     <y>390</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>fast_proj_type_pla</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onFastSettingsChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>727</x>
+     <y>207</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>469</x>
+     <y>390</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>fast_proj_type_sph</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onFastSettingsChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>320</x>
+     <y>207</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>469</x>
+     <y>390</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onMakePanoramaClicked()</slot>
@@ -1314,5 +1737,7 @@
   <slot>onOutputDirEdit(QString)</slot>
   <slot>onOutputDirChanged(QString)</slot>
   <slot>onOutputFilenameChanged(QString)</slot>
+  <slot>onFastSettingsChanged()</slot>
+  <slot>onAlgoSettingsChanged()</slot>
  </slots>
 </ui>

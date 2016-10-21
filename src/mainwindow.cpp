@@ -25,6 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     updateOutputDirFilename();
+    onFastSettingsChanged();
     onBlenderTypeChange();
     onExposureCompensatorChange();
     updateOCL();
@@ -284,6 +285,81 @@ void MainWindow::onSelectOutputDirClicked()
         manual_output_dir = false;
         updateOutputDirFilename();
     }
+}
+
+void MainWindow::onFastSettingsChanged()
+{
+    resetAlgoSetting();
+    int exp_comp = ui->fast_excomp_value->value();
+    switch(exp_comp)
+    {
+    case 0: // Very fast
+        ui->nfeed_spinbox->setValue(1);
+        ui->expcomp_mode_combobox->setCurrentText("Simple");
+        break;
+    case 1: // Fast
+        ui->nfeed_spinbox->setValue(3);
+        ui->expcomp_mode_combobox->setCurrentText("Simple");
+        break;
+    case 2: // Slow
+        ui->nfeed_spinbox->setValue(1);
+        ui->expcomp_mode_combobox->setCurrentText("Combined");
+        break;
+    case 3: // Very slow
+        ui->nfeed_spinbox->setValue(3);
+        ui->expcomp_mode_combobox->setCurrentText("Combined");
+        break;
+    }
+
+    int pan_size = ui->fast_pan_size_value->value();
+    switch(pan_size)
+    {
+    case 0: // Small
+        ui->compositingres_spinbox->setValue(1);
+        break;
+    case 1: // Medium
+        ui->compositingres_spinbox->setValue(5);
+        break;
+    case 2: // Full size
+        ui->compositingres_spinbox->setValue(0);
+        break;
+    }
+
+    QString proj_type = "Spherical";
+    if (ui->fast_proj_type_sph->isChecked())
+        proj_type = "Spherical";
+    else if (ui->fast_proj_type_cyl->isChecked())
+        proj_type = "Cylindrical";
+    else if (ui->fast_proj_type_pla->isChecked())
+        proj_type = "Perspective";
+    ui->warpmode_combobox->setCurrentText(proj_type);
+
+}
+
+void MainWindow::resetAlgoSetting()
+{
+    ui->regres_spinbox->setValue(0.6);
+    ui->featuresfinder_combobox->setCurrentText("AKAZE");
+    ui->featuresmatcher_combobox->setCurrentText("Best of 2 nearest");
+    ui->featuresmatcherconf_spinbox->setValue(0.65);
+    ui->warpmode_combobox->setCurrentText("Spherical");
+    ui->wavecorkind_combobox->setCurrentText("None");
+    ui->bundleadj_combobox->setCurrentText("Ray");
+    ui->confth_spinbox->setValue(1.0);
+
+    ui->expcomp_mode_combobox->setCurrentText("Combined");
+    ui->expcomp_type_combobox->setCurrentText("BGR");
+    ui->nfeed_spinbox->setValue(3);
+    ui->blocksize_spinbox->setValue(32);
+
+    ui->seamfinderres_spinbox->setValue(0.1);
+    ui->seamfindermode_combobox->setCurrentText("Graph cut color");
+
+    ui->blendertype_combobox->setCurrentText("Multiband");
+    ui->nbands_spinbox->setValue(3);
+
+    ui->compositingres_spinbox->setValue(0);
+    ui->interp_combobox->setCurrentText("Cubic");
 }
 
 void MainWindow::updateMakeEnabled()

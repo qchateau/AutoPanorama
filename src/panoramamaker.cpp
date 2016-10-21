@@ -298,7 +298,7 @@ bool PanoramaMaker::configureStitcher()
 
     // Warper
     Ptr<WarperCreator> warper;
-    if (warp_mode == QString("Plane"))
+    if (warp_mode == QString("Perspective"))
         warper = makePtr<PlaneWarper>();
     else if (warp_mode == QString("Cylindrical"))
         warper = makePtr<CylindricalWarper>();
