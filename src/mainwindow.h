@@ -54,6 +54,7 @@ protected:
     void closeEvent(QCloseEvent *event);
 
 private:
+    void startWorker(PanoramaMaker *worker);
     void createWorkerUi(PanoramaMaker *worker);
     void configureWorker(PanoramaMaker *worker);
     QString oclDeviceTypeToString(int type);

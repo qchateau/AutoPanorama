@@ -138,8 +138,7 @@ void MainWindow::runWorkers()
             break;
         if (workers[i]->getStatus() == PanoramaMaker::STOPPED)
         {
-            qDebug() << "Starting worker";
-            workers[i]->start();
+            startWorker(workers[i]);
             break;
         }
     }
@@ -155,6 +154,7 @@ void MainWindow::onWorkerFailed(QString msg)
     pb->setValue(100);
     pb->setStyleSheet("QProgressBar::chunk{background-color:red}");
     progress_bars[sender].close->setText("Hide");
+    progress_bars[sender].close->setEnabled(true);
 }
 
 void MainWindow::onWorkerDone()
@@ -169,6 +169,7 @@ void MainWindow::onWorkerDone()
                   .arg(QString::number(sender->getTotalTime(), 'f', 1))
                   .arg(QString::number(sender->getProcTime(), 'f', 1)));
     progress_bars[sender].close->setText("Hide");
+    progress_bars[sender].close->setEnabled(true);
 }
 
 void MainWindow::onBlenderTypeChange()
@@ -474,6 +475,14 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 
 
+void MainWindow::startWorker(PanoramaMaker *worker)
+{
+    qDebug() << "Starting worker";
+    QPushButton *close = progress_bars[worker].close;
+    close->setDisabled(true);
+    worker->start();
+}
+
 void MainWindow::createWorkerUi(PanoramaMaker *worker) {
     QProgressBar *progress_bar = new QProgressBar;
     QHBoxLayout *hbox = new QHBoxLayout;
@@ -590,7 +599,6 @@ void MainWindow::closeSenderWorker()
     workers.removeAll(pb_struct.worker);
     if (pb_struct.worker)
     {
-        pb_struct.worker->terminate();
         delete pb_struct.worker;
     }
     updateStatusBar();

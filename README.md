@@ -2,7 +2,6 @@
 * mingw on linux (cross compile ?)
 * linux check dependencies
 * linux deployment script (.deb gen)
-* disable cancel while processing
 
 ## TODO OpenCV : ##
 * linear instead of affine model for exposure compensation
