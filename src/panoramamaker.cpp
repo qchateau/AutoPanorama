@@ -96,6 +96,8 @@ QString PanoramaMaker::getStitcherConfString() {
     conf += QString("\n\n");
 
     conf += QString("Exposure compensator mode : %1").arg(getExposureCompensatorMode().mode);
+    conf += QString("\n");
+    conf += QString("Similarity threshold = %1").arg(getExposureCompensatorMode().similarity_th);
     if (getExposureCompensatorMode().mode == QString("Simple") ||
         getExposureCompensatorMode().mode == QString("Blocks") ||
         getExposureCompensatorMode().mode == QString("Combined"))
@@ -358,6 +360,7 @@ bool PanoramaMaker::configureStitcher()
     Ptr<detail::ExposureCompensator> exp_comp;
     int bs = exposure_compensator_mode.block_size;
     int nfeed = exposure_compensator_mode.nfeed;
+    double sim_th = exposure_compensator_mode.similarity_th;
     detail::GainCompensator::Mode exp_type = exposure_compensator_mode.type;
     if (exposure_compensator_mode.mode == QString("None"))
     {
@@ -365,16 +368,16 @@ bool PanoramaMaker::configureStitcher()
     }
     else if (exposure_compensator_mode.mode == QString("Simple"))
     {
-        exp_comp = makePtr<detail::GainCompensator>(exp_type, nfeed);
+        exp_comp = makePtr<detail::GainCompensator>(exp_type, nfeed, sim_th);
     }
     else if (exposure_compensator_mode.mode == QString("Blocks"))
     {
-        exp_comp = makePtr<detail::BlocksGainCompensator>(exp_type, nfeed, bs, bs);
+        exp_comp = makePtr<detail::BlocksGainCompensator>(exp_type, nfeed, bs, bs, sim_th);
     }
     else if (exposure_compensator_mode.mode == QString("Combined"))
     {
         int bs = exposure_compensator_mode.block_size;
-        exp_comp = makePtr<detail::CombinedGainCompensator>(exp_type, nfeed, bs, bs);
+        exp_comp = makePtr<detail::CombinedGainCompensator>(exp_type, nfeed, bs, bs, sim_th);
     }
     else
         return false;
