@@ -37,4 +37,3 @@ Source: "{#DeployFolder}\platforms\*"; DestDir: "{app}\platforms\"
 [Icons]
 Name: "{commondesktop}\{#DisplayAppName}"; Filename: "{app}\{#AppNameExe}"; Tasks: desktopicon      
 Name: "{commonprograms}\{#DisplayAppName}"; Filename: "{app}\{#AppNameExe}";
-Name: "{commonstartup}\{#DisplayAppName}"; Filename: "{app}\{#AppNameExe}";
