@@ -207,11 +207,13 @@ void MainWindow::onExposureCompensatorChange()
     {
         ui->blocksize_label->show();
         ui->blocksize_spinbox->show();
+        ui->exp_sim_th_spinbox->setValue(0.1);
     }
     else
     {
         ui->blocksize_label->hide();
         ui->blocksize_spinbox->hide();
+        ui->exp_sim_th_spinbox->setValue(1);
     }
     if (mode == QString("None"))
     {
@@ -219,6 +221,8 @@ void MainWindow::onExposureCompensatorChange()
         ui->nfeed_spinbox->hide();
         ui->expcomp_type_combobox->hide();
         ui->expcomp_type_label->hide();
+        ui->exp_sim_th_label->hide();
+        ui->exp_sim_th_spinbox->hide();
     }
     else
     {
@@ -226,6 +230,8 @@ void MainWindow::onExposureCompensatorChange()
         ui->nfeed_spinbox->show();
         ui->expcomp_type_combobox->show();
         ui->expcomp_type_label->show();
+        ui->exp_sim_th_label->show();
+        ui->exp_sim_th_spinbox->show();
     }
 }
 
@@ -351,6 +357,7 @@ void MainWindow::resetAlgoSetting()
     ui->expcomp_type_combobox->setCurrentText("BGR");
     ui->nfeed_spinbox->setValue(3);
     ui->blocksize_spinbox->setValue(32);
+    ui->exp_sim_th_spinbox->setValue(0.1);
 
     ui->seamfinderres_spinbox->setValue(0.1);
     ui->seamfindermode_combobox->setCurrentText("Graph cut color");
@@ -635,6 +642,7 @@ void MainWindow::configureWorker(PanoramaMaker *worker)
     }
     exp_comp_mode.block_size = ui->blocksize_spinbox->value();
     exp_comp_mode.nfeed = ui->nfeed_spinbox->value();
+    exp_comp_mode.similarity_th = ui->exp_sim_th_spinbox->value();
     worker->setExposureCompensatorMode(exp_comp_mode);
 
     // Seam estimation resolution

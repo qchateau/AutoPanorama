@@ -70,6 +70,7 @@ Rect InnerCutFinder::processFirst()
 
 bool InnerCutFinder::processLevel(int level)
 {
+    LOGLN("  level " << level+1);
     Rect roi;
     if (level == long(pyramid.size()-1))
     {
@@ -94,22 +95,62 @@ bool InnerCutFinder::processLevel(int level)
             y_inc = 1;
         }
 
+        bool max_side[4] = {false, false, false, false};
+        Point2f best_tl, best_br;
         Mat mask = pyramid[level];
         Rect best_roi = roi;
-        for (int inc = 1;; ++inc)
+
+        best_tl = tl;
+        best_br = br;
+
+        int inc = 0;
+        while (!(max_side[0] && max_side[1] && max_side[2] && max_side[3]))
         {
-            Point new_tl = tl - Point(int(x_inc*inc), int(y_inc*inc));
-            Point new_br = br + Point(int(x_inc*inc), int(y_inc*inc));
-            Rect new_roi(new_tl, new_br);
-            if (countNonZero(mask(new_roi)) != long(new_roi.area()))
-                break;
-            best_roi = new_roi;
+            ++inc;
+            for (int s = 0; s < 4; ++s)
+            {
+                if (max_side[s])
+                    continue;
+
+                Point2f new_tl = best_tl;
+                Point2f new_br = best_br;
+
+                if (s == 0) // top
+                    new_tl -= Point2f(0, y_inc*inc);
+                else if (s == 1) // right
+                    new_br += Point2f(x_inc*inc, 0);
+                else if (s == 2) // bottom
+                    new_br += Point2f(0, y_inc*inc);
+                else if (s == 3) // left
+                    new_tl -= Point2f(x_inc*inc, 0);
+
+                Rect new_roi = Rect(Point(new_tl), Point(new_br));
+                if (new_roi.tl() == best_roi.tl() && new_roi.br() == best_roi.br())
+                    continue;
+                if (new_roi.x+new_roi.width > mask.cols ||
+                        new_roi.x < 0 ||
+                        new_roi.y+new_roi.height > mask.rows ||
+                        new_roi.y < 0 ||
+                        countNonZero(mask(new_roi)) != long(new_roi.area()))
+                {
+                    max_side[s] = true;
+                }
+                else
+                {
+                    best_tl = new_tl;
+                    best_br = new_br;
+                    best_roi = new_roi;
+                }
+            }
         }
+
+        LOGLN("  ROI grew " << best_roi.area() - roi.area() << " pixels over " << inc << " iterations");
         roi = best_roi;
     }
 
     bool ret = (roi.area() >= roi_min_area);
-    roi = Rect(roi.tl() + Point(1,1), roi.br() - Point(1,1));
+    if (level != 0)
+        roi = Rect(roi.tl() + Point(1,1), roi.br() - Point(1,1));
     pyramid_roi[level] = roi;
     return ret;
 }
