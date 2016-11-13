@@ -399,7 +399,7 @@ void MainWindow::updateOCL()
     bool have_opencl = cv::ocl::haveOpenCL();
     ui->haveopencl_value->setText(have_opencl ? yes : no);
     ui->use_opencl_checkbox->setEnabled(have_opencl);
-    ui->use_opencl_checkbox->setChecked(have_opencl);
+    ui->use_opencl_checkbox->setChecked(false);
 
     if (!have_opencl)
     {
