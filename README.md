@@ -1,7 +1,5 @@
 ## TODO : ##
 * mingw on linux (cross compile ?)
-* linux check dependencies
-* linux deployment script (.deb gen)
 
 ## TODO OpenCV : ##
 * linear instead of affine model for exposure compensation
@@ -19,6 +17,10 @@
 * Install Inno Installer
 * Make install
 * Run the script "win_installer" with Inno Installer
+
+## To deploy the linux package : ##
+* Build the project in QTCreator
+* Run the script scripts/linux_deploy.sh
 
 ## References : ##
 #### Exposure compensation on all channels : ####
