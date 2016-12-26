@@ -68,16 +68,16 @@ win32 {
             -lopencv_imgproc \
             -lopencv_flann \
             -lopencv_core \
-            -llibwebp \
-            -llibtiff \
-            -llibjasper \
             -lIlmImf \
-            -ljpeg \
-            -lpng \
-            -lz \
             -lippicv \
             -Wl,-Bdynamic \
-            -ldl
+            -ldl \
+            -lwebp \
+            -ltiff \
+            -ljasper \
+            -ljpeg \
+            -lpng \
+            -lz
 }
 
 SOURCES += \
