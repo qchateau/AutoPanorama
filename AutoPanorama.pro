@@ -2,8 +2,8 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-VERSION = 1.0.1.2
-TARGET = AutoPanorama
+VERSION = 1.0.2.1
+TARGET = autopanorama
 TEMPLATE = app
 
 INCLUDEPATH += $$PWD/install/include/

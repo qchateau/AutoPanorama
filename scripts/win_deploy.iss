@@ -1,6 +1,6 @@
 #define DisplayAppName "Auto Panorama"
 #define AppName "AutoPanorama"  
-#define AppNameExe "AutoPanorama.exe"
+#define AppNameExe "autopanorama.exe"
 #define Arch "x64"
 #define DeployFolder "..\windows\"+Arch+"\"
 #define OutFolder "..\windows"   
