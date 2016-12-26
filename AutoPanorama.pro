@@ -49,6 +49,8 @@ win32 {
     RC_ICONS = "$$PWD/res/autopanorama.ico"
     QMAKE_TARGET_COPYRIGHT = "GNU GPL"
 } else {
+    target.path = "/usr/bin/"
+    INSTALLS += target
     LIBS += -Wl,-Bstatic \
             -L$$PWD/install/lib \
             -L$$PWD/install/share/OpenCV/3rdparty/lib \
