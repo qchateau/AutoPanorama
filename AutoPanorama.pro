@@ -2,21 +2,20 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-VERSION = 1.0.2.1
+VERSION = 1.0.2.2
 TARGET = autopanorama
 TEMPLATE = app
 
 INCLUDEPATH += $$PWD/install/include/
-DEPENDPATH += $$PWD/install/include/
 
 win32 {
     contains(QT_ARCH, i386) {
         QMAKE_LFLAGS += -Wl,--large-address-aware
         LIBS += -L$$PWD/install/x86/mingw/staticlib/
-            target.path = $$PWD/windows/x86
+        target.path = $$PWD/windows/x86
     } else {
         LIBS += -L$$PWD/install/x64/mingw/staticlib/
-            target.path = $$PWD/windows/x64
+        target.path = $$PWD/windows/x64
     }
     CONFIG(release, debug|release) {
         INSTALLS += target
@@ -49,8 +48,6 @@ win32 {
     RC_ICONS = "$$PWD/res/autopanorama.ico"
     QMAKE_TARGET_COPYRIGHT = "GNU GPL"
 } else {
-    target.path = "/usr/bin/"
-    INSTALLS += target
     LIBS += -Wl,-Bstatic \
             -L$$PWD/install/lib \
             -L$$PWD/install/share/OpenCV/3rdparty/lib \
