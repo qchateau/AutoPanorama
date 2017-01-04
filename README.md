@@ -1,6 +1,5 @@
 ## TODO : ##
 * mingw on linux (cross compile ?)
-* merge opencv 3.2.0 into my fork
 * use opencv_world
 * review .pro file
 * Linux : update deploy script to include build
