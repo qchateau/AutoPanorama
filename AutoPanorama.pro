@@ -17,9 +17,6 @@ win32 {
         LIBS += -L$$PWD/install/x64/mingw/staticlib/
         target.path = $$PWD/windows/x64
     }
-    CONFIG(release, debug|release) {
-        INSTALLS += target
-    }
     LIBS += -Wl,-Bstatic \
             #-lopencv_shape310 \
             -lopencv_stitching310 \
@@ -48,6 +45,7 @@ win32 {
     RC_ICONS = "$$PWD/res/autopanorama.ico"
     QMAKE_TARGET_COPYRIGHT = "GNU GPL"
 } else {
+    target.path = /usr/local/bin/
     LIBS += -Wl,-Bstatic \
             -L$$PWD/install/lib \
             -L$$PWD/install/share/OpenCV/3rdparty/lib \
@@ -77,6 +75,10 @@ win32 {
             -ljpeg \
             -lpng \
             -lz
+}
+
+CONFIG(release, debug|release) {
+    INSTALLS += target
 }
 
 SOURCES += \
