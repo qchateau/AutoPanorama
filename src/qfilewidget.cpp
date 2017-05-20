@@ -20,6 +20,7 @@
 #include <QPixmap>
 #include <QPainter>
 #include <QImageReader>
+#include <QMovie>
 
 QFileWidget::QFileWidget(QWidget *parent) :
     QListWidget(parent),
@@ -28,7 +29,7 @@ QFileWidget::QFileWidget(QWidget *parent) :
     installEventFilter(this);
 
     default_icon = QIcon(":/icon_loading.png");
-    no_preview_icon = QIcon(":/icon_loading.png");
+    no_preview_icon = QIcon(":/icon_invalid.png");
     items_cleaner.moveToThread(QApplication::instance()->thread());
     connect(&items_cleaner, SIGNAL(timeout()), this, SLOT(cleanItems()));
     items_cleaner.start(5000);
@@ -65,12 +66,20 @@ void QFileWidget::addFiles(QStringList files)
         }
         else
         {
+            QString filename = added_items[i]->toolTip();
             QIcon small_icon;
-            QImageReader reader(added_items[i]->toolTip());
+            QMovie movie(filename);
+            QImageReader reader(filename);
             if (reader.canRead())
             {
                 QPixmap pixmap = QPixmap::fromImageReader(&reader);
                 QIcon big_icon(pixmap);
+                small_icon = QIcon(big_icon.pixmap(iconSize()));
+            }
+            else if (movie.isValid())
+            {
+                movie.jumpToFrame(movie.frameCount()/2);
+                QIcon big_icon(movie.currentPixmap());
                 small_icon = QIcon(big_icon.pixmap(iconSize()));
             }
             else
