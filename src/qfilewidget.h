@@ -36,7 +36,7 @@ protected:
     void remove(QListWidgetItem* item);
 
 private:
-    QIcon default_icon, no_preview_icon;
+    QIcon default_icon, no_preview_icon, video_icon;
     QTimer items_cleaner;
     QPoint drag_start_position;
     QDrag *drag;

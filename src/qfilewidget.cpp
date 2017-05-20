@@ -20,7 +20,6 @@
 #include <QPixmap>
 #include <QPainter>
 #include <QImageReader>
-#include <QMovie>
 
 QFileWidget::QFileWidget(QWidget *parent) :
     QListWidget(parent),
@@ -30,6 +29,7 @@ QFileWidget::QFileWidget(QWidget *parent) :
 
     default_icon = QIcon(":/icon_loading.png");
     no_preview_icon = QIcon(":/icon_invalid.png");
+    video_icon = QIcon(":/icon_video.png");
     connect(&items_cleaner, SIGNAL(timeout()), this, SLOT(cleanItems()));
     items_cleaner.start(5000);
     items_cleaner.moveToThread(QApplication::instance()->thread());
@@ -67,8 +67,9 @@ void QFileWidget::addFiles(QStringList files)
         else
         {
             QString filename = added_items[i]->toolTip();
+            QString ext = QFileInfo(filename).suffix().toLower();
+            QStringList videos({"mp4", "avi", "mov", "mkv", "mpeg"});
             QIcon small_icon;
-            QMovie movie(filename);
             QImageReader reader(filename);
             if (reader.canRead())
             {
@@ -76,11 +77,9 @@ void QFileWidget::addFiles(QStringList files)
                 QIcon big_icon(pixmap);
                 small_icon = QIcon(big_icon.pixmap(iconSize()));
             }
-            else if (movie.isValid())
+            else if (videos.contains(ext))
             {
-                movie.jumpToFrame(movie.frameCount()/2);
-                QIcon big_icon(movie.currentPixmap());
-                small_icon = QIcon(big_icon.pixmap(iconSize()));
+                small_icon = video_icon;
             }
             else
             {
