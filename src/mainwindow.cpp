@@ -402,6 +402,8 @@ void MainWindow::resetAlgoSetting()
 
     ui->compositingres_spinbox->setValue(0);
     ui->interp_combobox->setCurrentText("Cubic");
+
+    ui->images_per_videos_spinbox->setValue(20);
 }
 
 void MainWindow::updateMakeEnabled()
@@ -705,6 +707,9 @@ void MainWindow::configureWorker(PanoramaMaker *worker)
 
     // Inner cut
     worker->setGenerateInnerCut(ui->inner_cut_checkbox->isChecked());
+
+    // Images per video
+    worker->setImagesPerVideo(ui->images_per_videos_spinbox->value());
 }
 
 void MainWindow::closeSenderWorker()

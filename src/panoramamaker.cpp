@@ -312,13 +312,16 @@ void PanoramaMaker::loadVideo(const QString &path)
     if (!cap.isOpened())
         throw std::invalid_argument("File "+filepath+" is not supported");
     double frame_count = cap.get(CAP_PROP_FRAME_COUNT);
-    const int to_grab = 20;
 
-    int interval = frame_count / to_grab;
-    for (int idx=0; idx < frame_count; idx+=interval)
+    double interval;
+    if (images_per_video > 1 && frame_count > 1)
+        interval = (frame_count-1) / (images_per_video-1);
+    else
+        interval = frame_count;
+    for (double idx=0; idx < frame_count; idx+=interval)
     {
         Mat img;
-        cap.set(CAP_PROP_POS_FRAMES, idx);
+        cap.set(CAP_PROP_POS_FRAMES, std::round(idx));
         cap.read(img);
         images.push_back(img);
     }

@@ -81,6 +81,9 @@ public:
     void setPanoConfidenceThresh(double conf) { pano_conf_threshold = conf; }
     double getPanoConfidenceThresh() { return pano_conf_threshold; }
 
+    void setImagesPerVideo(int nr) { images_per_video = nr; }
+    int getImagesPerVideo() { return images_per_video; }
+
     float getTotalTime() { return total_time/1000.; }
     float getProcTime() { return proc_time/1000.; }
     Status getStatus() { return status; }
@@ -130,6 +133,7 @@ private:
     QElapsedTimer total_timer, proc_timer;
     long total_time, proc_time;
     double progress;
+    int images_per_video;
     bool try_use_cuda, try_use_opencl, generate_inner_cut;
 
 signals:
