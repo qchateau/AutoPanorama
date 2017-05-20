@@ -2,7 +2,7 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-VERSION = 1.0.2.2
+VERSION = 1.1.0.0
 TARGET = autopanorama
 TEMPLATE = app
 
@@ -26,7 +26,7 @@ win32 {
             -lopencv_calib3d310 \
             -lopencv_features2d310 \
             #-lopencv_highgui310 \
-            #-lopencv_videoio310 \
+            -lopencv_videoio310 \
             -lopencv_imgcodecs310 \
             #-lopencv_video310 \
             #-lopencv_photo310 \
@@ -57,7 +57,7 @@ win32 {
             -lopencv_calib3d \
             -lopencv_features2d \
             #-lopencv_highgui \
-            #-lopencv_videoio \
+            -lopencv_videoio \
             -lopencv_imgcodecs \
             #-lopencv_video \
             #-lopencv_photo \
@@ -68,6 +68,19 @@ win32 {
             -lIlmImf \
             -lippicv \
             -Wl,-Bdynamic \
+            -lgstreamer-1.0 \ # videos support
+            -lgobject-2.0 \ # videos support
+            -lglib-2.0 \ # videos support
+            -ldc1394 \ # videos support
+            -lgstapp-1.0 \ # videos support
+            -lgstpbutils-1.0 \ # videos support
+            -lgstriff-1.0 \ # videos support
+            -lavcodec \ # videos support
+            -lavformat \ # videos support
+            -lavutil \ # videos support
+            -lswscale \ # videos support
+            -lgphoto2 \ # videos support
+            -lgphoto2_port \ # videos support
             -ldl \
             -lwebp \
             -ltiff \

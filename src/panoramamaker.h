@@ -97,6 +97,7 @@ private:
     void loadImages();
     void loadImagesFromImages();
     void loadImagesFromVideos();
+    void loadVideo(const QString& path);
     void failed(Stitcher::Status status);
     void failed(QString msg=QString("Unknown error"));
     void done();

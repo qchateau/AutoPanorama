@@ -6,6 +6,7 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/ocl.hpp>
+#include <opencv2/video.hpp>
 
 #include <QtDebug>
 #include <QStringList>
@@ -299,7 +300,27 @@ void PanoramaMaker::loadImagesFromVideos()
 
     for (int i=0; i<videos_path.size(); ++i)
     {
+        loadVideo(videos_path[i]);
         incProgress(10.0/N);
+    }
+}
+
+void PanoramaMaker::loadVideo(const QString &path)
+{
+    std::string filepath = path.toUtf8().constData();
+    VideoCapture cap(filepath);
+    if (!cap.isOpened())
+        throw std::invalid_argument("File "+filepath+" is not supported");
+    double frame_count = cap.get(CAP_PROP_FRAME_COUNT);
+    const int to_grab = 20;
+
+    int interval = frame_count / to_grab;
+    for (int idx=0; idx < frame_count; idx+=interval)
+    {
+        Mat img;
+        cap.set(CAP_PROP_POS_FRAMES, idx);
+        cap.read(img);
+        images.push_back(img);
     }
 }
 

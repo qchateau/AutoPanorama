@@ -15,7 +15,7 @@ CMAKE_OPTIONS="-DBUILD_DOCS=OFF \
 -DBUILD_opencv_superres=OFF \
 -DBUILD_opencv_ts=OFF \
 -DBUILD_opencv_video=OFF \
--DBUILD_opencv_videoio=OFF \
+-DBUILD_opencv_videoio=ON \
 -DBUILD_opencv_videostab=OFF \
 -DBUILD_OPENEXR=ON \
 -DWITH_LAPACK=OFF \
