@@ -123,14 +123,9 @@ void MainWindow::onMakePanoramaClicked()
         }
     }
 
-    if (files.size() < 2)
+    if (images.size() < 2 && videos.size() < 1)
     {
-        QMessageBox::warning(this, "Not enough files", "Please select at least 2 files");
-        return;
-    }
-    if (images.size() > 0 && videos.size() > 0)
-    {
-        QMessageBox::warning(this, "Invalid files", "Can't select both images and videos at the same time");
+        QMessageBox::warning(this, "Not enough files", "Please select at least 2 images or 1 video");
         return;
     }
 
@@ -145,7 +140,7 @@ void MainWindow::onMakePanoramaClicked()
             return;
         }
     }
-    else
+    if (videos.size() > 0)
     {
         try {
             worker->setVideos(videos);

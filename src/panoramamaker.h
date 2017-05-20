@@ -94,11 +94,15 @@ public:
     void run();
 
 private:
+    void loadImages();
+    void loadImagesFromImages();
+    void loadImagesFromVideos();
     void failed(Stitcher::Status status);
     void failed(QString msg=QString("Unknown error"));
     void done();
     void clean();
-    void setProgress(int prog);
+    void setProgress(double prog);
+    void incProgress(double inc);
     bool configureStitcher();
 
     QFileInfo genOutputFileInfo();
@@ -108,6 +112,7 @@ private:
     QString output_filename, output_ext, output_dir;
 
     Ptr<Stitcher> stitcher;
+    vector<Mat> images;
 
     QString status_msg;
     Status status;
@@ -123,7 +128,7 @@ private:
 
     QElapsedTimer total_timer, proc_timer;
     long total_time, proc_time;
-    int progress;
+    double progress;
     bool try_use_cuda, try_use_opencl, generate_inner_cut;
 
 signals:

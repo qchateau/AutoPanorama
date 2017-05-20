@@ -182,19 +182,12 @@ QString PanoramaMaker::getStitcherConfString() {
 
 Stitcher::Status PanoramaMaker::unsafeRun()
 {
-    int N = images_path.size();
-    vector<Mat> images;
     Rect inner_roi;
-
-    for (int i=0; i<N; ++i)
-    {
-        Mat image = imread(images_path[i].toUtf8().constData());
-        images.push_back(image);
-        setProgress(10*((i+1.0)/N));
-    }
-
-    proc_timer.start();
     Stitcher::Status stitcher_status;
+
+    loadImages();
+    proc_timer.start();
+
     stitcher_status = stitcher->estimateTransform(images);
     if (stitcher_status != Stitcher::OK)
         return stitcher_status;
@@ -282,6 +275,34 @@ void PanoramaMaker::run()
 
 
 
+void PanoramaMaker::loadImages()
+{
+    loadImagesFromImages();
+    loadImagesFromVideos();
+}
+
+void PanoramaMaker::loadImagesFromImages()
+{
+    int N = images_path.size() + videos_path.size();
+
+    for (int i=0; i<images_path.size(); ++i)
+    {
+        Mat image = imread(images_path[i].toUtf8().constData());
+        images.push_back(image);
+        incProgress(10.0/N);
+    }
+}
+
+void PanoramaMaker::loadImagesFromVideos()
+{
+    int N = images_path.size() + videos_path.size();
+
+    for (int i=0; i<videos_path.size(); ++i)
+    {
+        incProgress(10.0/N);
+    }
+}
+
 void PanoramaMaker::failed(Stitcher::Status status)
 {
     QString msg;
@@ -325,10 +346,15 @@ void PanoramaMaker::clean()
     }
 }
 
-void PanoramaMaker::setProgress(int prog)
+void PanoramaMaker::setProgress(double prog)
 {
     progress = prog;
-    emit percentage(prog);
+    emit percentage(std::round(progress));
+}
+
+void PanoramaMaker::incProgress(double inc)
+{
+    setProgress(progress + inc);
 }
 
 bool PanoramaMaker::configureStitcher()
