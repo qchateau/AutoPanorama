@@ -17,7 +17,8 @@
 using namespace cv;
 using namespace std;
 
-QStringList PanoramaMaker::getSupportedExtension()
+
+QStringList PanoramaMaker::getSupportedImageExtensions()
 {
     QStringList supported_extensions;
     supported_extensions << "jpg";
@@ -50,6 +51,16 @@ PanoramaMaker::PanoramaMaker(QObject *parent) :
 
 void PanoramaMaker::setImages(QStringList files)
 {
+    QStringList supported = getSupportedImageExtensions();
+    for (const QString& file : files)
+    {
+        QFileInfo info(file);
+        if (!info.exists() && info.isFile())
+            throw std::invalid_argument("File "+file.toStdString()+" does not exists");
+        QString ext = info.suffix().toLower();
+        if (!supported.contains(ext))
+            throw std::invalid_argument("File "+file.toStdString()+" is not supported");
+    }
     images_path = files;
 }
 

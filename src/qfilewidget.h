@@ -20,7 +20,7 @@ public:
     int countActive();
 
 public slots:
-    void clean_items();
+    void cleanItems();
     void clear();
     void removeSelected();
     void selectAndAddFiles();
@@ -36,7 +36,7 @@ protected:
     void remove(QListWidgetItem* item);
 
 private:
-    QIcon default_icon;
+    QIcon default_icon, no_preview_icon;
     QTimer items_cleaner;
     QPoint drag_start_position;
     QDrag *drag;

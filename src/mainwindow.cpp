@@ -22,6 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
     manual_output_dir(false),
     max_filename_length(50)
 {
+    qRegisterMetaType<QVector<int>>();
     ui->setupUi(this);
 
     updateOutputDirFilename();
@@ -34,10 +35,6 @@ MainWindow::MainWindow(QWidget *parent) :
     updateArch();
     updateStatusBar();
     updateMakeEnabled();
-
-    QStringList supported_extensions = PanoramaMaker::getSupportedExtension();
-    for (int i = 0; i < supported_extensions.size(); ++i)
-        ui->filesListWidget->addSupportedExtension(supported_extensions[i]);
 }
 
 MainWindow::~MainWindow()
@@ -113,7 +110,13 @@ void MainWindow::onMakePanoramaClicked()
     else
     {
         PanoramaMaker *worker = new PanoramaMaker;
-        worker->setImages(files);
+        try {
+            worker->setImages(files);
+        } catch (const invalid_argument& e) {
+            QMessageBox::warning(this, "Invalid files", e.what());
+            return;
+        }
+
         worker->setOutput(ui->output_filename_lineedit->text(),
                           ui->extension_combobox->currentText(),
                           ui->output_dir_lineedit->text());

@@ -25,7 +25,7 @@ public:
                                     double similarity_th; };
     struct FeaturesMatchingMode { QString mode; double conf; };
 
-    static QStringList getSupportedExtension();
+    static QStringList getSupportedImageExtensions();
 
     explicit PanoramaMaker(QObject *parent = 0);
 

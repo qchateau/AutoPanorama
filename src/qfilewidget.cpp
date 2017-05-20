@@ -19,6 +19,7 @@
 #include <QIcon>
 #include <QPixmap>
 #include <QPainter>
+#include <QImageReader>
 
 QFileWidget::QFileWidget(QWidget *parent) :
     QListWidget(parent),
@@ -27,8 +28,9 @@ QFileWidget::QFileWidget(QWidget *parent) :
     installEventFilter(this);
 
     default_icon = QIcon(":/icon_loading.png");
+    no_preview_icon = QIcon(":/icon_loading.png");
     items_cleaner.moveToThread(QApplication::instance()->thread());
-    connect(&items_cleaner, SIGNAL(timeout()), this, SLOT(clean_items()));
+    connect(&items_cleaner, SIGNAL(timeout()), this, SLOT(cleanItems()));
     items_cleaner.start(5000);
 }
 
@@ -39,8 +41,9 @@ void QFileWidget::addFiles(QStringList files)
     for (int i = 0; i < files.size(); ++i)
     {
         QFileInfo fileinfo(files[i]);
+        QString extension = fileinfo.suffix().toLower();
         if (fileinfo.exists() && fileinfo.isFile() &&
-                (supported_extensions.contains(fileinfo.suffix().toLower())) &&
+                (supported_extensions.empty() || supported_extensions.contains(extension)) &&
                 (!getFilesList().contains(fileinfo.absoluteFilePath())))
         {
             QListWidgetItem *new_item = new QListWidgetItem(default_icon, fileinfo.fileName(), this);
@@ -62,8 +65,18 @@ void QFileWidget::addFiles(QStringList files)
         }
         else
         {
-            QIcon small_icon, big_icon(added_items[i]->toolTip());
-            small_icon = QIcon(big_icon.pixmap(iconSize()));
+            QIcon small_icon;
+            QImageReader reader(added_items[i]->toolTip());
+            if (reader.canRead())
+            {
+                QPixmap pixmap = QPixmap::fromImageReader(&reader);
+                QIcon big_icon(pixmap);
+                small_icon = QIcon(big_icon.pixmap(iconSize()));
+            }
+            else
+            {
+                small_icon = no_preview_icon;
+            }
             added_items[i]->setIcon(small_icon);
             scheduleDelayedItemsLayout();
         }
@@ -107,7 +120,7 @@ QStringList QFileWidget::getSelectedFilesList()
 
 
 
-void QFileWidget::clean_items()
+void QFileWidget::cleanItems()
 {
     if (thread() != QApplication::instance()->thread())
     {
