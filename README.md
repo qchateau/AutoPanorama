@@ -1,11 +1,9 @@
 ## TODO : ##
-* mingw on linux (cross compile ?)
-* use opencv_world
 * review .pro file
 * Linux : update deploy script to include build
 
 ## TODO OpenCV : ##
-* linear instead of affine model for exposure compensation
+* affine instead of linear model for exposure compensation
 * slow opencl
 
 ## This build needs the opencv submodule to be built correctly : ##
