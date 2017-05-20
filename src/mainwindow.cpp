@@ -285,10 +285,7 @@ void MainWindow::onOutputDirChanged(QString edit)
         palette.setColor(QPalette::Text,Qt::red);
         tooltip = "This directory doesn't exists";
     }
-    else
-    {
-        palette.setColor(QPalette::Text,Qt::black);
-    }
+
     qobject_cast<QLineEdit*>(sender())->setPalette(palette);
     qobject_cast<QLineEdit*>(sender())->setToolTip(tooltip);
     updateMakeEnabled();
@@ -379,6 +376,7 @@ void MainWindow::onFastSettingsChanged()
 
 void MainWindow::resetAlgoSetting()
 {
+    ui->inner_cut_checkbox->setCheckState(Qt::Checked);
     ui->regres_spinbox->setValue(0.6);
     ui->featuresfinder_combobox->setCurrentText("AKAZE");
     ui->featuresmatcher_combobox->setCurrentText("Best of 2 nearest");
