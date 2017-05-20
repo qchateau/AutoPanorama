@@ -26,10 +26,12 @@ public:
     struct FeaturesMatchingMode { QString mode; double conf; };
 
     static QStringList getSupportedImageExtensions();
+    static QStringList getSupportedVideoExtensions();
 
     explicit PanoramaMaker(QObject *parent = 0);
 
     void setImages(QStringList files);
+    void setVideos(QStringList files);
     void setOutput(QString output_filename_,
                    QString output_ext_,
                    QString output_dir_);
@@ -102,7 +104,7 @@ private:
     QFileInfo genOutputFileInfo();
     QFileInfo genInnerCutOutputFileInfo();
 
-    QStringList images_path;
+    QStringList images_path, videos_path;
     QString output_filename, output_ext, output_dir;
 
     Ptr<Stitcher> stitcher;

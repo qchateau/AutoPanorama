@@ -31,6 +31,20 @@ QStringList PanoramaMaker::getSupportedImageExtensions()
     return supported_extensions;
 }
 
+QStringList PanoramaMaker::getSupportedVideoExtensions()
+{
+    QStringList supported_extensions;
+    supported_extensions << "avi";
+    supported_extensions << "mpg";
+    supported_extensions << "mpeg";
+    supported_extensions << "mp4";
+    supported_extensions << "mov";
+    supported_extensions << "mkv";
+    return supported_extensions;
+}
+
+
+
 
 
 
@@ -62,6 +76,21 @@ void PanoramaMaker::setImages(QStringList files)
             throw std::invalid_argument("File "+file.toStdString()+" is not supported");
     }
     images_path = files;
+}
+
+void PanoramaMaker::setVideos(QStringList files)
+{
+    QStringList supported = getSupportedVideoExtensions();
+    for (const QString& file : files)
+    {
+        QFileInfo info(file);
+        if (!info.exists() && info.isFile())
+            throw std::invalid_argument("File "+file.toStdString()+" does not exists");
+        QString ext = info.suffix().toLower();
+        if (!supported.contains(ext))
+            throw std::invalid_argument("File "+file.toStdString()+" is not supported");
+    }
+    videos_path = files;
 }
 
 void PanoramaMaker::setOutput(QString output_filename_,

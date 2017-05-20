@@ -105,32 +105,69 @@ void MainWindow::onMakePanoramaClicked()
         clear_files = true;
     }
 
-    if (files.size() < 2)
-        QMessageBox::warning(this, "Not enough files", "Please select at least 2 files");
-    else
+    QStringList supported_image_ext = PanoramaMaker::getSupportedImageExtensions();
+    QStringList supported_video_ext = PanoramaMaker::getSupportedVideoExtensions();
+    QStringList images, videos;
+
+    for (const QString& file : files)
     {
-        PanoramaMaker *worker = new PanoramaMaker;
+        QString ext = QFileInfo(file).suffix();
+        if (supported_image_ext.contains(ext))
+            images.append(file);
+        else if (supported_video_ext.contains(ext))
+            videos.append(file);
+        else
+        {
+            QMessageBox::warning(this, "Invalid files", "File "+file+"is not supported");
+            return;
+        }
+    }
+
+    if (files.size() < 2)
+    {
+        QMessageBox::warning(this, "Not enough files", "Please select at least 2 files");
+        return;
+    }
+    if (images.size() > 0 && videos.size() > 0)
+    {
+        QMessageBox::warning(this, "Invalid files", "Can't select both images and videos at the same time");
+        return;
+    }
+
+    PanoramaMaker *worker = new PanoramaMaker;
+
+    if (images.size() > 0)
+    {
         try {
-            worker->setImages(files);
+            worker->setImages(images);
         } catch (const invalid_argument& e) {
             QMessageBox::warning(this, "Invalid files", e.what());
             return;
         }
-
-        worker->setOutput(ui->output_filename_lineedit->text(),
-                          ui->extension_combobox->currentText(),
-                          ui->output_dir_lineedit->text());
-        configureWorker(worker);
-        createWorkerUi(worker);
-        connect(worker, SIGNAL(finished()), this, SLOT(runWorkers()));
-
-        qDebug() << "Queuing worker";
-        workers << worker;
-        runWorkers();
-
-        if (clear_files)
-            ui->filesListWidget->clear();
     }
+    else
+    {
+        try {
+            worker->setVideos(videos);
+        } catch (const invalid_argument& e) {
+            QMessageBox::warning(this, "Invalid files", e.what());
+            return;
+        }
+    }
+
+    worker->setOutput(ui->output_filename_lineedit->text(),
+                      ui->extension_combobox->currentText(),
+                      ui->output_dir_lineedit->text());
+    configureWorker(worker);
+    createWorkerUi(worker);
+    connect(worker, SIGNAL(finished()), this, SLOT(runWorkers()));
+
+    qDebug() << "Queuing worker";
+    workers << worker;
+    runWorkers();
+
+    if (clear_files)
+        ui->filesListWidget->clear();
     updateStatusBar();
 }
 
