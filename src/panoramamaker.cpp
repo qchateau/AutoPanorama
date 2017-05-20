@@ -230,8 +230,8 @@ Stitcher::Status PanoramaMaker::unsafeRun()
 
 void PanoramaMaker::run()
 {
-    if (images_path.size() < 2)
-        failed("Need at least 2 compatible images");
+    if (images_path.size() < 2 && videos_path.size() < 1)
+        failed("Need at least 2 images or 1 video");
     else if (!QDir(output_dir).exists())
         failed("Destination directory doesn't exists");
     else if (!configureStitcher())
