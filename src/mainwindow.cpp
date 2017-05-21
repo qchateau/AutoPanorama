@@ -401,7 +401,7 @@ void MainWindow::resetAlgoSetting()
     ui->compositingres_spinbox->setValue(0);
     ui->interp_combobox->setCurrentText("Cubic");
 
-    ui->images_per_videos_spinbox->setValue(20);
+    ui->images_per_videos_spinbox->setValue(30);
 }
 
 void MainWindow::updateMakeEnabled()
