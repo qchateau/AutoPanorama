@@ -1132,7 +1132,7 @@ compensation</string>
              <x>0</x>
              <y>0</y>
              <width>916</width>
-             <height>607</height>
+             <height>583</height>
             </rect>
            </property>
            <property name="sizePolicy">
@@ -1454,12 +1454,12 @@ compensation</string>
         </property>
         <item>
          <property name="text">
-          <string>.jpg</string>
+          <string>.png</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>.png</string>
+          <string>.jpg</string>
          </property>
         </item>
        </widget>
