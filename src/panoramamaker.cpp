@@ -1,12 +1,12 @@
 #include "panoramamaker.h"
 #include "akazefeaturesfinder.h"
 #include "innercutfinder.h"
+#include "videopreprocessor.h"
 
 #include <opencv2/stitching.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/ocl.hpp>
-#include <opencv2/video.hpp>
 
 #include <QtDebug>
 #include <QStringList>
@@ -308,23 +308,10 @@ void PanoramaMaker::loadImagesFromVideos()
 void PanoramaMaker::loadVideo(const QString &path)
 {
     std::string filepath = path.toUtf8().constData();
-    VideoCapture cap(filepath);
-    if (!cap.isOpened())
-        throw std::invalid_argument("File "+filepath+" is not supported");
-    double frame_count = cap.get(CAP_PROP_FRAME_COUNT);
-
-    double interval;
-    if (images_per_video > 1 && frame_count > 1)
-        interval = (frame_count-1) / (images_per_video-1);
-    else
-        interval = frame_count;
-    for (double idx=0; idx < frame_count; idx+=interval)
-    {
-        Mat img;
-        cap.set(CAP_PROP_POS_FRAMES, std::round(idx));
-        cap.read(img);
-        images.push_back(img);
-    }
+    VideoPreprocessor preproc(filepath);
+    std::vector<Mat> video_images = preproc.evenTimeSpace(images_per_video);
+    for (const Mat& image : video_images)
+        images.push_back(image);
 }
 
 void PanoramaMaker::failed(Stitcher::Status status)

@@ -99,14 +99,16 @@ SOURCES += \
     src/mainwindow.cpp \
     src/panoramamaker.cpp \
     src/qfilewidget.cpp \
-    src/innercutfinder.cpp
+    src/innercutfinder.cpp \
+    src/videopreprocessor.cpp
 
 HEADERS  += \
     src/mainwindow.h \
     src/panoramamaker.h \
     src/qfilewidget.h \
     src/innercutfinder.h \
-    src/env.h
+    src/env.h \
+    src/videopreprocessor.h
 
 FORMS    += \
     src/mainwindow.ui
