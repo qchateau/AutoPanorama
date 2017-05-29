@@ -40,7 +40,13 @@ win32 {
             -lIlmImf \
             -llibjpeg \
             -llibpng \
-            -lz
+            -lz \
+            -lavifil32 \ # video support
+            -lavicap32 \ # video support
+            -lmsvfw32 \ # video support
+            -lole32 \ # video support
+            -loleaut32 \ # video support
+            -luuid # video support
 
     RC_ICONS = "$$PWD/res/autopanorama.ico"
     QMAKE_TARGET_COPYRIGHT = "GNU GPL"

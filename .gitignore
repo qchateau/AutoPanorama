@@ -5,6 +5,9 @@
 build
 install
 
+# sample images
+sample_img/
+
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
