@@ -170,7 +170,7 @@ void QFileWidget::selectAndAddFiles()
     QStringList filters;
     for (int i = 0; i < supported_extensions.size(); ++i)
         filters << "*."+supported_extensions[i];
-    QString filter = QString("Images (%1)").arg(filters.join(' '));
+    QString filter = QString("Images/Videos (%1)").arg(filters.join(' '));
     QStringList files = QFileDialog::getOpenFileNames(Q_NULLPTR, QString(), QString(), filter);
     asyncAddFiles(files);
 }
@@ -255,7 +255,7 @@ void QFileWidget::paintEvent(QPaintEvent *e) {
       if (countActive() > 0) return;
 
       QPainter p(this->viewport());
-      p.drawText(rect(), Qt::AlignCenter, "Drop images here");
+      p.drawText(rect(), Qt::AlignCenter, "Drop images or videos here");
    }
 
 void QFileWidget::remove(int row)

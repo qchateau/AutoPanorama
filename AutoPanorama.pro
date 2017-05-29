@@ -5,6 +5,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 VERSION = 1.1.0.0
 TARGET = autopanorama
 TEMPLATE = app
+DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 
 INCLUDEPATH += $$PWD/install/include/
 

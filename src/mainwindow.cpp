@@ -33,6 +33,7 @@ MainWindow::MainWindow(QWidget *parent) :
     updateEigen();
     updateIPP();
     updateArch();
+    updateVersion();
     updateStatusBar();
     updateMakeEnabled();
 }
@@ -518,6 +519,11 @@ void MainWindow::updateArch()
     ui->arch_value->setText("32 bits");
 #endif
 #endif
+}
+
+void MainWindow::updateVersion()
+{
+    ui->version_value->setText(APP_VERSION);
 }
 
 void MainWindow::updateOutputDirFilename()

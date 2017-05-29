@@ -49,6 +49,7 @@ public slots:
     void updateEigen();
     void updateIPP();
     void updateArch();
+    void updateVersion();
     void updateOutputDirFilename();
     void updateStatusBar();
 
