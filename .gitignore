@@ -1,8 +1,5 @@
+.directory
 *.pro.user*
-*.PNG
-*.png
-*.jpg
-*.JPG
 *.exe
 
 build
