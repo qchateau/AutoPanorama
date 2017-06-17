@@ -1,6 +1,7 @@
 ## TODO : ##
 * review .pro file
 * Linux : update deploy script to include build
+* Ubuntu 17.04 : desktop file
 
 ## TODO OpenCV : ##
 * affine instead of linear model for exposure compensation
@@ -13,6 +14,10 @@
 * Win32 :
     * Build as static lib
     * Install localy in ./opencv/install/
+
+## Build dependencies ##
+#### Ubuntu 17.04 ####
+qt5-default libdc1394-22-dev libglib2.0-dev libwebp-dev libtiff5-dev libpng-dev libgphoto2-dev libgstreamer1.0-dev libavcodec-dev libavformat-dev libswscale-dev libjpeg-dev libgstreamer-plugins-base1.0-dev 
 
 ## To deploy the windows executable : ##
 * Install Inno Installer

@@ -73,6 +73,7 @@ win32 {
             -lopencv_core \
             -lIlmImf \
             -lippicv \
+            -llibjasper \
             -Wl,-Bdynamic \
             -lgstreamer-1.0 \ # videos support
             -lgobject-2.0 \ # videos support
@@ -90,7 +91,6 @@ win32 {
             -ldl \
             -lwebp \
             -ltiff \
-            -ljasper \
             -ljpeg \
             -lpng \
             -lz

@@ -17,6 +17,7 @@ CMAKE_OPTIONS="-DBUILD_DOCS=OFF \
 -DBUILD_opencv_video=OFF \
 -DBUILD_opencv_videoio=ON \
 -DBUILD_opencv_videostab=OFF \
+-DBUILD_JASPER=ON \
 -DBUILD_OPENEXR=ON \
 -DWITH_LAPACK=OFF \
 -DWITH_EIGEN=ON \
