@@ -1,6 +1,7 @@
 .directory
 *.pro.user*
 *.exe
+*.dll
 
 build
 install

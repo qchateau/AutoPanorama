@@ -74,7 +74,7 @@ void PanoramaMaker::setImages(QStringList files)
             throw std::invalid_argument("File "+file.toStdString()+" does not exists");
         QString ext = info.suffix().toLower();
         if (!supported.contains(ext))
-            throw std::invalid_argument("File "+file.toStdString()+" is not supported");
+            throw std::invalid_argument("Extension '"+ext.toStdString()+"' is not supported");
     }
     images_path = files;
 }
@@ -89,7 +89,7 @@ void PanoramaMaker::setVideos(QStringList files)
             throw std::invalid_argument("File "+file.toStdString()+" does not exists");
         QString ext = info.suffix().toLower();
         if (!supported.contains(ext))
-            throw std::invalid_argument("File "+file.toStdString()+" is not supported");
+            throw std::invalid_argument("Extension '"+ext.toStdString()+"' is not supported");
     }
     videos_path = files;
 }
@@ -259,6 +259,11 @@ void PanoramaMaker::run()
         {
             failed("Bad alloc error");
             qDebug() << "Bad alloc error : " << QString(e.what());
+        }
+        catch(std::exception& e)
+        {
+            failed(e.what());
+            qDebug() << "Exception :" << e.what();
         }
         catch(...)
         {

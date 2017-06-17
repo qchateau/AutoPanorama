@@ -10,31 +10,39 @@ DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 INCLUDEPATH += $$PWD/install/include/
 
 win32 {
+    OPENCV_VERSION = 320
     contains(QT_ARCH, i386) {
         QMAKE_LFLAGS += -Wl,--large-address-aware
         LIBS += -L$$PWD/install/x86/mingw/staticlib/
-        target.path = $$PWD/windows/x86
+        LIBS += -L$$PWD/install/x86/mingw/bin/
+        FFMPEG_LIB = opencv_ffmpeg$${OPENCV_VERSION}
+        TARGET_PATH = $$PWD/windows/x86
     } else {
         LIBS += -L$$PWD/install/x64/mingw/staticlib/
-        target.path = $$PWD/windows/x64
+        LIBS += -L$$PWD/install/x64/mingw/bin/
+        FFMPEG_LIB = opencv_ffmpeg$${OPENCV_VERSION}_64
+        TARGET_PATH = $$PWD/windows/x64
     }
-    LIBS += -Wl,-Bstatic \
-            #-lopencv_shape310 \
-            -lopencv_stitching310 \
-            #-lopencv_objdetect310 \
-            #-lopencv_superres310 \
-            #-lopencv_videostab310 \
-            -lopencv_calib3d310 \
-            -lopencv_features2d310 \
-            #-lopencv_highgui310 \
-            -lopencv_videoio310 \
-            -lopencv_imgcodecs310 \
-            #-lopencv_video310 \
-            #-lopencv_photo310 \
-            #-lopencv_ml310 \
-            -lopencv_imgproc310 \
-            -lopencv_flann310 \
-            -lopencv_core310 \
+    target.path = $$TARGET_PATH
+    LIBS += \
+            -l$${FFMPEG_LIB} \
+            -Wl,-Bstatic \
+            #-lopencv_shape$${OPENCV_VERSION} \
+            -lopencv_stitching$${OPENCV_VERSION} \
+            #-lopencv_objdetect$${OPENCV_VERSION} \
+            #-lopencv_superres$${OPENCV_VERSION} \
+            #-lopencv_videostab$${OPENCV_VERSION} \
+            -lopencv_calib3d$${OPENCV_VERSION} \
+            -lopencv_features2d$${OPENCV_VERSION} \
+            #-lopencv_highgui$${OPENCV_VERSION} \
+            -lopencv_videoio$${OPENCV_VERSION} \
+            -lopencv_imgcodecs$${OPENCV_VERSION} \
+            #-lopencv_video$${OPENCV_VERSION} \
+            #-lopencv_photo$${OPENCV_VERSION} \
+            #-lopencv_ml$${OPENCV_VERSION} \
+            -lopencv_imgproc$${OPENCV_VERSION} \
+            -lopencv_flann$${OPENCV_VERSION} \
+            -lopencv_core$${OPENCV_VERSION} \
             -llibwebp \
             -llibtiff \
             -llibjasper \
@@ -48,6 +56,11 @@ win32 {
             -lole32 \ # video support
             -loleaut32 \ # video support
             -luuid # video support
+
+    # copy ffmpeg dll
+    copyfiles.commands = $$QMAKE_COPY \"$$shell_path($$PWD/install/x64/mingw/bin/$${FFMPEG_LIB}.dll)\" \"$$shell_path($${TARGET_PATH}$$)\" $$escape_expand(\\n\\t)
+    QMAKE_EXTRA_TARGETS += copyfiles
+    POST_TARGETDEPS += copyfiles
 
     RC_ICONS = "$$PWD/res/autopanorama.ico"
     QMAKE_TARGET_COPYRIGHT = "GNU GPL"

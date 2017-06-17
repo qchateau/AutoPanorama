@@ -13,7 +13,7 @@
     * Use script in the script folder
 * Win32 :
     * Build as static lib
-    * Install localy in ./opencv/install/
+    * Install localy in ./install/
 
 ## Build dependencies ##
 #### Ubuntu 17.04 ####
