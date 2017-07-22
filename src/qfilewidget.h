@@ -43,7 +43,11 @@ private:
     QList<QListWidgetItem*> items_to_delete;
     QStringList supported_extensions;
 
+private slots:
+    void refreshIcons();
+
 signals:
+    void iconChanged();
     void itemsAdded();
     void itemsRemoved();
 };

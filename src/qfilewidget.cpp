@@ -30,6 +30,7 @@ QFileWidget::QFileWidget(QWidget *parent) :
     default_icon = QIcon(":/icon_loading.png");
     no_preview_icon = QIcon(":/icon_invalid.png");
     video_icon = QIcon(":/icon_video.png");
+    connect(this, SIGNAL(iconChanged()), this, SLOT(refreshIcons()));
     connect(&items_cleaner, SIGNAL(timeout()), this, SLOT(cleanItems()));
     items_cleaner.start(5000);
     items_cleaner.moveToThread(QApplication::instance()->thread());
@@ -86,9 +87,9 @@ void QFileWidget::addFiles(QStringList files)
                 small_icon = no_preview_icon;
             }
             added_items[i]->setIcon(small_icon);
-            scheduleDelayedItemsLayout();
         }
     }
+    emit iconChanged();
 }
 
 void QFileWidget::asyncAddFiles(QStringList files)
@@ -119,6 +120,11 @@ QStringList QFileWidget::getSelectedFilesList()
         files_list << selected[i]->data(Qt::ToolTipRole).toString();
     }
     return files_list;
+}
+
+void QFileWidget::refreshIcons()
+{
+    scheduleDelayedItemsLayout();
 }
 
 

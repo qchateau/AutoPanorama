@@ -209,6 +209,7 @@ Stitcher::Status PanoramaMaker::unsafeRun()
         setProgress(30);
 
     UMat pano, pano_mask;
+
     stitcher_status = stitcher->composePanorama(pano, pano_mask);
     if (stitcher_status != Stitcher::OK)
         return stitcher_status;
