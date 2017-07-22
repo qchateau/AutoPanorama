@@ -103,15 +103,28 @@ void PanoramaMaker::setOutput(QString output_filename_,
     output_dir = output_dir_;
 }
 
-QString PanoramaMaker::getStitcherConfString() {
-    QStringList files_filename;
-    for (int i=0; i<images_path.size(); ++i)
-        files_filename << QFileInfo(images_path[i]).fileName();
-
+QString PanoramaMaker::getStitcherConfString()
+{
     QString conf;
-    conf += QString("Images : ");
-    conf += QString("\n");
-    conf += files_filename.join(", ");
+    if (images_path.size() > 0)
+    {
+        QStringList files_filename;
+        for (const QString& path : images_path)
+            files_filename << QFileInfo(path).fileName();
+        conf += QString("Images : ");
+        conf += QString("\n");
+        conf += files_filename.join(", ");
+    }
+    else if (videos_path.size() > 0)
+    {
+        QStringList files_filename;
+        for (const QString& path : videos_path)
+            files_filename << QFileInfo(path).fileName();
+        conf += QString("Videos : ");
+        conf += QString("\n");
+        conf += files_filename.join(", ");
+        conf += QString("Images extracted : %1").arg(getImagesPerVideo());
+    }
     conf += QString("\n\n");
 
     conf += QString("Registration Resolution : %1 Mpx").arg(getRegistrationResol());
