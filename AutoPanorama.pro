@@ -7,6 +7,8 @@ TARGET = autopanorama
 TEMPLATE = app
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 
+QMAKE_CXXFLAGS += -std=c++11
+
 INCLUDEPATH += $$PWD/install/include/
 
 win32 {
