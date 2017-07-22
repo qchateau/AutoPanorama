@@ -26,7 +26,7 @@ if test ! -e "$control_file"; then
     exit 1
 fi
 
-version=$(cat $pro_file | grep -E "VERSION\s*=" | sed 's/VERSION\s*=\s*\(.*\)$/\1/')
+version=$(cat $pro_file | grep -E "^\s*VERSION\s*=" | sed 's/VERSION\s*=\s*\(.*\)$/\1/')
 deb_file=$root_dir/autopanorama_${version}.deb
 exec_file="$1"
 
