@@ -9,11 +9,16 @@ fi
 root_dir=$(git rev-parse --show-toplevel)
 exec_name="autopanorama"
 dpkg_dir=$root_dir/linux
+res_dir=$root_dir/res
 pro_file=$root_dir/AutoPanorama.pro
 control_file=$dpkg_dir/control
+desktop_file=$dpkg_dir/autopanorama.desktop
+icon_file=$res_dir/autopanorama.png
 
 dpkg_build_dir=$dpkg_dir/pkg
 exec_file_dst=$dpkg_build_dir/usr/bin/$exec_name
+desktop_file_dst=$dpkg_build_dir/usr/share/applications/${exec_name}.desktop
+icon_file_dst=$dpkg_build_dir/usr/share/autopanorama/autopanorama.png
 
 
 if test ! -e "$pro_file"; then
@@ -36,9 +41,13 @@ fi
 
 mkdir $dpkg_build_dir
 mkdir $dpkg_build_dir/DEBIAN
-mkdir -p $dpkg_build_dir/usr/bin
+mkdir -p $(dirname $exec_file_dst)
+mkdir -p $(dirname $desktop_file_dst)
+mkdir -p $(dirname $icon_file_dst)
 
 cp $exec_file $exec_file_dst
+cp $desktop_file $desktop_file_dst
+cp $icon_file $icon_file_dst
 cp $control_file $dpkg_build_dir/DEBIAN
 
 cat $control_file | sed "s/^Version:.*$/Version: $version/" > $dpkg_build_dir/DEBIAN/control

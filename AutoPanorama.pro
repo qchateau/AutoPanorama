@@ -137,7 +137,10 @@ FORMS    += \
 
 DISTFILES += \
     res/autopanorama.rc \
+    linux/autopanorama.desktop \
+    linux/control \
     scripts/compile_opencv.sh \
+    scripts/linux_deploy.sh \
     README.md \
     scripts/win_deploy.iss
 

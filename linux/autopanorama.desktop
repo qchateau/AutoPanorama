@@ -1,0 +1,9 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Version=1.0
+Terminal=false
+Type=Application
+Name=Autopanorama
+Exec=/usr/bin/autopanorama
+Icon=/usr/share/autopanorama/autopanorama.png
+Categories=Graphics;Photography;ImageProcessing;Qt;
