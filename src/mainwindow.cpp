@@ -505,7 +505,7 @@ void MainWindow::updateEigen()
 
 void MainWindow::updateIPP()
 {
-    QRegExp regex("Use IPP:([ \\t]*)([^\\n\\r]*)");
+    QRegExp regex("Use Intel IPP:([ \\t]*)([^\\n\\r]*)");
     regex.indexIn(cv::getBuildInformation().c_str());
     ui->have_ipp_value->setText(regex.cap(2).replace("YES", "Yes").replace("NO", "No"));
 }
