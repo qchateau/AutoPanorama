@@ -36,6 +36,11 @@ MainWindow::MainWindow(QWidget *parent) :
     updateVersion();
     updateStatusBar();
     updateMakeEnabled();
+
+    for (const QString ext : PanoramaMaker::getSupportedImageExtensions())
+        ui->filesListWidget->addSupportedExtension(ext);
+    for (const QString ext : PanoramaMaker::getSupportedVideoExtensions())
+        ui->filesListWidget->addSupportedExtension(ext);
 }
 
 MainWindow::~MainWindow()
