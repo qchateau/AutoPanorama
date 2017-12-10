@@ -68,48 +68,13 @@ win32 {
     QMAKE_TARGET_COPYRIGHT = "GNU GPL"
 } else {
     target.path = /usr/local/bin/
-    LIBS += -Wl,-Bstatic \
-            -L$$PWD/install/lib \
-            -L$$PWD/install/share/OpenCV/3rdparty/lib \
-            #-lopencv_shape \
+    QMAKE_RPATHDIR += /usr/share/autopanorama/lib
+    LIBS += -L$$PWD/install/lib \
             -lopencv_stitching \
-            #-lopencv_objdetect \
-            #-lopencv_superres \
-            #-lopencv_videostab \
-            -lopencv_calib3d \
-            -lopencv_features2d \
-            #-lopencv_highgui \
             -lopencv_videoio \
             -lopencv_imgcodecs \
-            #-lopencv_video \
-            #-lopencv_photo \
-            #-lopencv_ml \
             -lopencv_imgproc \
-            -lopencv_flann \
-            -lopencv_core \
-            -lIlmImf \
-            -lippicv \
-            -llibjasper \
-            -Wl,-Bdynamic \
-            -lgstreamer-1.0 \ # videos support
-            -lgobject-2.0 \ # videos support
-            -lglib-2.0 \ # videos support
-            -ldc1394 \ # videos support
-            -lgstapp-1.0 \ # videos support
-            -lgstpbutils-1.0 \ # videos support
-            -lgstriff-1.0 \ # videos support
-            -lavcodec \ # videos support
-            -lavformat \ # videos support
-            -lavutil \ # videos support
-            -lswscale \ # videos support
-            -lgphoto2 \ # videos support
-            -lgphoto2_port \ # videos support
-            -ldl \
-            -lwebp \
-            -ltiff \
-            -ljpeg \
-            -lpng \
-            -lz
+            -lopencv_core
 }
 
 CONFIG(release, debug|release) {
