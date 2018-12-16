@@ -8,7 +8,7 @@ TARGET = autopanorama
 TEMPLATE = app
 QMAKE_CXXFLAGS += -std=c++11
 
-INCLUDEPATH += $$PWD/install/include/
+INCLUDEPATH += $$PWD/install/include/opencv4/
 
 win32 {
     VERSION = $$WIN_VERSION
@@ -76,6 +76,7 @@ win32 {
     QMAKE_RPATHDIR += /usr/share/autopanorama/lib
     LIBS += -L$$PWD/install/lib \
             -lopencv_stitching \
+            -lopencv_features2d \
             -lopencv_videoio \
             -lopencv_imgcodecs \
             -lopencv_imgproc \

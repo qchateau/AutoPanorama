@@ -1,5 +1,4 @@
 #include "panoramamaker.h"
-#include "akazefeaturesfinder.h"
 #include "innercutfinder.h"
 #include "videopreprocessor.h"
 
@@ -390,7 +389,8 @@ void PanoramaMaker::incProgress(double inc)
 bool PanoramaMaker::configureStitcher()
 {
     ocl::setUseOpenCL(try_use_opencl);
-    stitcher = createStitcher();
+
+    stitcher = Stitcher::create();
     if (stitcher.empty())
         return false;
 
@@ -497,11 +497,11 @@ bool PanoramaMaker::configureStitcher()
     stitcher->setBundleAdjuster(bundle_adj);
 
     // Features finder
-    Ptr<detail::FeaturesFinder> ffinder;
+    Ptr<Feature2D> ffinder;
     if (features_finder_mode == QString("ORB"))
-        ffinder = makePtr<detail::OrbFeaturesFinder>();
+        ffinder = ORB::create();
     else if (features_finder_mode == QString("AKAZE"))
-        ffinder = makePtr<detail::AKAZEFeaturesFinder>();
+        ffinder = AKAZE::create();
     else
         return false;
 
