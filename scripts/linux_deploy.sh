@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 if [ ! -x "$1" ]; then
     echo "Usage :"
