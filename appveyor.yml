@@ -1,0 +1,96 @@
+version: 1.0.{build}
+os: Visual Studio 2017
+clone_folder: C:\projects\autopanorama
+test: off
+
+branches:
+  only:
+    - master
+    - appveyor
+
+configuration:
+  - Release
+
+install:
+  - set QTDIR=C:\Qt\5.11.2\msvc2017_64
+  - set PATH=%PATH%;%QTDIR%\bin
+
+  ############################################################################
+  # Clone submodules
+  ############################################################################
+  - cd C:\projects\autopanorama
+  - git submodule init
+  - git submodule update --depth 1 --init --recursive
+
+  ############################################################################
+  # All external dependencies are installed in C:\projects\deps
+  ############################################################################
+  - mkdir C:\projects\deps
+  - cd C:\projects\deps
+
+  ############################################################################
+  # Install Ninja
+  ############################################################################
+  - set NINJA_URL="https://github.com/ninja-build/ninja/releases/download/v1.6.0/ninja-win.zip"
+  - appveyor DownloadFile %NINJA_URL% -FileName ninja.zip
+  - 7z x ninja.zip -oC:\projects\deps\ninja > nul
+  - set PATH=C:\projects\deps\ninja;%PATH%
+  - ninja --version
+
+  ############################################################################
+  # Install a recent CMake
+  ############################################################################
+  - set CMAKE_URL="https://cmake.org/files/v3.10/cmake-3.10.0-win64-x64.zip"
+  - appveyor DownloadFile %CMAKE_URL% -FileName cmake.zip
+  - 7z x cmake.zip -oC:\projects\deps > nul
+  - move C:\projects\deps\cmake-* C:\projects\deps\cmake # Move to a version-agnostic directory
+  - set PATH=C:\projects\deps\cmake\bin;%PATH%
+  - cmake --version
+
+  ############################################################################
+  # Install Eigen
+  ############################################################################
+  - set EIGEN_URL="http://bitbucket.org/eigen/eigen/get/3.3.7.zip"
+  - appveyor DownloadFile %EIGEN_URL% -FileName eigen.zip
+  - 7z x eigen.zip -oC:\projects\deps > nul
+  - move C:\projects\deps\eigen-* C:\projects\deps\eigen # Move to a version-agnostic directory
+  - set INCLUDE=C:\projects\deps\eigen;%INCLUDE%
+
+before_build:
+  - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
+
+  - cd C:\projects\autopanorama
+  - md build
+  - cd build
+
+  - md autopanorama
+  - cd autopanorama
+
+  - cd c:\projects\autopanorama\build
+  - md opencv
+  - cd opencv
+
+build_script:
+  - cd c:\projects\autopanorama\build\opencv
+  - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=C:\projects\autopanorama\install -GNinja -DBUILD_DOCS=OFF -DBUILD_SHARED_LIBS=ON -DBUILD_opencv_apps=OFF -DBUILD_opencv_highgui=OFF -DBUILD_opencv_photo=OFF -DBUILD_opencv_shape=OFF -DBUILD_opencv_superres=OFF -DBUILD_opencv_ts=OFF -DBUILD_opencv_video=OFF -DBUILD_opencv_videostab=OFF -DBUILD_opencv_dnn=OFF -DBUILD_JASPER=ON -DBUILD_OPENEXR=ON -DWITH_EIGEN=ON -DWITH_LAPACK=OFF -DWITH_MATLAB=OFF -DWITH_VTK=OFF -DCMAKE_SH="CMAKE_SH-NOTFOUND" ../../opencv
+  - cmake --build . --target install
+
+  - cd c:\projects\autopanorama\build\autopanorama
+  - cmake -DCMAKE_BUILD_TYPE=Release -GNinja ../../
+  - cmake --build . --target package
+
+artifacts:    
+  - path: build\autopanorama\autopanorama-*.exe
+    name: nsis
+
+deploy:
+  description: 'Automatic release from AppVeyor'
+  provider: GitHub
+  auth_token:
+    secure: MCWweEAAWVxgcMZx4+cka17EHXAW0vOlpXUQiN7pXE5cdijt96wSvqXSZgyeLT7U
+  artifact: nsis
+  draft: false
+  prerelease: false
+  on:
+    APPVEYOR_REPO_TAG: true
+
