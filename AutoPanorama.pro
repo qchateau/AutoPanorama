@@ -2,7 +2,7 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-LINUX_VERSION = 1.2.0.0
+LINUX_VERSION = 1.2.0.1
 WIN_VERSION = 1.1.0.1
 TARGET = autopanorama
 TEMPLATE = app
