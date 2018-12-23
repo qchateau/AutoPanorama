@@ -33,6 +33,9 @@ for file in $libs_files; do
     fi
 done
 
+# include libpng to the package as it causes incompatibility between ubuntu 16.04 and 18.04+
+libpng_path=$(echo "$needed_libs" | grep libpng | cut -d ' ' -f 3)
+
 dpkg_build_dir=$dpkg_dir/pkg
 exec_file_dst=$dpkg_build_dir/usr/bin/$exec_name
 desktop_file_dst=$dpkg_build_dir/usr/share/applications/${exec_name}.desktop
@@ -67,6 +70,7 @@ mkdir -p $libs_dst
 cp $exec_file $exec_file_dst
 cp $desktop_file $desktop_file_dst
 cp $icon_file $icon_file_dst
+cp $libpng_path $libs_dst
 cp -a $used_libs_files $libs_dst
 cp $control_file $dpkg_build_dir/DEBIAN
 
