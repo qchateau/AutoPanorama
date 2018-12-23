@@ -3,7 +3,7 @@ os: linux
 dist: xenial
 compiler: gcc
 install:
-- sudo apt-get install -qq qt5-default tree
+- sudo apt-get install -qq qt5-default tree libeigen3-dev
 script:
 - "./scripts/compile_opencv.sh"
 - "./scripts/compile_autopanorama.sh"
