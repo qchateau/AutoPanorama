@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "env.h"
 
+#include <iostream>
 #include <QtDebug>
 #include <QMessageBox>
 #include <QFileDialog>
@@ -24,6 +25,8 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     qRegisterMetaType<QVector<int>>();
     ui->setupUi(this);
+
+    std::cout << cv::getBuildInformation() << std::endl;
 
     updateOutputDirFilename();
     onFastSettingsChanged();
@@ -503,14 +506,14 @@ void MainWindow::updateOCL()
 
 void MainWindow::updateEigen()
 {
-    QRegExp regex("Use Eigen:([ \\t]*)([^\\n\\r]*)");
+    QRegExp regex(".*Eigen:([ \\t]*)([^\\n\\r]*)");
     regex.indexIn(cv::getBuildInformation().c_str());
     ui->have_eigen_value->setText(regex.cap(2).replace("YES", "Yes").replace("NO", "No"));
 }
 
 void MainWindow::updateIPP()
 {
-    QRegExp regex("Use Intel IPP:([ \\t]*)([^\\n\\r]*)");
+    QRegExp regex(".*IPP:([ \\t]*)([^\\n\\r]*)");
     regex.indexIn(cv::getBuildInformation().c_str());
     ui->have_ipp_value->setText(regex.cap(2).replace("YES", "Yes").replace("NO", "No"));
 }
