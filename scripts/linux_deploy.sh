@@ -12,12 +12,19 @@ exec_name="autopanorama"
 dpkg_dir=$root_dir/linux
 res_dir=$root_dir/res
 pro_file=$root_dir/AutoPanorama.pro
+opencv_libs_dir=$root_dir/build/opencv/lib
 control_file=$dpkg_dir/control
 desktop_file=$dpkg_dir/autopanorama.desktop
 icon_file=$res_dir/autopanorama.png
 
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$opencv_libs_dir"
 needed_libs=$(ldd $exec_file)
-libs_files=$(ls $root_dir/build/opencv/lib/*.so)
+if echo "$needed_libs" | grep -q "not found"; then
+    echo "Could not find required libraries"
+    exit 1
+fi
+
+libs_files=$(ls $opencv_libs_dir/*.so)
 used_libs_files=""
 for file in $libs_files; do
     basename=$(basename $file)
