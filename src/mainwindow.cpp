@@ -120,14 +120,18 @@ void MainWindow::onMakePanoramaClicked()
 
     for (const QString& file : files)
     {
-        QString ext = QFileInfo(file).suffix();
+        QString ext = QFileInfo(file).suffix().toLower();
         if (supported_image_ext.contains(ext))
+        {
             images.append(file);
+        }
         else if (supported_video_ext.contains(ext))
+        {
             videos.append(file);
+        }
         else
         {
-            QMessageBox::warning(this, "Invalid files", "File "+file+"is not supported");
+            QMessageBox::warning(this, "Invalid files", "File "+file+" is not supported.");
             return;
         }
     }
