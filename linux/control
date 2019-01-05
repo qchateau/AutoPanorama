@@ -1,8 +1,0 @@
-Package: autopanorama
-Version: 0.0.0.0
-Section: base
-Priority: optional
-Architecture: all
-Depends: libqt5core5a, libqt5gui5, libqt5widgets5
-Maintainer: Quentin Chateau <quentin.chateau@gmail.com>
-Description: Panorama composition from multiple pictures or movies

@@ -3,15 +3,19 @@ os: linux
 dist: xenial
 compiler: gcc
 install:
-- sudo apt-get install -qq qt5-default tree libeigen3-dev
+- sudo apt-get install -qq qt5-default libeigen3-dev
 script:
 - "./scripts/compile_opencv.sh"
-- "./scripts/compile_autopanorama.sh"
-- "./scripts/linux_deploy.sh build/autopanorama/autopanorama"
+- "mkdir -p build/autopanorama && cd build/autopanorama"
+- "cmake ../../ -DCMAKE_BUILD_TYPE=Release"
+- "make -j package"
+- "mv autopanorama-*.deb ../../"
+- "cd ../../"
+- "dpkg -c *.deb"
 deploy:
   provider: releases
   api_key:
-    secure: MaVyXkXrFJfY21xlVgbaWiLP9xzlw1q8nuPnZbXpBIntWZRxD/0U851HJOzQFRI2yl/c8d4XO1m+8XOqC4P0DpIAOqiBm55P5S+SeRp/sJ3diaiRYIKPWhVvyKIKIGHoNIa3WOZYNTH2k82h2jSt2wS9JS/yAXeDVSbir4Z/vbiU4LyRdPUtO8M3J2gDuGlzCzqCw0my7qptLfTuwfa9aRLjAZpFtz5z42u9r1EcKhfqG9/UU3jfwIoOoxxM0ARaOxF2WJZYK3iWmXRBPYWXwfV/UuFm/E09TMfhl6SWWVeG+HREZhF3MYj3uSMG4VkSfEOO4SrcxuALTP29kM0y+Ke1Gdr38bmJVXVMhKCdXrfbO/x/unOgWnkKCJfHrCg1xdGKuyxF5J2RALHBBNUCqfLhK9/TSQvtVDTUzSYu6zLJRnQLUzlCv2k6zqexPyan3jXFyfmOivvL6qyOeDxo8Nh5HseJkl3xHD+sc0BugXMrKJ53AQXTvLYdur8C79NGITDWdSLByuYj3i6ZEZ/pbsnKP6yxCRKosROcKpnRVe1kh6vQkjxL3wJLGK5XSIcJwkSHSlkeTxaVuC7JCe6yfrum8B3zEZvZ/h3dts4tkNSV+NyorE3oPqUa7NbQjlJCma6H0H0RLu2IiF52h5PQloEy0027tAwtCfDNImIpO7M=
+    secure: MYO3XLtpEgrb9cXmOM9CfKOxyJrsNVONDrz/1KLd0RE+aaRKtPN0MFaxUKJgRj6RbXYIoSA8EFfJojV3uDk2PnjKbYxzaTN8cVn8NocMXtdAt6vu6sB4KdyUZMfDTDUT0SOIB6V4+DpvcBfP9XXP1sV8tlFlsYTbfLHSW3sAkH0dHyEN3U6W0ArfZyX6SrQEpQjUHhc4/JsHGbYF/8Pv9Mbhha51rX6RugV0732fvibicToAJ/6hB2G/x3gLFK+fjvSeodpqNEnSaDwz0w/BH4ErCqx+YHGQGOfO+BuK76wcx1h+ObGOnDAH+WFlfvo19yP5+zvzff3DcXDeHMyjYPQl8NX2JXfYVyNJ2CWTZ4GdMtfrgsYN96OQUiFK26omBXIiuj5IsfPL+vP/mXtht5iagEsew5qy1dJeqMHv+oz+EztAqnRw1rwcAVLwO48rh42d5NvDvtBMb4xn0axpxLCZdr2BxWM8xfSDN7iAXYmpbGs6l0a2BOOyLbS35Qvyne+Le//glTq6pM2zZfv4BcJTXXDX7u7zE8Nqn/ZZty3FNEtfPqH97rAxPaBe6FJej38WHcsQwsfczTAMjIfnnfpVqhjpIQyukG+aZYcMS49lMKT4VU+iNNLOAHMUH4c1oQr2LvqVY+ferFbdI55IEJSwBoAzOjL/x4NEryNmQ0E=
   file_glob: true
   file: "*.deb"
   skip_cleanup: true
