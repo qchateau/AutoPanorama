@@ -79,7 +79,7 @@ build_script:
   - cmake -DCMAKE_BUILD_TYPE=Release -GNinja ../../
   - cmake --build . --target package
 
-artifacts:    
+artifacts:
   - path: build\autopanorama\autopanorama-*.exe
     name: nsis
 
@@ -87,7 +87,7 @@ deploy:
   description: 'Automatic release from AppVeyor'
   provider: GitHub
   auth_token:
-    secure: MCWweEAAWVxgcMZx4+cka17EHXAW0vOlpXUQiN7pXE5cdijt96wSvqXSZgyeLT7U
+    secure: f/Ixlhv5ZAa/7VwNWFU76+Z9jYdPOZcj72WdGUG5O8mks8tBbOsSNi0vKCYqBaQA
   artifact: nsis
   draft: false
   prerelease: false
