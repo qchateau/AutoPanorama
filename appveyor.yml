@@ -3,11 +3,6 @@ os: Visual Studio 2017
 clone_folder: C:\projects\autopanorama
 test: off
 
-branches:
-  only:
-    - master
-    - appveyor
-
 configuration:
   - Release
 

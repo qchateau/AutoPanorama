@@ -38,7 +38,7 @@ void InnerCutFinder::process()
 #if ENABLE_LOG
     int64_t t = getTickCount();
 #endif
-    for (int level = pyramid.size()-1; level >= 0; --level)
+    for (int level = static_cast<int>(pyramid.size()-1); level >= 0; --level)
         if (!processLevel(level))
         {
             failed = true;
@@ -79,8 +79,10 @@ bool InnerCutFinder::processLevel(int level)
     else
     {
         Rect down_roi = pyramid_roi[level+1];
-        Point tl(down_roi.tl().x/step_down_scale, down_roi.tl().y/step_down_scale);
-        Point br(down_roi.br().x/step_down_scale, down_roi.br().y/step_down_scale);
+        Point tl(static_cast<int>(down_roi.tl().x/step_down_scale),
+            static_cast<int>(down_roi.tl().y/step_down_scale));
+        Point br(static_cast<int>(down_roi.br().x/step_down_scale),
+            static_cast<int>(down_roi.br().y/step_down_scale));
         roi = Rect(tl, br);
 
         float x_inc, y_inc;

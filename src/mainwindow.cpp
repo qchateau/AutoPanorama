@@ -459,7 +459,7 @@ void MainWindow::updateOCL()
         ocl::Device default_device = ocl::Device::getDefault();
         std::vector<cv::ocl::PlatformInfo> platforms;
         cv::ocl::getPlatfomsInfo(platforms);
-        for (size_t i = 0; i < platforms.size(); i++)
+        for (int i = 0; i < static_cast<int>(platforms.size()); i++)
         {
             const cv::ocl::PlatformInfo* platform = &platforms[i];
 

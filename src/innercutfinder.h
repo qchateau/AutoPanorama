@@ -29,9 +29,8 @@ private:
     std::vector<Mat> pyramid;
     std::vector<Rect> pyramid_roi;
     int min_search_res;
-    float step_down_scale;
-    float ratio_x, ratio_y;
-    float roi_min_area;
+    double step_down_scale;
+    double roi_min_area;
     bool done, failed;
 };
 
