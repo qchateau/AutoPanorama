@@ -67,11 +67,11 @@ before_build:
 
 build_script:
   - cd c:\projects\autopanorama\build\opencv
-  - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=C:\projects\autopanorama\install -GNinja -DBUILD_DOCS=OFF -DBUILD_SHARED_LIBS=ON -DBUILD_opencv_apps=OFF -DBUILD_opencv_highgui=OFF -DBUILD_opencv_photo=OFF -DBUILD_opencv_shape=OFF -DBUILD_opencv_superres=OFF -DBUILD_opencv_ts=OFF -DBUILD_opencv_video=OFF -DBUILD_opencv_videostab=OFF -DBUILD_opencv_dnn=OFF -DBUILD_JASPER=ON -DBUILD_OPENEXR=ON -DWITH_EIGEN=ON -DWITH_LAPACK=OFF -DWITH_MATLAB=OFF -DWITH_VTK=OFF -DCMAKE_SH="CMAKE_SH-NOTFOUND" ../../opencv
+  - cmake -G Ninja -C ../../opencv.cmake -DCMAKE_SH="CMAKE_SH-NOTFOUND" ../../opencv
   - cmake --build . --target install
 
   - cd c:\projects\autopanorama\build\autopanorama
-  - cmake -DCMAKE_BUILD_TYPE=Release -GNinja ../../
+  - cmake -DCMAKE_BUILD_TYPE=Release -G Ninja ../../
   - cmake --build . --target package
 
 artifacts:
