@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.1.0)
-project(autopanorama VERSION 1.2.1)
+project(autopanorama VERSION 1.2.2)
 set(TITLE_PROJECT_NAME "AutoPanorama")
 
 # Find and use Qt
