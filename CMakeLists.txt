@@ -116,20 +116,6 @@ endif()
 # Install dependencies
 if(UNIX)
     set(OPENCV_LIBRARIES_PATH "${OPENCV_INSTALL_PATH}/lib")
-
-    # Add libpng as it breaks between ubuntu 16 and 18
-    find_library(libpng_location png)
-    get_filename_component(libpng_location ${libpng_location} REALPATH)
-    if(NOT libpng_location)
-        message(SEND_ERROR "Not found: libpng")
-    else()
-        message(STATUS "Found libpng: ${all_locations}")
-    endif()
-
-    get_filename_component(libpng_name ${libpng_location} NAME)
-    file(COPY ${libpng_location} DESTINATION ${CMAKE_BINARY_DIR})
-    file(RENAME ${CMAKE_BINARY_DIR}/${libpng_name} ${CMAKE_BINARY_DIR}/libpng12.so.0)
-    list(APPEND REQUIRED_LIBS_PATHS ${CMAKE_BINARY_DIR}/libpng12.so.0)
 else()
     set(OPENCV_LIBRARIES_PATH "${OPENCV_INSTALL_PATH}/x64/vc15/bin/")
 
