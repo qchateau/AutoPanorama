@@ -1,8 +1,6 @@
 ## AutoPanorama
 
-[![Build status](https://ci.appveyor.com/api/projects/status/dt9bpb0ab4lj4jaf?svg=true)](https://ci.appveyor.com/project/Tytan/autopanorama)
-[![Build Status](https://travis-ci.org/qchateau/AutoPanorama.svg?branch=master)](https://travis-ci.org/qchateau/AutoPanorama)
-
+[![Build status](https://ci.appveyor.com/api/projects/status/dt9bpb0ab4lj4jaf/branch/master?svg=true)](https://ci.appveyor.com/project/Tytan/autopanorama/branch/master)
 
 ## References : ##
 #### Exposure compensation on all channels : ####
