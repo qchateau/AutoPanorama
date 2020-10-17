@@ -1,6 +1,20 @@
 cmake_minimum_required(VERSION 3.1.0)
-project(autopanorama VERSION 1.2.2)
+project(autopanorama VERSION 1.3.0)
 set(TITLE_PROJECT_NAME "AutoPanorama")
+
+# Configure project
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(BUILD_SHARED_LIBS OFF)
+
+# Include OpenCV
+set(WITH_EIGEN ON)
+set(WITH_LAPACK OFF)
+set(WITH_MATLAB OFF)
+set(WITH_VTK OFF)
+add_subdirectory(opencv EXCLUDE_FROM_ALL)
+file(GLOB OPENCV_INCLUDE_DIRS opencv/modules/*/include)
+include_directories(BEFORE SYSTEM opencv/include ${OPENCV_INCLUDE_DIRS})
 
 # Find and use Qt
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
@@ -17,17 +31,8 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-# Find and use OpenCV
-set(OPENCV_INSTALL_PATH "${CMAKE_SOURCE_DIR}/install")
-find_package(OpenCV REQUIRED HINTS ${OPENCV_INSTALL_PATH})
-include_directories(${OpenCV_INCLUDE_DIRS})
-message(STATUS "Found OpenCV version ${OpenCV_VERSION}")
-message(STATUS "Found OpenCV headers: ${OpenCV_INCLUDE_DIRS}")
-message(STATUS "Using OpenCV libraries: ${OpenCV_LIBRARIES}")
-
 # Custom definition and flags
 add_definitions(-DAPP_VERSION="${PROJECT_VERSION}")
-set(CMAKE_CXX_STANDARD 11)
 
 if(UNIX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror")
@@ -37,51 +42,39 @@ elseif(WIN32)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /WX")
 endif()
 
-# Handle rpath before declaring executable
-if(UNIX)
-    # Add rpath to our custom OpenCV library
-    set(AUTOPANORAMA_RPATH "$ORIGIN/../share/${PROJECT_NAME}/lib/")
-    list(APPEND CMAKE_INSTALL_RPATH "${AUTOPANORAMA_RPATH}")
-    message(STATUS "Setting RPATH: ${CMAKE_INSTALL_RPATH}")
+# Files
+set(ICO res/autopanorama.ico)
+set(RC res/application.qrc)
+if(WIN32)
+    list(APPEND RC res/autopanorama.rc)
 endif()
 
-# Files
-set(MAIN_SOURCES
+set(
+    SOURCES
+
     src/main.cpp
     src/mainwindow.cpp
     src/qfilewidget.cpp
     src/videopreprocessor.cpp
     src/panoramamaker.cpp
     src/innercutfinder.cpp
-)
 
-set(ICO
-    res/autopanorama.ico
+    ${ICO}
+    ${RC}
 )
-
-set(RC
-    res/application.qrc
-)
-
-if(WIN32)
-    set(RC
-        ${RC}
-        res/autopanorama.rc
-    )
-endif()
 
 # Main binary
-add_executable(${PROJECT_NAME}
+add_executable(
+    ${PROJECT_NAME}
+
     WIN32
-    ${MAIN_SOURCES}
-    ${RC}
-    ${MOC_SRCS}
-    ${RES_SOURCES}
-    ${UI_HEADERS}
+    ${SOURCES}
 )
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries(
+    ${PROJECT_NAME}
+
     ${Qt5Widgets_LIBRARIES}
-    ${OpenCV_LIBRARIES}
+    opencv_stitching
 )
 
 # Install tool function
@@ -98,30 +91,30 @@ else()
 endif()
 
 # Install main binary
-install(TARGETS
-    ${PROJECT_NAME}
+install(
+    TARGETS ${PROJECT_NAME}
     RUNTIME DESTINATION ${DESTINATION_BINARY}
 )
 
 # Install desktop file
 if(UNIX)
-    install(FILES
+    install(
+        FILES
+
         res/autopanorama.desktop
         DESTINATION share/applications
     )
-    install(FILES
+    install(
+        FILES
+
         res/autopanorama.png
         DESTINATION share/${PROJECT_NAME}
     )
 endif()
 
 # Install dependencies
-if(UNIX)
-    set(OPENCV_LIBRARIES_PATH "${OPENCV_INSTALL_PATH}/lib")
-else()
-    set(OPENCV_LIBRARIES_PATH "${OPENCV_INSTALL_PATH}/x64/vc15/bin/")
-
-    # Install some Qt libraries
+if(WIN32)
+    # Install Qt libraries
     set(QT_REQUIRED_LIBS_TARGET_NAMES
         Qt5::Widgets
         Qt5::Core
@@ -138,8 +131,9 @@ else()
         else()
             message(STATUS "Found ${target_name}: ${all_locations}")
         endif()
-        list(APPEND REQUIRED_LIBS_PATHS ${all_locations})
+        list(APPEND QT_LIBS_PATHS ${all_locations})
     endforeach()
+    install(FILES ${QT_LIBS_PATHS} DESTINATION ${DESTINATION_SH})
 
     # Install required Qt plugins
     get_filename_component(QT_ROOT ${Qt5_DIR}/../../.. ABSOLUTE)
@@ -170,35 +164,6 @@ else()
     endif()
     install(FILES ${qwindows_library} DESTINATION ${DESTINATION_SH}/platforms)
 endif()
-
-# Select opencv libs to install
-set(OPENCV_REQUIRED_LIBS_NAMES
-    opencv_stitching
-    opencv_features2d
-    opencv_calib3d
-    opencv_flann
-    opencv_videoio
-    opencv_imgcodecs
-    opencv_imgproc
-    opencv_core
-)
-
-# Install required OpenCV libraries
-foreach(required_lib_name ${OPENCV_REQUIRED_LIBS_NAMES})
-    file(GLOB all_locations "${OPENCV_LIBRARIES_PATH}/${SH_PREFIX}${required_lib_name}*.${SH_EXT}*")
-    if(NOT all_locations)
-        message(SEND_ERROR "Not found: ${required_lib_name}")
-    else()
-        message(STATUS "Found ${required_lib_name}: ${all_locations}")
-    endif()
-    list(APPEND REQUIRED_LIBS_PATHS ${all_locations})
-endforeach()
-
-# Install all required libraries
-install(FILES
-    ${REQUIRED_LIBS_PATHS}
-    DESTINATION ${DESTINATION_SH}
-)
 
 # Package
 set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
