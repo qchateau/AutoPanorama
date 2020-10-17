@@ -60,3 +60,4 @@ Temporary Items
 # custom
 .history
 .vscode
+compile_commands.json

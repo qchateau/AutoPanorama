@@ -30,8 +30,8 @@ QFileWidget::QFileWidget(QWidget *parent) :
     default_icon = QIcon(":/icon_loading.png");
     no_preview_icon = QIcon(":/icon_invalid.png");
     video_icon = QIcon(":/icon_video.png");
-    connect(this, SIGNAL(iconChanged()), this, SLOT(refreshIcons()));
-    connect(&items_cleaner, SIGNAL(timeout()), this, SLOT(cleanItems()));
+    connect(this, &QFileWidget::iconChanged, this, &QFileWidget::refreshIcons);
+    connect(&items_cleaner, &QTimer::timeout, this, &QFileWidget::cleanItems);
     items_cleaner.start(5000);
     items_cleaner.moveToThread(QApplication::instance()->thread());
 }

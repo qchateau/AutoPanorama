@@ -1,6 +1,7 @@
 #include "panoramamaker.h"
 #include "innercutfinder.h"
 #include "videopreprocessor.h"
+#include "exposure_compensator.h"
 
 #include <opencv2/stitching.hpp>
 #include <opencv2/imgcodecs.hpp>
@@ -207,9 +208,9 @@ Stitcher::Status PanoramaMaker::unsafeRun()
     else
         setProgress(30);
 
-    UMat pano, pano_mask;
+    UMat pano;
 
-    stitcher_status = stitcher->composePanorama(pano, pano_mask);
+    stitcher_status = stitcher->composePanorama(pano);
     if (stitcher_status != Stitcher::OK)
         return stitcher_status;
     else
@@ -217,6 +218,7 @@ Stitcher::Status PanoramaMaker::unsafeRun()
 
     if (generate_inner_cut)
     {
+        UMat pano_mask = stitcher->resultMask();
         InnerCutFinder cutter(pano_mask);
         inner_roi = cutter.getROI();
         if (inner_roi.area() == 0)
@@ -408,7 +410,7 @@ bool PanoramaMaker::configureStitcher()
     stitcher->setWarper(warper);
 
     // Interpolation
-    int interp;
+    InterpolationFlags interp;
     if (interp_mode == QString("Nearest"))
         interp = INTER_NEAREST;
     else if (interp_mode == QString("Linear"))
@@ -420,7 +422,7 @@ bool PanoramaMaker::configureStitcher()
     else
         return false;
 
-    stitcher->setInterpolation(interp);
+    stitcher->setInterpolationFlags(interp);
 
     // Seam finder
     Ptr<detail::SeamFinder> seamfinder;
@@ -457,26 +459,71 @@ bool PanoramaMaker::configureStitcher()
     int bs = exposure_compensator_mode.block_size;
     int nfeed = exposure_compensator_mode.nfeed;
     double sim_th = exposure_compensator_mode.similarity_th;
-    detail::GainCompensator::Mode exp_type = exposure_compensator_mode.type;
-    if (exposure_compensator_mode.mode == QString("None"))
+    if (exposure_compensator_mode.mode == "None")
     {
-        exp_comp = makePtr<detail::NoExposureCompensator>();
+        exp_comp = makePtr<NoExposureCompensator>();
     }
-    else if (exposure_compensator_mode.mode == QString("Simple"))
+    else if (exposure_compensator_mode.mode == "Simple")
     {
-        exp_comp = makePtr<detail::GainCompensator>(exp_type, nfeed, sim_th);
+        if (exposure_compensator_mode.type == "Gain")
+        {
+            auto ptr = makePtr<GainCompensator>(nfeed);
+            ptr->setSimilarityThreshold(sim_th);
+            exp_comp = ptr;
+        }
+        else if (exposure_compensator_mode.type == "BGR")
+        {
+            auto ptr = makePtr<ChannelsCompensator>(nfeed);
+            ptr->setSimilarityThreshold(sim_th);
+            exp_comp = ptr;
+        }
+        else
+        {
+            return false;
+        }
     }
-    else if (exposure_compensator_mode.mode == QString("Blocks"))
+    else if (exposure_compensator_mode.mode == "Blocks")
     {
-        exp_comp = makePtr<detail::BlocksGainCompensator>(exp_type, nfeed, bs, bs, sim_th);
+        if (exposure_compensator_mode.type == "Gain")
+        {
+            auto ptr = makePtr<BlocksGainCompensator>(bs, bs, nfeed);
+            ptr->setSimilarityThreshold(sim_th);
+            exp_comp = ptr;
+        }
+        else if (exposure_compensator_mode.type == "BGR")
+        {
+            auto ptr = makePtr<BlocksChannelsCompensator>(bs, bs, nfeed);
+            ptr->setSimilarityThreshold(sim_th);
+            exp_comp = ptr;
+        }
+        else
+        {
+            return false;
+        }
     }
-    else if (exposure_compensator_mode.mode == QString("Combined"))
+    else if (exposure_compensator_mode.mode == "Combined")
     {
-        int bs = exposure_compensator_mode.block_size;
-        exp_comp = makePtr<detail::CombinedGainCompensator>(exp_type, nfeed, bs, bs, sim_th);
+        if (exposure_compensator_mode.type == "Gain")
+        {
+            auto ptr = makePtr<CombinedGainCompensator>(bs, bs, nfeed);
+            ptr->setSimilarityThreshold(sim_th);
+            exp_comp = ptr;
+        }
+        else if (exposure_compensator_mode.type == "BGR")
+        {
+            auto ptr = makePtr<CombinedChannelsCompensator>(bs, bs, nfeed);
+            ptr->setSimilarityThreshold(sim_th);
+            exp_comp = ptr;
+        }
+        else
+        {
+            return false;
+        }
     }
     else
+    {
         return false;
+    }
 
     stitcher->setExposureCompensator(exp_comp);
 

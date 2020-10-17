@@ -3,9 +3,13 @@ project(autopanorama VERSION 1.3.0)
 set(TITLE_PROJECT_NAME "AutoPanorama")
 
 # Configure project
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(BUILD_SHARED_LIBS OFF)
+if (ENABLE_LOG)
+    add_definitions(-DENABLE_LOG=1)
+endif ()
 
 # Include OpenCV
 set(WITH_EIGEN ON)
@@ -75,6 +79,7 @@ target_link_libraries(
 
     ${Qt5Widgets_LIBRARIES}
     opencv_stitching
+    opencv_videoio
 )
 
 # Install tool function

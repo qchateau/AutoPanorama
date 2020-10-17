@@ -40,10 +40,14 @@ MainWindow::MainWindow(QWidget *parent) :
     updateStatusBar();
     updateMakeEnabled();
 
-    for (const QString ext : PanoramaMaker::getSupportedImageExtensions())
+    for (const QString& ext : PanoramaMaker::getSupportedImageExtensions())
+    {
         ui->filesListWidget->addSupportedExtension(ext);
-    for (const QString ext : PanoramaMaker::getSupportedVideoExtensions())
+    }
+    for (const QString& ext : PanoramaMaker::getSupportedVideoExtensions())
+    {
         ui->filesListWidget->addSupportedExtension(ext);
+    }
 }
 
 MainWindow::~MainWindow()
@@ -168,7 +172,7 @@ void MainWindow::onMakePanoramaClicked()
                       ui->output_dir_lineedit->text());
     configureWorker(worker);
     createWorkerUi(worker);
-    connect(worker, SIGNAL(finished()), this, SLOT(runWorkers()));
+    connect(worker, &PanoramaMaker::finished, this, &MainWindow::runWorkers);
 
     qDebug() << "Queuing worker";
     workers << worker;
@@ -640,13 +644,13 @@ void MainWindow::createWorkerUi(PanoramaMaker *worker) {
     progress_bars[worker] = pb_struct;
     progress_bars[close] = pb_struct;
 
-    connect(worker, SIGNAL(percentage(int)), progress_bar, SLOT(setValue(int)));
-    connect(worker, SIGNAL(percentage(int)), this, SLOT(updateStatusBar()));
-    connect(worker, SIGNAL(is_failed(QString)), this, SLOT(onWorkerFailed(QString)));
-    connect(worker, SIGNAL(is_done()), this, SLOT(onWorkerDone()));
-    connect(worker, SIGNAL(finished()), this, SLOT(updateStatusBar()));
+    connect(worker, &PanoramaMaker::percentage, progress_bar, &QProgressBar::setValue);
+    connect(worker, &PanoramaMaker::percentage, this, &MainWindow::updateStatusBar);
+    connect(worker, &PanoramaMaker::is_failed, this, &MainWindow::onWorkerFailed);
+    connect(worker, &PanoramaMaker::is_done, this, &MainWindow::onWorkerDone);
+    connect(worker, &PanoramaMaker::finished, this, &MainWindow::updateStatusBar);
 
-    connect(close, SIGNAL(clicked(bool)), this, SLOT(closeSenderWorker()));
+    connect(close, &QPushButton::clicked, this, &MainWindow::closeSenderWorker);
 
     hbox->addWidget(progress_bar);
     hbox->addWidget(close);
@@ -685,14 +689,7 @@ void MainWindow::configureWorker(PanoramaMaker *worker)
     // Exposure compensator mode
     PanoramaMaker::ExposureComensatorMode exp_comp_mode;
     exp_comp_mode.mode = ui->expcomp_mode_combobox->currentText();
-    if (ui->expcomp_type_combobox->currentText() == QString("Gain"))
-    {
-        exp_comp_mode.type = detail::GainCompensator::GAIN;
-    }
-    else if (ui->expcomp_type_combobox->currentText() == QString("BGR"))
-    {
-        exp_comp_mode.type = detail::GainCompensator::CHANNELS;
-    }
+    exp_comp_mode.type = ui->expcomp_type_combobox->currentText();
     exp_comp_mode.block_size = ui->blocksize_spinbox->value();
     exp_comp_mode.nfeed = ui->nfeed_spinbox->value();
     exp_comp_mode.similarity_th = ui->exp_sim_th_spinbox->value();

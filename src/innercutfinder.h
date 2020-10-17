@@ -7,8 +7,7 @@
 
 using namespace cv;
 
-#define ENABLE_LOG 1
-#if ENABLE_LOG
+#if defined(ENABLE_LOG) && ENABLE_LOG
 #define LOG(x) std::cout << x
 #define LOGLN(x) std::cout << x << std::endl
 #else

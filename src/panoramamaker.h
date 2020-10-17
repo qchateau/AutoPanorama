@@ -19,7 +19,7 @@ public:
     enum Status { STOPPED, WORKING, DONE, FAILED };
     struct BlenderMode { QString mode; double sharpness; int bands; };
     struct ExposureComensatorMode { QString mode;
-                                    detail::GainCompensator::Mode type;
+                                    QString type;
                                     int block_size;
                                     int nfeed;
                                     double similarity_th; };
@@ -140,8 +140,6 @@ signals:
     void percentage(int);
     void is_failed(QString msg=QString());
     void is_done();
-
-public slots:
 };
 
 #endif // PANORAMAMAKER_H
