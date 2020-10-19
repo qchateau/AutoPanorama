@@ -3,19 +3,20 @@
 
 #include <opencv2/stitching.hpp>
 
+namespace autopanorama {
 namespace details {
 
-template <typename BlocksCompensator, typename SimpleCompensator>
-class CombinedCompensator : public BlocksCompensator {
+template <typename BlocksComp, typename SimpleComp>
+class CombinedCompensator : public BlocksComp {
 public:
-    using BlocksCompensator::BlocksCompensator;
+    using BlocksComp::BlocksComp;
 
     void feed(
         const std::vector<cv::Point>& corners,
         const std::vector<cv::UMat>& images,
         const std::vector<std::pair<cv::UMat, uchar>>& masks) override
     {
-        const int num_images = images.size();
+        const int num_images = static_cast<int>(images.size());
 
         std::vector<cv::UMat> copied_images;
         copied_images.reserve(num_images);
@@ -24,7 +25,7 @@ public:
             copied_images.emplace_back(images[i].clone());
         }
 
-        SimpleCompensator compensator;
+        SimpleComp compensator;
         compensator.setNrFeeds(this->getNrFeeds());
         compensator.setSimilarityThreshold(this->getSimilarityThreshold());
         compensator.feed(corners, copied_images, masks);
@@ -34,7 +35,7 @@ public:
             compensator.apply(i, corners[i], copied_images[i], masks[i].first);
         }
 
-        BlocksCompensator block_compensator;
+        BlocksComp block_compensator;
         block_compensator.setBlockSize(this->getBlockSize());
         block_compensator.setNrFeeds(this->getNrFeeds());
         block_compensator.setSimilarityThreshold(this->getSimilarityThreshold());
@@ -52,8 +53,8 @@ public:
 };
 
 using CombinedGainCompensator =
-    ::details::CombinedCompensator<cv::detail::BlocksGainCompensator, cv::detail::GainCompensator>;
-using CombinedChannelsCompensator = ::details::CombinedCompensator<
+    details::CombinedCompensator<cv::detail::BlocksGainCompensator, cv::detail::GainCompensator>;
+using CombinedChannelsCompensator = details::CombinedCompensator<
     cv::detail::BlocksChannelsCompensator,
     cv::detail::ChannelsCompensator>;
 
@@ -67,7 +68,9 @@ using ChannelsCompensator = ::cv::detail::ChannelsCompensator;
 using BlocksGainCompensator = ::cv::detail::BlocksGainCompensator;
 using BlocksChannelsCompensator = ::cv::detail::BlocksChannelsCompensator;
 
-using CombinedGainCompensator = ::details::CombinedGainCompensator;
-using CombinedChannelsCompensator = ::details::CombinedChannelsCompensator;
+using CombinedGainCompensator = details::CombinedGainCompensator;
+using CombinedChannelsCompensator = details::CombinedChannelsCompensator;
+
+} // autopanorama
 
 #endif // EXPOSURE_COMPENSATOR_H

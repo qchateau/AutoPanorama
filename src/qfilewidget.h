@@ -6,6 +6,8 @@
 #include <QStringList>
 #include <QTimer>
 
+namespace autopanorama {
+
 class QFileWidget : public QListWidget {
     Q_OBJECT
 public:
@@ -52,5 +54,7 @@ signals:
     void itemsAdded();
     void itemsRemoved();
 };
+
+} // autopanorama
 
 #endif // QFILEWIDGET_H

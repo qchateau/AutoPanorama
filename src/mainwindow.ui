@@ -45,7 +45,7 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
-         <widget class="QFileWidget" name="filesListWidget">
+         <widget class="autopanorama::QFileWidget" name="filesListWidget">
           <property name="editTriggers">
            <set>QAbstractItemView::NoEditTriggers</set>
           </property>
@@ -1474,7 +1474,7 @@ compensation</string>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>QFileWidget</class>
+   <class>autopanorama::QFileWidget</class>
    <extends>QListWidget</extends>
    <header>src/qfilewidget.h</header>
    <slots>

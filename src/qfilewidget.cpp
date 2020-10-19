@@ -21,6 +21,8 @@
 #include <QtDebug>
 #include <QtConcurrent/QtConcurrentRun>
 
+namespace autopanorama {
+
 QFileWidget::QFileWidget(QWidget* parent)
     : QListWidget(parent), items_cleaner(this)
 {
@@ -250,3 +252,5 @@ void QFileWidget::remove(QListWidgetItem* item)
     items_to_delete << item;
     emit itemsRemoved();
 }
+
+} // autopanorama

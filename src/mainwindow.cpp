@@ -16,6 +16,8 @@
 #include <opencv2/core.hpp>
 #include <opencv2/core/ocl.hpp>
 
+namespace autopanorama {
+
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent),
       ui(new Ui::MainWindow),
@@ -146,7 +148,7 @@ void MainWindow::onMakePanoramaClicked()
         try {
             worker->setImages(images);
         }
-        catch (const invalid_argument& e) {
+        catch (const std::invalid_argument& e) {
             QMessageBox::warning(this, "Invalid files", e.what());
             return;
         }
@@ -155,7 +157,7 @@ void MainWindow::onMakePanoramaClicked()
         try {
             worker->setVideos(videos);
         }
-        catch (const invalid_argument& e) {
+        catch (const std::invalid_argument& e) {
             QMessageBox::warning(this, "Invalid files", e.what());
             return;
         }
@@ -441,7 +443,7 @@ void MainWindow::updateOCL()
         ui->opencl_device_tree_label->hide();
     }
     else {
-        ocl::Device default_device = ocl::Device::getDefault();
+        cv::ocl::Device default_device = cv::ocl::Device::getDefault();
         std::vector<cv::ocl::PlatformInfo> platforms;
         cv::ocl::getPlatfomsInfo(platforms);
         for (int i = 0; i < static_cast<int>(platforms.size()); i++) {
@@ -472,11 +474,12 @@ void MainWindow::updateOCL()
                     device_item->setForeground(0, QBrush(Qt::green));
                 }
                 QString mem_type;
-                if (current_device.localMemType() == ocl::Device::LOCAL_IS_GLOBAL)
+                if (current_device.localMemType()
+                    == cv::ocl::Device::LOCAL_IS_GLOBAL)
                     mem_type = "global";
-                else if (current_device.localMemType() == ocl::Device::LOCAL_IS_LOCAL)
+                else if (current_device.localMemType() == cv::ocl::Device::LOCAL_IS_LOCAL)
                     mem_type = "local";
-                else if (current_device.localMemType() == ocl::Device::NO_LOCAL_MEM)
+                else if (current_device.localMemType() == cv::ocl::Device::NO_LOCAL_MEM)
                     mem_type = "none";
                 QString tooltip;
                 tooltip += QString("2D Image max size : %1x%2\n")
@@ -690,7 +693,7 @@ void MainWindow::configureWorker(PanoramaMaker* worker)
     // Compositing resolution
     double compositing_res = ui->compositingres_spinbox->value();
     if (compositing_res <= 0)
-        compositing_res = Stitcher::ORIG_RESOL;
+        compositing_res = cv::Stitcher::ORIG_RESOL;
 
     worker->setCompositingResol(compositing_res);
 
@@ -722,15 +725,15 @@ void MainWindow::closeSenderWorker()
 QString MainWindow::oclDeviceTypeToString(int type)
 {
     QStringList strs;
-    if (type & ocl::Device::TYPE_CPU)
+    if (type & cv::ocl::Device::TYPE_CPU)
         strs << "CPU";
-    if (type & ocl::Device::TYPE_GPU) {
+    if (type & cv::ocl::Device::TYPE_GPU) {
         bool type_found = false;
-        if ((type - ocl::Device::TYPE_GPU) & ocl::Device::TYPE_DGPU) {
+        if ((type - cv::ocl::Device::TYPE_GPU) & cv::ocl::Device::TYPE_DGPU) {
             type_found = true;
             strs << "DGPU";
         }
-        if ((type - ocl::Device::TYPE_GPU) & ocl::Device::TYPE_IGPU) {
+        if ((type - cv::ocl::Device::TYPE_GPU) & cv::ocl::Device::TYPE_IGPU) {
             type_found = true;
             strs << "IGPU";
         }
@@ -738,7 +741,7 @@ QString MainWindow::oclDeviceTypeToString(int type)
             strs << "GPU";
         }
     }
-    if (type & ocl::Device::TYPE_ACCELERATOR)
+    if (type & cv::ocl::Device::TYPE_ACCELERATOR)
         strs << "Accelerator";
 
     if (strs.size() == 0)
@@ -746,3 +749,5 @@ QString MainWindow::oclDeviceTypeToString(int type)
 
     return strs.join(", ");
 }
+
+} // autopanorama

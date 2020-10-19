@@ -9,8 +9,7 @@
 #include <QFileInfo>
 #include <QThread>
 
-using namespace cv;
-using namespace std;
+namespace autopanorama {
 
 class PanoramaMaker : public QThread {
     Q_OBJECT
@@ -111,7 +110,7 @@ public:
     QString getStitcherConfString();
     QString getOutputFilename() { return output_filename; }
 
-    Stitcher::Status unsafeRun();
+    cv::Stitcher::Status unsafeRun();
     void run();
 
 private:
@@ -119,7 +118,7 @@ private:
     void loadImagesFromImages();
     void loadImagesFromVideos();
     void loadVideo(const QString& path);
-    void failed(Stitcher::Status status);
+    void failed(cv::Stitcher::Status status);
     void failed(QString msg = QString("Unknown error"));
     void done();
     void clean();
@@ -133,8 +132,8 @@ private:
     QStringList images_path, videos_path;
     QString output_filename, output_ext, output_dir;
 
-    Ptr<Stitcher> stitcher;
-    vector<Mat> images;
+    cv::Ptr<cv::Stitcher> stitcher;
+    std::vector<cv::Mat> images;
 
     QString status_msg;
     Status status;
@@ -159,5 +158,7 @@ signals:
     void is_failed(QString msg = QString());
     void is_done();
 };
+
+} // autopanorama
 
 #endif // PANORAMAMAKER_H

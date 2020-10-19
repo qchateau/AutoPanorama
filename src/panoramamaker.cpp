@@ -15,8 +15,7 @@
 #include <exception>
 #include <vector>
 
-using namespace cv;
-using namespace std;
+namespace autopanorama {
 
 QStringList PanoramaMaker::getSupportedImageExtensions()
 {
@@ -152,9 +151,9 @@ QString PanoramaMaker::getStitcherConfString()
     if (getExposureCompensatorMode().mode == QString("Simple")
         || getExposureCompensatorMode().mode == QString("Blocks")
         || getExposureCompensatorMode().mode == QString("Combined")) {
-        if (getExposureCompensatorMode().type == detail::GainCompensator::GAIN)
+        if (getExposureCompensatorMode().type == cv::detail::GainCompensator::GAIN)
             conf += QString(" Gain");
-        else if (getExposureCompensatorMode().type == detail::GainCompensator::CHANNELS)
+        else if (getExposureCompensatorMode().type == cv::detail::GainCompensator::CHANNELS)
             conf += QString(" Channels");
         if (getExposureCompensatorMode().mode == QString("Blocks")
             || getExposureCompensatorMode().mode == QString("Combined")) {
@@ -181,7 +180,7 @@ QString PanoramaMaker::getStitcherConfString()
 
     conf += QString("Compositing Resolution : %1")
                 .arg(
-                    getCompositingResol() == Stitcher::ORIG_RESOL
+                    getCompositingResol() == cv::Stitcher::ORIG_RESOL
                         ? "Original"
                         : QString("%1  Mpx").arg(getCompositingResol()));
     conf += QString("\n");
@@ -194,30 +193,30 @@ QString PanoramaMaker::getStitcherConfString()
     return conf;
 }
 
-Stitcher::Status PanoramaMaker::unsafeRun()
+cv::Stitcher::Status PanoramaMaker::unsafeRun()
 {
-    Rect inner_roi;
-    Stitcher::Status stitcher_status;
+    cv::Rect inner_roi;
+    cv::Stitcher::Status stitcher_status;
 
     loadImages();
     proc_timer.start();
 
     stitcher_status = stitcher->estimateTransform(images);
-    if (stitcher_status != Stitcher::OK)
+    if (stitcher_status != cv::Stitcher::OK)
         return stitcher_status;
     else
         setProgress(30);
 
-    UMat pano;
+    cv::UMat pano;
 
     stitcher_status = stitcher->composePanorama(pano);
-    if (stitcher_status != Stitcher::OK)
+    if (stitcher_status != cv::Stitcher::OK)
         return stitcher_status;
     else
         setProgress(80);
 
     if (generate_inner_cut) {
-        UMat pano_mask = stitcher->resultMask();
+        cv::UMat pano_mask = stitcher->resultMask();
         InnerCutFinder cutter(pano_mask);
         inner_roi = cutter.getROI();
         if (inner_roi.area() == 0)
@@ -226,8 +225,8 @@ Stitcher::Status PanoramaMaker::unsafeRun()
     setProgress(90);
     proc_time = proc_timer.elapsed();
 
-    string out = genOutputFileInfo().absoluteFilePath().toUtf8().constData();
-    string inner_cut_out =
+    std::string out = genOutputFileInfo().absoluteFilePath().toUtf8().constData();
+    std::string inner_cut_out =
         genInnerCutOutputFileInfo().absoluteFilePath().toUtf8().constData();
 
     qDebug() << "Writing full panorama to " << QString::fromStdString(out);
@@ -255,9 +254,9 @@ void PanoramaMaker::run()
         try {
             status = WORKING;
             total_timer.start();
-            Stitcher::Status stitcher_status = unsafeRun();
+            cv::Stitcher::Status stitcher_status = unsafeRun();
             total_time = total_timer.elapsed();
-            if (stitcher_status == Stitcher::OK)
+            if (stitcher_status == cv::Stitcher::OK)
                 done();
             else
                 failed(stitcher_status);
@@ -293,7 +292,7 @@ void PanoramaMaker::loadImagesFromImages()
     int N = images_path.size() + videos_path.size();
 
     for (int i = 0; i < images_path.size(); ++i) {
-        Mat image = imread(images_path[i].toUtf8().constData());
+        cv::Mat image = cv::imread(images_path[i].toUtf8().constData());
         images.push_back(image);
         incProgress(10.0 / N);
     }
@@ -313,22 +312,22 @@ void PanoramaMaker::loadVideo(const QString& path)
 {
     std::string filepath = path.toUtf8().constData();
     VideoPreprocessor preproc(filepath);
-    std::vector<Mat> video_images = preproc.evenTimeSpace(images_per_video);
-    for (const Mat& image : video_images)
+    std::vector<cv::Mat> video_images = preproc.evenTimeSpace(images_per_video);
+    for (const cv::Mat& image : video_images)
         images.push_back(image);
 }
 
-void PanoramaMaker::failed(Stitcher::Status status)
+void PanoramaMaker::failed(cv::Stitcher::Status status)
 {
     QString msg;
     switch (status) {
-    case Stitcher::ERR_NEED_MORE_IMGS:
+    case cv::Stitcher::ERR_NEED_MORE_IMGS:
         msg = "Need more images";
         break;
-    case Stitcher::ERR_HOMOGRAPHY_EST_FAIL:
+    case cv::Stitcher::ERR_HOMOGRAPHY_EST_FAIL:
         msg = "Homography estimation failed";
         break;
-    case Stitcher::ERR_CAMERA_PARAMS_ADJUST_FAIL:
+    case cv::Stitcher::ERR_CAMERA_PARAMS_ADJUST_FAIL:
         msg = "Camera parameters adjustment failed";
         break;
     default:
@@ -372,52 +371,52 @@ void PanoramaMaker::incProgress(double inc)
 
 bool PanoramaMaker::configureStitcher()
 {
-    ocl::setUseOpenCL(try_use_opencl);
+    cv::ocl::setUseOpenCL(try_use_opencl);
 
-    stitcher = Stitcher::create();
+    stitcher = cv::Stitcher::create();
     if (stitcher.empty())
         return false;
 
     // Warper
-    Ptr<WarperCreator> warper;
+    cv::Ptr<cv::WarperCreator> warper;
     if (warp_mode == QString("Perspective"))
-        warper = makePtr<PlaneWarper>();
+        warper = cv::makePtr<cv::PlaneWarper>();
     else if (warp_mode == QString("Cylindrical"))
-        warper = makePtr<CylindricalWarper>();
+        warper = cv::makePtr<cv::CylindricalWarper>();
     else if (warp_mode == QString("Spherical"))
-        warper = makePtr<SphericalWarper>();
+        warper = cv::makePtr<cv::SphericalWarper>();
     else
         return false;
 
     stitcher->setWarper(warper);
 
     // Interpolation
-    InterpolationFlags interp;
+    cv::InterpolationFlags interp;
     if (interp_mode == QString("Nearest"))
-        interp = INTER_NEAREST;
+        interp = cv::INTER_NEAREST;
     else if (interp_mode == QString("Linear"))
-        interp = INTER_LINEAR;
+        interp = cv::INTER_LINEAR;
     else if (interp_mode == QString("Cubic"))
-        interp = INTER_CUBIC;
+        interp = cv::INTER_CUBIC;
     else if (interp_mode == QString("Lanczos4"))
-        interp = INTER_LANCZOS4;
+        interp = cv::INTER_LANCZOS4;
     else
         return false;
 
     stitcher->setInterpolationFlags(interp);
 
     // Seam finder
-    Ptr<detail::SeamFinder> seamfinder;
+    cv::Ptr<cv::detail::SeamFinder> seamfinder;
     if (seam_finder_mode == QString("None"))
-        seamfinder = makePtr<detail::NoSeamFinder>();
+        seamfinder = cv::makePtr<cv::detail::NoSeamFinder>();
     else if (seam_finder_mode == QString("Voronoi"))
-        seamfinder = makePtr<detail::VoronoiSeamFinder>();
+        seamfinder = cv::makePtr<cv::detail::VoronoiSeamFinder>();
     else if (seam_finder_mode == QString("Graph cut color"))
-        seamfinder = makePtr<detail::GraphCutSeamFinder>(
-            detail::GraphCutSeamFinderBase::COST_COLOR);
+        seamfinder = cv::makePtr<cv::detail::GraphCutSeamFinder>(
+            cv::detail::GraphCutSeamFinderBase::COST_COLOR);
     else if (seam_finder_mode == QString("Graph cut gradient"))
-        seamfinder = makePtr<detail::GraphCutSeamFinder>(
-            detail::GraphCutSeamFinderBase::COST_COLOR_GRAD);
+        seamfinder = cv::makePtr<cv::detail::GraphCutSeamFinder>(
+            cv::detail::GraphCutSeamFinderBase::COST_COLOR_GRAD);
     else
         return false;
 
@@ -425,36 +424,36 @@ bool PanoramaMaker::configureStitcher()
     stitcher->setSeamEstimationResol(seam_est_resol);
 
     // Blender
-    Ptr<detail::Blender> blender;
+    cv::Ptr<cv::detail::Blender> blender;
     if (blender_mode.mode == QString("Feather"))
-        blender = makePtr<detail::FeatherBlender>(blender_mode.sharpness);
+        blender = cv::makePtr<cv::detail::FeatherBlender>(blender_mode.sharpness);
     else if (blender_mode.mode == QString("Multiband"))
-        blender = makePtr<detail::MultiBandBlender>(
+        blender = cv::makePtr<cv::detail::MultiBandBlender>(
             try_use_cuda, blender_mode.bands, CV_32F);
     // blender = makePtr<detail::MultiBandBlender>(try_use_cuda, blender_mode.bands, CV_16S);
     else if (blender_mode.mode == QString("None"))
-        blender = makePtr<detail::Blender>();
+        blender = cv::makePtr<cv::detail::Blender>();
     else
         return false;
 
     stitcher->setBlender(blender);
 
     // Exposure
-    Ptr<detail::ExposureCompensator> exp_comp;
+    cv::Ptr<cv::detail::ExposureCompensator> exp_comp;
     int bs = exposure_compensator_mode.block_size;
     int nfeed = exposure_compensator_mode.nfeed;
     double sim_th = exposure_compensator_mode.similarity_th;
     if (exposure_compensator_mode.mode == "None") {
-        exp_comp = makePtr<NoExposureCompensator>();
+        exp_comp = cv::makePtr<NoExposureCompensator>();
     }
     else if (exposure_compensator_mode.mode == "Simple") {
         if (exposure_compensator_mode.type == "Gain") {
-            auto ptr = makePtr<GainCompensator>(nfeed);
+            auto ptr = cv::makePtr<GainCompensator>(nfeed);
             ptr->setSimilarityThreshold(sim_th);
             exp_comp = ptr;
         }
         else if (exposure_compensator_mode.type == "BGR") {
-            auto ptr = makePtr<ChannelsCompensator>(nfeed);
+            auto ptr = cv::makePtr<ChannelsCompensator>(nfeed);
             ptr->setSimilarityThreshold(sim_th);
             exp_comp = ptr;
         }
@@ -464,12 +463,12 @@ bool PanoramaMaker::configureStitcher()
     }
     else if (exposure_compensator_mode.mode == "Blocks") {
         if (exposure_compensator_mode.type == "Gain") {
-            auto ptr = makePtr<BlocksGainCompensator>(bs, bs, nfeed);
+            auto ptr = cv::makePtr<BlocksGainCompensator>(bs, bs, nfeed);
             ptr->setSimilarityThreshold(sim_th);
             exp_comp = ptr;
         }
         else if (exposure_compensator_mode.type == "BGR") {
-            auto ptr = makePtr<BlocksChannelsCompensator>(bs, bs, nfeed);
+            auto ptr = cv::makePtr<BlocksChannelsCompensator>(bs, bs, nfeed);
             ptr->setSimilarityThreshold(sim_th);
             exp_comp = ptr;
         }
@@ -479,12 +478,12 @@ bool PanoramaMaker::configureStitcher()
     }
     else if (exposure_compensator_mode.mode == "Combined") {
         if (exposure_compensator_mode.type == "Gain") {
-            auto ptr = makePtr<CombinedGainCompensator>(bs, bs, nfeed);
+            auto ptr = cv::makePtr<CombinedGainCompensator>(bs, bs, nfeed);
             ptr->setSimilarityThreshold(sim_th);
             exp_comp = ptr;
         }
         else if (exposure_compensator_mode.type == "BGR") {
-            auto ptr = makePtr<CombinedChannelsCompensator>(bs, bs, nfeed);
+            auto ptr = cv::makePtr<CombinedChannelsCompensator>(bs, bs, nfeed);
             ptr->setSimilarityThreshold(sim_th);
             exp_comp = ptr;
         }
@@ -499,12 +498,12 @@ bool PanoramaMaker::configureStitcher()
     stitcher->setExposureCompensator(exp_comp);
 
     // Bundle adjuster
-    Ptr<detail::BundleAdjusterBase> bundle_adj;
+    cv::Ptr<cv::detail::BundleAdjusterBase> bundle_adj;
     if (bundle_adjuster_mode == QString("Ray")) {
-        bundle_adj = makePtr<detail::BundleAdjusterRay>();
+        bundle_adj = cv::makePtr<cv::detail::BundleAdjusterRay>();
     }
     else if (bundle_adjuster_mode == QString("Reproj")) {
-        bundle_adj = makePtr<detail::BundleAdjusterReproj>();
+        bundle_adj = cv::makePtr<cv::detail::BundleAdjusterReproj>();
     }
     else {
         return false;
@@ -512,20 +511,20 @@ bool PanoramaMaker::configureStitcher()
     stitcher->setBundleAdjuster(bundle_adj);
 
     // Features finder
-    Ptr<Feature2D> ffinder;
+    cv::Ptr<cv::Feature2D> ffinder;
     if (features_finder_mode == QString("ORB"))
-        ffinder = ORB::create();
+        ffinder = cv::ORB::create();
     else if (features_finder_mode == QString("AKAZE"))
-        ffinder = AKAZE::create();
+        ffinder = cv::AKAZE::create();
     else
         return false;
 
     stitcher->setFeaturesFinder(ffinder);
 
     // Matcher
-    Ptr<detail::FeaturesMatcher> matcher;
+    cv::Ptr<cv::detail::FeaturesMatcher> matcher;
     if (features_matching_mode.mode == QString("Best of 2 nearest"))
-        matcher = makePtr<detail::BestOf2NearestMatcher>(
+        matcher = cv::makePtr<cv::detail::BestOf2NearestMatcher>(
             try_use_cuda, features_matching_mode.conf);
     else
         return false;
@@ -535,11 +534,11 @@ bool PanoramaMaker::configureStitcher()
     // Wave correction
     if (wave_correction_mode == QString("Horizontal")) {
         stitcher->setWaveCorrection(true);
-        stitcher->setWaveCorrectKind(detail::WAVE_CORRECT_HORIZ);
+        stitcher->setWaveCorrectKind(cv::detail::WAVE_CORRECT_HORIZ);
     }
     else if (wave_correction_mode == QString("Vertical")) {
         stitcher->setWaveCorrection(true);
-        stitcher->setWaveCorrectKind(detail::WAVE_CORRECT_VERT);
+        stitcher->setWaveCorrectKind(cv::detail::WAVE_CORRECT_VERT);
     }
     else {
         stitcher->setWaveCorrection(false);
@@ -590,3 +589,5 @@ QFileInfo PanoramaMaker::genInnerCutOutputFileInfo()
     } while (innner_cut_output_fileinfo.exists());
     return innner_cut_output_fileinfo;
 }
+
+} // autopanorama

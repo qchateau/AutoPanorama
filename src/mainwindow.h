@@ -16,6 +16,8 @@ namespace Ui {
 class MainWindow;
 }
 
+namespace autopanorama {
+
 class MainWindow : public QMainWindow {
     Q_OBJECT
 
@@ -74,12 +76,14 @@ private:
     std::map<QObject*, ProgressBarContent> progress_bars;
     int worker_index;
 
-    Stitcher stitcher;
+    cv::Stitcher stitcher;
     bool manual_output_filename, manual_output_dir;
     int max_filename_length;
 
 private slots:
     void closeSenderWorker();
 };
+
+} // autopanorama
 
 #endif // MAINWINDOW_H

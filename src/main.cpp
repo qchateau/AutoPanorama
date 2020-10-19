@@ -9,7 +9,7 @@ int main(int argc, char* argv[])
     a.setStyle(QStyleFactory::create("fusion"));
 #endif
 
-    MainWindow w;
+    autopanorama::MainWindow w;
     w.show();
 
     return a.exec();
