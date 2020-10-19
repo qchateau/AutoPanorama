@@ -3,25 +3,24 @@
 
 #include "panoramamaker.h"
 
-#include <opencv2/stitching.hpp>
 #include <map>
+#include <opencv2/stitching.hpp>
 
+#include <QHBoxLayout>
 #include <QMainWindow>
-#include <QTimer>
 #include <QProgressBar>
 #include <QPushButton>
-#include <QHBoxLayout>
+#include <QTimer>
 
 namespace Ui {
 class MainWindow;
 }
 
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(QWidget* parent = 0);
     ~MainWindow();
     int getNbQueued();
     int getNbDone();
@@ -33,14 +32,14 @@ public:
 public slots:
     void onMakePanoramaClicked();
     void runWorkers();
-    void onWorkerFailed(QString msg=QString());
+    void onWorkerFailed(QString msg = QString());
     void onWorkerDone();
     void onBlenderTypeChange();
     void onExposureCompensatorChange();
-    void onOutputFilenameChanged(QString edit=QString());
-    void onOutputDirChanged(QString edit=QString());
-    void onOutputFilenameEdit(QString edit=QString());
-    void onOutputDirEdit(QString edit=QString());
+    void onOutputFilenameChanged(QString edit = QString());
+    void onOutputDirChanged(QString edit = QString());
+    void onOutputFilenameEdit(QString edit = QString());
+    void onOutputDirEdit(QString edit = QString());
     void onSelectOutputDirClicked();
     void onFastSettingsChanged();
     void resetAlgoSetting();
@@ -54,22 +53,22 @@ public slots:
     void updateStatusBar();
 
 protected:
-    void closeEvent(QCloseEvent *event);
+    void closeEvent(QCloseEvent* event);
 
 private:
-    void startWorker(PanoramaMaker *worker);
-    void createWorkerUi(PanoramaMaker *worker);
-    void configureWorker(PanoramaMaker *worker);
+    void startWorker(PanoramaMaker* worker);
+    void createWorkerUi(PanoramaMaker* worker);
+    void configureWorker(PanoramaMaker* worker);
     QString oclDeviceTypeToString(int type);
 
     struct ProgressBarContent {
-        QProgressBar *pb;
-        QPushButton *close;
-        PanoramaMaker *worker;
-        QHBoxLayout *layout;
+        QProgressBar* pb;
+        QPushButton* close;
+        PanoramaMaker* worker;
+        QHBoxLayout* layout;
     };
 
-    Ui::MainWindow *ui;
+    Ui::MainWindow* ui;
 
     QList<PanoramaMaker*> workers;
     std::map<QObject*, ProgressBarContent> progress_bars;

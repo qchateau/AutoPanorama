@@ -1,29 +1,28 @@
-#include "ui_mainwindow.h"
 #include "qfilewidget.h"
+#include "ui_mainwindow.h"
 
-#include <QtDebug>
-#include <QDragEnterEvent>
-#include <QDragMoveEvent>
-#include <QDragLeaveEvent>
-#include <QDropEvent>
-#include <QMimeData>
-#include <QListWidgetItem>
-#include <QFileInfo>
-#include <QStringList>
-#include <QList>
-#include <QMouseEvent>
-#include <QFileDialog>
-#include <QDrag>
 #include <QApplication>
-#include <QtConcurrent/QtConcurrentRun>
+#include <QDrag>
+#include <QDragEnterEvent>
+#include <QDragLeaveEvent>
+#include <QDragMoveEvent>
+#include <QDropEvent>
+#include <QFileDialog>
+#include <QFileInfo>
 #include <QIcon>
-#include <QPixmap>
-#include <QPainter>
 #include <QImageReader>
+#include <QList>
+#include <QListWidgetItem>
+#include <QMimeData>
+#include <QMouseEvent>
+#include <QPainter>
+#include <QPixmap>
+#include <QStringList>
+#include <QtDebug>
+#include <QtConcurrent/QtConcurrentRun>
 
-QFileWidget::QFileWidget(QWidget *parent) :
-    QListWidget(parent),
-    items_cleaner(this)
+QFileWidget::QFileWidget(QWidget* parent)
+    : QListWidget(parent), items_cleaner(this)
 {
     installEventFilter(this);
 
@@ -40,15 +39,15 @@ void QFileWidget::addFiles(QStringList files)
 {
     QList<QListWidgetItem*> added_items;
     QApplication::setOverrideCursor(Qt::WaitCursor);
-    for (int i = 0; i < files.size(); ++i)
-    {
+    for (int i = 0; i < files.size(); ++i) {
         QFileInfo fileinfo(files[i]);
         QString extension = fileinfo.suffix().toLower();
-        if (fileinfo.exists() && fileinfo.isFile() &&
-                (supported_extensions.empty() || supported_extensions.contains(extension)) &&
-                (!getFilesList().contains(fileinfo.absoluteFilePath())))
-        {
-            QListWidgetItem *new_item = new QListWidgetItem(default_icon, fileinfo.fileName(), this);
+        if (fileinfo.exists() && fileinfo.isFile()
+            && (supported_extensions.empty()
+                || supported_extensions.contains(extension))
+            && (!getFilesList().contains(fileinfo.absoluteFilePath()))) {
+            QListWidgetItem* new_item =
+                new QListWidgetItem(default_icon, fileinfo.fileName(), this);
             new_item->setToolTip(fileinfo.absoluteFilePath());
             added_items << new_item;
         }
@@ -57,33 +56,27 @@ void QFileWidget::addFiles(QStringList files)
     emit itemsAdded();
 
     // Delayed icon set
-    for (int i = 0; i < added_items.size(); ++i)
-    {
-        if (items_to_delete.contains(added_items[i]))
-        {
+    for (int i = 0; i < added_items.size(); ++i) {
+        if (items_to_delete.contains(added_items[i])) {
             // Change the icon so item will be deleted
             // but don't spend time loading the full image
             added_items[i]->setIcon(QIcon());
         }
-        else
-        {
+        else {
             QString filename = added_items[i]->toolTip();
             QString ext = QFileInfo(filename).suffix().toLower();
             QStringList videos({"mp4", "avi", "mov", "mkv", "mpeg"});
             QIcon small_icon;
             QImageReader reader(filename);
-            if (reader.canRead())
-            {
+            if (reader.canRead()) {
                 QPixmap pixmap = QPixmap::fromImageReader(&reader);
                 QIcon big_icon(pixmap);
                 small_icon = QIcon(big_icon.pixmap(iconSize()));
             }
-            else if (videos.contains(ext))
-            {
+            else if (videos.contains(ext)) {
                 small_icon = video_icon;
             }
-            else
-            {
+            else {
                 small_icon = no_preview_icon;
             }
             added_items[i]->setIcon(small_icon);
@@ -100,8 +93,7 @@ void QFileWidget::asyncAddFiles(QStringList files)
 QStringList QFileWidget::getFilesList()
 {
     QStringList files_list;
-    for (int i = 0; i < count(); ++i)
-    {
+    for (int i = 0; i < count(); ++i) {
         if (item(i)->isHidden())
             continue;
         files_list << item(i)->data(Qt::ToolTipRole).toString();
@@ -113,8 +105,7 @@ QStringList QFileWidget::getSelectedFilesList()
 {
     QStringList files_list;
     QList<QListWidgetItem*> selected = selectedItems();
-    for (int i = 0; i < selected.size(); ++i)
-    {
+    for (int i = 0; i < selected.size(); ++i) {
         if (selected[i]->isHidden())
             continue;
         files_list << selected[i]->data(Qt::ToolTipRole).toString();
@@ -127,27 +118,18 @@ void QFileWidget::refreshIcons()
     scheduleDelayedItemsLayout();
 }
 
-
-
-
-
-
-
-
 void QFileWidget::cleanItems()
 {
-    if (thread() != QApplication::instance()->thread())
-    {
-        qDebug() << "WARNING : clean_item must be called in the GUI thread. Skipping.";
+    if (thread() != QApplication::instance()->thread()) {
+        qDebug() << "WARNING : clean_item must be called in the GUI thread. "
+                    "Skipping.";
         return;
     }
 
     QList<QListWidgetItem*> items_not_deleted;
-    while (items_to_delete.size() > 0)
-    {
+    while (items_to_delete.size() > 0) {
         QListWidgetItem* item = items_to_delete.takeFirst();
-        if (item)
-        {
+        if (item) {
             if (item->icon().cacheKey() == default_icon.cacheKey())
                 items_not_deleted << item;
             else
@@ -175,9 +157,10 @@ void QFileWidget::selectAndAddFiles()
 {
     QStringList filters;
     for (int i = 0; i < supported_extensions.size(); ++i)
-        filters << "*."+supported_extensions[i];
+        filters << "*." + supported_extensions[i];
     QString filter = QString("Images/Videos (%1)").arg(filters.join(' '));
-    QStringList files = QFileDialog::getOpenFileNames(Q_NULLPTR, QString(), QString(), filter);
+    QStringList files =
+        QFileDialog::getOpenFileNames(Q_NULLPTR, QString(), QString(), filter);
     asyncAddFiles(files);
 }
 
@@ -190,24 +173,18 @@ int QFileWidget::countActive()
     return cnt;
 }
 
-
-
-
-
-
-
-void QFileWidget::dragEnterEvent(QDragEnterEvent *event)
+void QFileWidget::dragEnterEvent(QDragEnterEvent* event)
 {
     QListWidget::dragEnterEvent(event);
 
-    const QMimeData *mimeData = event->mimeData();
+    const QMimeData* mimeData = event->mimeData();
     if (event->source() == this)
         event->ignore();
     else if (mimeData->hasUrls() && (event->source() == 0))
         event->acceptProposedAction();
 }
 
-void QFileWidget::dragMoveEvent(QDragMoveEvent *event)
+void QFileWidget::dragMoveEvent(QDragMoveEvent* event)
 {
     QListWidget::dragMoveEvent(event);
 
@@ -215,23 +192,20 @@ void QFileWidget::dragMoveEvent(QDragMoveEvent *event)
         event->acceptProposedAction();
 }
 
-void QFileWidget::dropEvent(QDropEvent *event)
+void QFileWidget::dropEvent(QDropEvent* event)
 {
     QListWidget::dropEvent(event);
 
-    const QMimeData *mimeData = event->mimeData();
-    if (mimeData->hasUrls() && (event->source() == 0))
-    {
+    const QMimeData* mimeData = event->mimeData();
+    if (mimeData->hasUrls() && (event->source() == 0)) {
         QStringList new_files;
         QList<QUrl> urlList = mimeData->urls();
-        for (int i = 0; i < urlList.size() && i < 32; ++i)
-        {
-            QUrl &url = urlList[i];
+        for (int i = 0; i < urlList.size() && i < 32; ++i) {
+            QUrl& url = urlList[i];
             if (url.isLocalFile())
                 new_files << url.toLocalFile();
         }
-        if (new_files.size() > 0)
-        {
+        if (new_files.size() > 0) {
             event->acceptProposedAction();
             asyncAddFiles(new_files);
         }
@@ -240,10 +214,9 @@ void QFileWidget::dropEvent(QDropEvent *event)
 
 bool QFileWidget::eventFilter(QObject* obj, QEvent* event)
 {
-    if (event->type()==QEvent::KeyPress)
-    {
+    if (event->type() == QEvent::KeyPress) {
         QKeyEvent* key = static_cast<QKeyEvent*>(event);
-        if (key->key()==Qt::Key_Delete)
+        if (key->key() == Qt::Key_Delete)
             removeSelected();
         else
             return QListWidget::eventFilter(obj, event);
@@ -256,13 +229,15 @@ bool QFileWidget::eventFilter(QObject* obj, QEvent* event)
     return false;
 }
 
-void QFileWidget::paintEvent(QPaintEvent *e) {
-      QListWidget::paintEvent(e);
-      if (countActive() > 0) return;
+void QFileWidget::paintEvent(QPaintEvent* e)
+{
+    QListWidget::paintEvent(e);
+    if (countActive() > 0)
+        return;
 
-      QPainter p(this->viewport());
-      p.drawText(rect(), Qt::AlignCenter, "Drop images or videos here");
-   }
+    QPainter p(this->viewport());
+    p.drawText(rect(), Qt::AlignCenter, "Drop images or videos here");
+}
 
 void QFileWidget::remove(int row)
 {

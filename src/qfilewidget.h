@@ -1,18 +1,20 @@
 #ifndef QFILEWIDGET_H
 #define QFILEWIDGET_H
 
-#include <QObject>
 #include <QListWidget>
-#include <QTimer>
+#include <QObject>
 #include <QStringList>
+#include <QTimer>
 
-class QFileWidget : public QListWidget
-{
+class QFileWidget : public QListWidget {
     Q_OBJECT
 public:
-    QFileWidget(QWidget *parent=0);
+    QFileWidget(QWidget* parent = 0);
 
-    void addSupportedExtension(QString ext) { supported_extensions << ext.toLower(); }
+    void addSupportedExtension(QString ext)
+    {
+        supported_extensions << ext.toLower();
+    }
     void addFiles(QStringList files);
     void asyncAddFiles(QStringList files);
     QStringList getFilesList();
@@ -26,11 +28,11 @@ public slots:
     void selectAndAddFiles();
 
 protected:
-    void dragEnterEvent(QDragEnterEvent *);
-    void dragMoveEvent(QDragMoveEvent *);
-    void dropEvent(QDropEvent *);
+    void dragEnterEvent(QDragEnterEvent*);
+    void dragMoveEvent(QDragMoveEvent*);
+    void dropEvent(QDropEvent*);
     bool eventFilter(QObject* obj, QEvent* event);
-    void paintEvent(QPaintEvent *e);
+    void paintEvent(QPaintEvent* e);
 
     void remove(int i);
     void remove(QListWidgetItem* item);
@@ -39,7 +41,7 @@ private:
     QIcon default_icon, no_preview_icon, video_icon;
     QTimer items_cleaner;
     QPoint drag_start_position;
-    QDrag *drag;
+    QDrag* drag;
     QList<QListWidgetItem*> items_to_delete;
     QStringList supported_extensions;
 

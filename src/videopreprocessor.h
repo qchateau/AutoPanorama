@@ -5,8 +5,7 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/videoio.hpp>
 
-class VideoPreprocessor
-{
+class VideoPreprocessor {
 public:
     VideoPreprocessor(const std::string& video_path);
 

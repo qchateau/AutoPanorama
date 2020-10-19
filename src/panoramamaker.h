@@ -1,40 +1,46 @@
 #ifndef PANORAMAMAKER_H
 #define PANORAMAMAKER_H
 
-#include <opencv2/stitching.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/opencv.hpp>
+#include <opencv2/stitching.hpp>
 
-#include <QThread>
 #include <QElapsedTimer>
 #include <QFileInfo>
+#include <QThread>
 
 using namespace cv;
 using namespace std;
 
-class PanoramaMaker : public QThread
-{
+class PanoramaMaker : public QThread {
     Q_OBJECT
 public:
     enum Status { STOPPED, WORKING, DONE, FAILED };
-    struct BlenderMode { QString mode; double sharpness; int bands; };
-    struct ExposureComensatorMode { QString mode;
-                                    QString type;
-                                    int block_size;
-                                    int nfeed;
-                                    double similarity_th; };
-    struct FeaturesMatchingMode { QString mode; double conf; };
+    struct BlenderMode {
+        QString mode;
+        double sharpness;
+        int bands;
+    };
+    struct ExposureComensatorMode {
+        QString mode;
+        QString type;
+        int block_size;
+        int nfeed;
+        double similarity_th;
+    };
+    struct FeaturesMatchingMode {
+        QString mode;
+        double conf;
+    };
 
     static QStringList getSupportedImageExtensions();
     static QStringList getSupportedVideoExtensions();
 
-    explicit PanoramaMaker(QObject *parent = 0);
+    explicit PanoramaMaker(QObject* parent = 0);
 
     void setImages(QStringList files);
     void setVideos(QStringList files);
-    void setOutput(QString output_filename_,
-                   QString output_ext_,
-                   QString output_dir_);
+    void setOutput(QString output_filename_, QString output_ext_, QString output_dir_);
 
     void setUseOpenCL(bool use) { try_use_opencl = use; }
     bool getUseOpenCL() { return try_use_opencl; }
@@ -45,11 +51,23 @@ public:
     void setBlenderMode(BlenderMode mode) { blender_mode = mode; }
     BlenderMode getBlenderMode() { return blender_mode; }
 
-    void setExposureCompensatorMode(ExposureComensatorMode mode) { exposure_compensator_mode = mode; }
-    ExposureComensatorMode getExposureCompensatorMode() { return exposure_compensator_mode; }
+    void setExposureCompensatorMode(ExposureComensatorMode mode)
+    {
+        exposure_compensator_mode = mode;
+    }
+    ExposureComensatorMode getExposureCompensatorMode()
+    {
+        return exposure_compensator_mode;
+    }
 
-    void setFeaturesMatchingMode(FeaturesMatchingMode mode) { features_matching_mode = mode; }
-    FeaturesMatchingMode getFeaturesMatchingMode() { return features_matching_mode; }
+    void setFeaturesMatchingMode(FeaturesMatchingMode mode)
+    {
+        features_matching_mode = mode;
+    }
+    FeaturesMatchingMode getFeaturesMatchingMode()
+    {
+        return features_matching_mode;
+    }
 
     void setWarpMode(QString mode) { warp_mode = mode; }
     QString getWarpMode() { return warp_mode; }
@@ -84,8 +102,8 @@ public:
     void setImagesPerVideo(int nr) { images_per_video = nr; }
     int getImagesPerVideo() { return images_per_video; }
 
-    float getTotalTime() { return total_time/1000.; }
-    float getProcTime() { return proc_time/1000.; }
+    float getTotalTime() { return total_time / 1000.; }
+    float getProcTime() { return proc_time / 1000.; }
     Status getStatus() { return status; }
     QString getStatusMsg() { return status_msg; }
     int getProgress() { return progress; }
@@ -102,7 +120,7 @@ private:
     void loadImagesFromVideos();
     void loadVideo(const QString& path);
     void failed(Stitcher::Status status);
-    void failed(QString msg=QString("Unknown error"));
+    void failed(QString msg = QString("Unknown error"));
     void done();
     void clean();
     void setProgress(double prog);
@@ -138,7 +156,7 @@ private:
 
 signals:
     void percentage(int);
-    void is_failed(QString msg=QString());
+    void is_failed(QString msg = QString());
     void is_done();
 };
 

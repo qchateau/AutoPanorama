@@ -5,22 +5,22 @@
 
 namespace details {
 
-template<typename BlocksCompensator, typename SimpleCompensator>
-class CombinedCompensator: public BlocksCompensator
-{
+template <typename BlocksCompensator, typename SimpleCompensator>
+class CombinedCompensator : public BlocksCompensator {
 public:
     using BlocksCompensator::BlocksCompensator;
 
-    void feed(const std::vector<cv::Point> &corners, const std::vector<cv::UMat> &images,
-              const std::vector<std::pair<cv::UMat,uchar> > &masks) override
+    void feed(
+        const std::vector<cv::Point>& corners,
+        const std::vector<cv::UMat>& images,
+        const std::vector<std::pair<cv::UMat, uchar>>& masks) override
     {
         const int num_images = images.size();
 
         std::vector<cv::UMat> copied_images;
         copied_images.reserve(num_images);
 
-        for (int i = 0; i < num_images; ++i)
-        {
+        for (int i = 0; i < num_images; ++i) {
             copied_images.emplace_back(images[i].clone());
         }
 
@@ -30,8 +30,7 @@ public:
         compensator.feed(corners, copied_images, masks);
         auto global_gains = compensator.gains();
 
-        for (int i = 0; i < num_images; ++i)
-        {
+        for (int i = 0; i < num_images; ++i) {
             compensator.apply(i, corners[i], copied_images[i], masks[i].first);
         }
 
@@ -44,8 +43,7 @@ public:
         std::vector<cv::Mat> gain_maps;
         block_compensator.getMatGains(gain_maps);
 
-        for (int i = 0; i < num_images; ++i)
-        {
+        for (int i = 0; i < num_images; ++i) {
             multiply(gain_maps[i], global_gains[i], gain_maps[i]);
         }
 
@@ -53,11 +51,11 @@ public:
     }
 };
 
-using CombinedGainCompensator = ::details::CombinedCompensator<
-    cv::detail::BlocksGainCompensator,
-    cv::detail::GainCompensator>;
+using CombinedGainCompensator =
+    ::details::CombinedCompensator<cv::detail::BlocksGainCompensator, cv::detail::GainCompensator>;
 using CombinedChannelsCompensator = ::details::CombinedCompensator<
-    cv::detail::BlocksChannelsCompensator, cv::detail::ChannelsCompensator>;
+    cv::detail::BlocksChannelsCompensator,
+    cv::detail::ChannelsCompensator>;
 
 } // details
 
@@ -71,6 +69,5 @@ using BlocksChannelsCompensator = ::cv::detail::BlocksChannelsCompensator;
 
 using CombinedGainCompensator = ::details::CombinedGainCompensator;
 using CombinedChannelsCompensator = ::details::CombinedChannelsCompensator;
-
 
 #endif // EXPOSURE_COMPENSATOR_H

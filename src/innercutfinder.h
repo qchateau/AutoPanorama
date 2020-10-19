@@ -1,9 +1,9 @@
 #ifndef INNERCUTFINDER_H
 #define INNERCUTFINDER_H
 
-#include <opencv2/opencv.hpp>
 #include <iostream>
 #include <vector>
+#include <opencv2/opencv.hpp>
 
 using namespace cv;
 
@@ -15,8 +15,7 @@ using namespace cv;
 #define LOGLN(x)
 #endif
 
-class InnerCutFinder
-{
+class InnerCutFinder {
 public:
     InnerCutFinder(InputArray mask);
     Rect getROI();
