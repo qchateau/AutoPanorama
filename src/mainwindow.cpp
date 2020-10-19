@@ -259,7 +259,7 @@ void MainWindow::onExposureCompensatorChange()
     {
         ui->blocksize_label->show();
         ui->blocksize_spinbox->show();
-        ui->exp_sim_th_spinbox->setValue(0.1);
+        ui->exp_sim_th_spinbox->setValue(0.30);
     }
     else
     {
@@ -350,18 +350,26 @@ void MainWindow::onFastSettingsChanged()
     {
     case 0: // Very fast
         ui->nfeed_spinbox->setValue(1);
+        ui->seamfinderres_spinbox->setValue(0.1);
+        ui->regres_spinbox->setValue(0.6);
         ui->expcomp_mode_combobox->setCurrentText("Simple");
         break;
     case 1: // Fast
         ui->nfeed_spinbox->setValue(3);
+        ui->seamfinderres_spinbox->setValue(0.1);
+        ui->regres_spinbox->setValue(0.6);
         ui->expcomp_mode_combobox->setCurrentText("Simple");
         break;
     case 2: // Slow
         ui->nfeed_spinbox->setValue(1);
+        ui->seamfinderres_spinbox->setValue(0.2);
+        ui->regres_spinbox->setValue(1.0);
         ui->expcomp_mode_combobox->setCurrentText("Combined");
         break;
     case 3: // Very slow
         ui->nfeed_spinbox->setValue(3);
+        ui->seamfinderres_spinbox->setValue(0.2);
+        ui->regres_spinbox->setValue(1.0);
         ui->expcomp_mode_combobox->setCurrentText("Combined");
         break;
     }
@@ -394,7 +402,7 @@ void MainWindow::onFastSettingsChanged()
 void MainWindow::resetAlgoSetting()
 {
     ui->inner_cut_checkbox->setCheckState(Qt::Checked);
-    ui->regres_spinbox->setValue(0.6);
+    ui->regres_spinbox->setValue(1.0);
     ui->featuresfinder_combobox->setCurrentText("AKAZE");
     ui->featuresmatcher_combobox->setCurrentText("Best of 2 nearest");
     ui->featuresmatcherconf_spinbox->setValue(0.65);
@@ -407,9 +415,9 @@ void MainWindow::resetAlgoSetting()
     ui->expcomp_type_combobox->setCurrentText("BGR");
     ui->nfeed_spinbox->setValue(3);
     ui->blocksize_spinbox->setValue(32);
-    ui->exp_sim_th_spinbox->setValue(0.1);
+    ui->exp_sim_th_spinbox->setValue(0.30);
 
-    ui->seamfinderres_spinbox->setValue(0.1);
+    ui->seamfinderres_spinbox->setValue(0.2);
     ui->seamfindermode_combobox->setCurrentText("Graph cut color");
 
     ui->blendertype_combobox->setCurrentText("Multiband");
