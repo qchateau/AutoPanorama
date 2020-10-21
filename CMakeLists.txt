@@ -39,7 +39,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 add_definitions(-DAPP_VERSION="${PROJECT_VERSION}")
 
 if(UNIX)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -fdiagnostics-color=always")
     # https://stackoverflow.com/questions/47117443/dynamic-linking-with-rpath-not-working-under-ubuntu-17-10
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--disable-new-dtags")
 elseif(WIN32)
