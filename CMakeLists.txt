@@ -1,14 +1,12 @@
 cmake_minimum_required(VERSION 3.1.0)
-project(autopanorama VERSION 1.3.0)
+project(autopanorama VERSION 1.3.1)
 set(TITLE_PROJECT_NAME "AutoPanorama")
 
 # Configure project
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_EXTENSIONS OFF)
-if (NOT DEFINED BUILD_SHARED_LIBS)
-    set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
-endif ()
+set(BUILD_SHARED_LIBS OFF)
 if (ENABLE_LOG)
     add_definitions(-DENABLE_LOG=1)
 endif ()
@@ -70,6 +68,19 @@ set(
     ${RC}
 )
 
+set(
+    OPENCV_LIBRARIES
+
+    opencv_stitching
+    opencv_features2d
+    opencv_calib3d
+    opencv_flann
+    opencv_videoio
+    opencv_imgcodecs
+    opencv_imgproc
+    opencv_core
+)
+
 # Main binary
 add_executable(
     ${PROJECT_NAME}
@@ -81,27 +92,13 @@ target_link_libraries(
     ${PROJECT_NAME}
 
     ${Qt5Widgets_LIBRARIES}
-    opencv_stitching
-    opencv_videoio
+    ${OPENCV_LIBRARIES}
 )
-
-# Install tool function
-if(UNIX)
-    set(SH_EXT "so")
-    set(SH_PREFIX "lib")
-    set(DESTINATION_BINARY "bin")
-    set(DESTINATION_SH "share/${PROJECT_NAME}/lib")
-else()
-    set(SH_EXT "dll")
-    set(SH_PREFIX "")
-    set(DESTINATION_BINARY "bin")
-    set(DESTINATION_SH "bin")
-endif()
 
 # Install main binary
 install(
     TARGETS ${PROJECT_NAME}
-    RUNTIME DESTINATION ${DESTINATION_BINARY}
+    RUNTIME DESTINATION bin
 )
 
 # Install desktop file
@@ -122,6 +119,12 @@ endif()
 
 # Install dependencies
 if(WIN32)
+    # Install OpenCV libraries
+    install(
+        TARGETS ${OPENCV_LIBRARIES}
+        RUNTIME DESTINATION bin
+    )
+
     # Install Qt libraries
     set(QT_REQUIRED_LIBS_TARGET_NAMES
         Qt5::Widgets
@@ -132,7 +135,7 @@ if(WIN32)
         get_target_property(location ${target_name} LOCATION_Release)
         get_filename_component(dir ${location} DIRECTORY)
         get_filename_component(basename ${location} NAME_WE)
-        file(GLOB all_locations ${dir}/${basename}.${SH_EXT}*)
+        file(GLOB all_locations ${dir}/${basename}.dll*)
 
         if(NOT all_locations)
             message(SEND_ERROR "Not found: ${target_name}")
@@ -141,36 +144,36 @@ if(WIN32)
         endif()
         list(APPEND QT_LIBS_PATHS ${all_locations})
     endforeach()
-    install(FILES ${QT_LIBS_PATHS} DESTINATION ${DESTINATION_SH})
+    install(FILES ${QT_LIBS_PATHS} DESTINATION bin)
 
     # Install required Qt plugins
     get_filename_component(QT_ROOT ${Qt5_DIR}/../../.. ABSOLUTE)
     set(QT_PLATFORMS ${QT_ROOT}/plugins/platforms)
     set(QT_IMAGE_FORMATS ${QT_ROOT}/plugins/imageformats)
 
-    file(GLOB qjpeg_library "${QT_IMAGE_FORMATS}/${SH_PREFIX}qjpeg.${SH_EXT}")
+    file(GLOB qjpeg_library "${QT_IMAGE_FORMATS}/qjpeg.dll")
     if(NOT qjpeg_library)
         message(SEND_ERROR "Not found: qjpeg in ${QT_IMAGE_FORMATS}")
     else()
         message(STATUS "Found qjpeg: ${qjpeg_library}")
     endif()
-    install(FILES ${qjpeg_library} DESTINATION ${DESTINATION_SH}/imageformats)
+    install(FILES ${qjpeg_library} DESTINATION bin/imageformats)
 
-    file(GLOB qico_library "${QT_IMAGE_FORMATS}/${SH_PREFIX}qico.${SH_EXT}")
+    file(GLOB qico_library "${QT_IMAGE_FORMATS}/qico.dll")
     if(NOT qico_library)
         message(SEND_ERROR "Not found: qico in ${QT_IMAGE_FORMATS}")
     else()
         message(STATUS "Found qico: ${qico_library}")
     endif()
-    install(FILES ${qico_library} DESTINATION ${DESTINATION_SH}/imageformats)
+    install(FILES ${qico_library} DESTINATION bin/imageformats)
 
-    file(GLOB qwindows_library "${QT_PLATFORMS}/${SH_PREFIX}qwindows.${SH_EXT}")
+    file(GLOB qwindows_library "${QT_PLATFORMS}/qwindows.dll")
     if(NOT qwindows_library)
         message(SEND_ERROR "Not found: qwindows in ${QT_PLATFORMS}")
     else()
         message(STATUS "Found qjpeg: ${qwindows_library}")
     endif()
-    install(FILES ${qwindows_library} DESTINATION ${DESTINATION_SH}/platforms)
+    install(FILES ${qwindows_library} DESTINATION bin/platforms)
 endif()
 
 # Package
