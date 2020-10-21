@@ -27,6 +27,9 @@ void RescalableLabel::mousePressEvent(QMouseEvent* event)
 
 void RescalableLabel::updatePixmap()
 {
+    if (original_.isNull()) {
+        return;
+    }
     QPixmap scaled = original_.scaled(
         this->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
     QLabel::setPixmap(scaled);
