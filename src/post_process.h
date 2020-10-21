@@ -1,36 +1,23 @@
 #ifndef POST_PROCESS_H
 #define POST_PROCESS_H
 
-#include "types.h"
+#include "rescalable_label.h"
+#include "ui_post_process.h"
 
 #include <QDialog>
 #include <QLabel>
 #include <QPixmap>
+#include <QRadioButton>
 #include <QSlider>
-#include <QVBoxLayout>
 
 #include <opencv2/opencv.hpp>
 
 namespace autopanorama {
 
-class RescalableLabel : public QLabel {
-public:
-    RescalableLabel(QPixmap pixmap, QWidget* parent = nullptr);
-    void setPixmap(QPixmap pixmap);
-
-protected:
-    void resizeEvent(QResizeEvent*) override;
-
-private:
-    void updatePixmap();
-
-    QPixmap original_;
-};
-
 class PostProcess : public QDialog {
     Q_OBJECT
 public:
-    PostProcess(const OutputFiles& outputs, QWidget* parent = nullptr);
+    PostProcess(const QString& output_path, QWidget* parent = nullptr);
 
 private:
     static constexpr double kPreciseSliderScale = 100;
@@ -42,13 +29,9 @@ private:
     void onSave();
     QString getPostProcessPath() const;
 
-    QSlider* slider_angle_coarse_;
-    QSlider* slider_angle_precise_;
-    QLabel* label_angle_;
-    RescalableLabel* label_rotated_;
-    RescalableLabel* label_cut_;
+    Ui::PostProcess* ui_;
 
-    OutputFiles outputs_;
+    QString output_path_;
     QPixmap original_;
     cv::UMat downscaled_mask_;
     double mask_scale_;

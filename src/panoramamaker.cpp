@@ -1,5 +1,6 @@
 #include "panoramamaker.h"
 #include "exposure_compensator.h"
+#include "utils.h"
 #include "videopreprocessor.h"
 
 #include <opencv2/core/ocl.hpp>
@@ -84,13 +85,9 @@ void PanoramaMaker::setVideos(QStringList files)
     videos_path = files;
 }
 
-void PanoramaMaker::setOutput(
-    QString output_filename_,
-    QString output_ext_,
-    QString output_dir_)
+void PanoramaMaker::setOutput(QString output_filename_, QString output_dir_)
 {
     output_filename = output_filename_;
-    output_ext = output_ext_;
     output_dir = output_dir_;
 }
 
@@ -201,7 +198,7 @@ cv::Stitcher::Status PanoramaMaker::unsafeRun()
     else
         setProgress(30);
 
-    cv::UMat pano, mask;
+    cv::UMat pano, alpha_pano;
 
     stitcher_status = stitcher->composePanorama(pano);
     if (stitcher_status != cv::Stitcher::OK)
@@ -209,14 +206,16 @@ cv::Stitcher::Status PanoramaMaker::unsafeRun()
     else
         setProgress(80);
 
-    mask = stitcher->resultMask();
-    actual_output = genOutputFilesInfo();
+    cv::cvtColor(pano, alpha_pano, cv::COLOR_BGR2BGRA);
+    std::vector<cv::UMat> channels;
+    cv::split(alpha_pano, channels);
+    channels[3] = stitcher->resultMask();
+    cv::merge(channels, alpha_pano);
 
-    qDebug() << "Writing panorama to " << actual_output.output.absoluteFilePath();
-    std::string out = actual_output.output.absoluteFilePath().toStdString();
-    std::string mask_out = actual_output.mask.absoluteFilePath().toStdString();
-    imwrite(out, pano);
-    imwrite(mask_out, mask);
+    output_path = genOutputFilePath();
+
+    qDebug() << "Writing panorama to " << output_path;
+    imwrite(output_path.toStdString(), alpha_pano);
 
     proc_time = proc_timer.elapsed();
     setProgress(100);
@@ -537,22 +536,9 @@ bool PanoramaMaker::configureStitcher()
     return true;
 }
 
-OutputFiles PanoramaMaker::genOutputFilesInfo()
+QString PanoramaMaker::genOutputFilePath()
 {
-    int nr = 0;
-    OutputFiles infos;
-    QString final_basename;
-    do {
-        final_basename = output_filename;
-        if (nr++ > 0)
-            final_basename += "_" + QString::number(nr);
-
-        infos.output = QFileInfo(
-            QDir(output_dir).filePath(final_basename + output_ext));
-        infos.mask = QFileInfo(
-            QDir(output_dir).filePath(final_basename + "_mask" + output_ext));
-    } while (infos.output.exists() || infos.mask.exists());
-    return infos;
+    return generateNewFilename(output_filename + ".png", output_dir);
 }
 
 } // autopanorama

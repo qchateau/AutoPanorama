@@ -63,6 +63,8 @@ set(
     src/panoramamaker.cpp
     src/innercutfinder.cpp
     src/post_process.cpp
+    src/rescalable_label.cpp
+    src/utils.cpp
 
     ${ICO}
     ${RC}

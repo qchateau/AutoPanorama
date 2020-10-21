@@ -1,43 +1,24 @@
 #include "post_process.h"
 
 #include "innercutfinder.h"
+#include "utils.h"
 
 #include <QDebug>
 #include <QDialogButtonBox>
 #include <QDir>
+#include <QGraphicsColorizeEffect>
+#include <QGridLayout>
+#include <QVBoxLayout>
 
 namespace autopanorama {
 
-RescalableLabel::RescalableLabel(QPixmap pixmap, QWidget* parent)
-    : QLabel(parent), original_{pixmap}
+PostProcess::PostProcess(const QString& output_path, QWidget* parent)
+    : QDialog(parent),
+      ui_(new Ui::PostProcess),
+      output_path_{output_path},
+      original_{output_path}
 {
-    setMinimumSize(640, 480);
-    setScaledContents(false);
-}
-
-void RescalableLabel::setPixmap(QPixmap pixmap)
-{
-    original_ = pixmap;
-    updatePixmap();
-}
-
-void RescalableLabel::resizeEvent(QResizeEvent*)
-{
-    updatePixmap();
-}
-
-void RescalableLabel::updatePixmap()
-{
-    QPixmap scaled = original_.scaled(
-        this->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    QLabel::setPixmap(scaled);
-}
-
-PostProcess::PostProcess(const OutputFiles& outputs, QWidget* parent)
-    : QDialog(parent), outputs_{outputs}, original_{outputs.output.absoluteFilePath()}
-{
-    cv::Mat mask = cv::imread(
-        outputs.mask.absoluteFilePath().toStdString(), cv::IMREAD_GRAYSCALE);
+    cv::Mat mask = cv::imread(output_path_.toStdString(), cv::IMREAD_GRAYSCALE);
     mask_scale_ = std::min(640.0 / mask.cols, 480.0 / mask.rows);
     cv::resize(
         mask,
@@ -47,62 +28,51 @@ PostProcess::PostProcess(const OutputFiles& outputs, QWidget* parent)
         mask_scale_,
         cv::INTER_NEAREST);
 
-    label_angle_ = new QLabel("Angle: 0°");
+    auto set_disabled_effect = [](QWidget* widget) {
+        QGraphicsColorizeEffect* disabled_effect = new QGraphicsColorizeEffect;
+        disabled_effect->setColor(QColor(128, 128, 128));
+        widget->setGraphicsEffect(disabled_effect);
+    };
+    auto clear_disabled_effect = [](QWidget* widget) {
+        widget->setGraphicsEffect(nullptr);
+    };
 
-    slider_angle_coarse_ = new QSlider(Qt::Horizontal, this);
-    slider_angle_coarse_->setMinimum(-180);
-    slider_angle_coarse_->setMaximum(180);
-    slider_angle_coarse_->setValue(0);
-    QHBoxLayout* slider_coarse_layout = new QHBoxLayout;
-    QLabel* coarse_label = new QLabel("Coarse");
-    coarse_label->setFixedHeight(60);
-    slider_coarse_layout->addWidget(coarse_label);
-    slider_coarse_layout->addWidget(slider_angle_coarse_);
+    ui_->setupUi(this);
 
-    slider_angle_precise_ = new QSlider(Qt::Horizontal, this);
-    slider_angle_precise_->setMinimum(-5 * kPreciseSliderScale);
-    slider_angle_precise_->setMaximum(5 * kPreciseSliderScale);
-    slider_angle_precise_->setValue(0);
-    QHBoxLayout* slider_precise_layout = new QHBoxLayout;
-    QLabel* precise_label = new QLabel("Precise");
-    precise_label->setFixedHeight(60);
-    slider_precise_layout->addWidget(precise_label);
-    slider_precise_layout->addWidget(slider_angle_precise_);
+    ui_->slider_coarse->setMinimum(-180);
+    ui_->slider_coarse->setMaximum(180);
+    ui_->slider_coarse->setValue(0);
 
-    label_rotated_ = new RescalableLabel(original_, this);
-    label_cut_ = new RescalableLabel(original_, this);
-    QHBoxLayout* images_layout = new QHBoxLayout;
-    images_layout->addWidget(label_rotated_);
-    images_layout->addWidget(label_cut_);
+    ui_->slider_precise->setMinimum(-5 * kPreciseSliderScale);
+    ui_->slider_precise->setMaximum(5 * kPreciseSliderScale);
+    ui_->slider_precise->setValue(0);
 
-    QDialogButtonBox* button_box = new QDialogButtonBox(
-        QDialogButtonBox::Save | QDialogButtonBox::Cancel);
-
-    QVBoxLayout* layout = new QVBoxLayout;
-    layout->addWidget(label_angle_);
-    layout->setAlignment(label_angle_, Qt::AlignCenter);
-    layout->addLayout(slider_coarse_layout);
-    layout->addLayout(slider_precise_layout);
-
-    layout->addLayout(images_layout);
-    layout->addWidget(button_box);
+    set_disabled_effect(ui_->label_cut);
+    ui_->radio_rotated->setChecked(true);
+    connect(ui_->label_rotated, &RescalableLabel::clicked, this, [=]() {
+        ui_->radio_rotated->setChecked(true);
+        clear_disabled_effect(ui_->label_rotated);
+        set_disabled_effect(ui_->label_cut);
+    });
+    connect(ui_->label_cut, &RescalableLabel::clicked, this, [=]() {
+        ui_->radio_cut->setChecked(true);
+        clear_disabled_effect(ui_->label_cut);
+        set_disabled_effect(ui_->label_rotated);
+    });
 
     connect(
-        slider_angle_coarse_,
+        ui_->slider_coarse,
         &QSlider::valueChanged,
         this,
         &PostProcess::updateRotated);
     connect(
-        slider_angle_precise_,
+        ui_->slider_precise,
         &QSlider::valueChanged,
         this,
         &PostProcess::updateRotated);
 
-    connect(button_box, &QDialogButtonBox::accepted, this, &PostProcess::accept);
-    connect(button_box, &QDialogButtonBox::rejected, this, &PostProcess::reject);
     connect(this, &PostProcess::accepted, this, &PostProcess::onSave);
 
-    setLayout(layout);
     setModal(false);
     setWindowTitle("Post-process");
     setAttribute(Qt::WA_DeleteOnClose);
@@ -111,8 +81,8 @@ PostProcess::PostProcess(const OutputFiles& outputs, QWidget* parent)
 
 double PostProcess::rotation() const
 {
-    return slider_angle_coarse_->value()
-           + slider_angle_precise_->value() / kPreciseSliderScale;
+    return ui_->slider_coarse->value()
+           + ui_->slider_precise->value() / kPreciseSliderScale;
 }
 QMatrix PostProcess::qtMatrix() const
 {
@@ -139,10 +109,10 @@ cv::Mat PostProcess::cvMatrix(cv::InputArray image_to_rotate) const
 void PostProcess::updateRotated()
 {
     QPixmap rotated = original_.transformed(qtMatrix());
-    label_rotated_->setPixmap(rotated);
+    ui_->label_rotated->setPixmap(rotated);
     QString text;
     text.sprintf("Angle: %.2f°", rotation());
-    label_angle_->setText(text);
+    ui_->label_angle->setText(text);
 
     cv::UMat rotated_mask;
     cv::Size size(rotated.width() * mask_scale_, rotated.height() * mask_scale_);
@@ -164,50 +134,54 @@ void PostProcess::updateRotated()
     roi.height /= mask_scale_;
 
     QPixmap cropped = rotated.copy(QRect(roi.x, roi.y, roi.width, roi.height));
-    label_cut_->setPixmap(cropped);
+    ui_->label_cut->setPixmap(cropped);
 }
 
 void PostProcess::onSave()
 {
-    qDebug() << "Reading original image and mask";
-    cv::Mat mask = cv::imread(
-        outputs_.mask.absoluteFilePath().toStdString(), cv::IMREAD_GRAYSCALE);
-    cv::Mat original = cv::imread(
-        outputs_.output.absoluteFilePath().toStdString());
+    qDebug() << "Reading original image";
+    cv::UMat original;
+    cv::imread(output_path_.toStdString()).copyTo(original);
 
-    qDebug() << "Rotating mask and image";
+    qDebug() << "Rotating the image";
     QPixmap qt_rotated = original_.transformed(qtMatrix());
     cv::Size size(qt_rotated.width(), qt_rotated.height());
 
-    cv::UMat rotated, rotated_mask;
-    cv::warpAffine(mask, rotated_mask, cvMatrix(mask), size, cv::INTER_NEAREST);
+    cv::UMat rotated;
     cv::warpAffine(original, rotated, cvMatrix(original), size, cv::INTER_CUBIC);
 
-    qDebug() << "Computing ROI";
-    InnerCutFinder finder(rotated_mask);
-    cv::Rect roi = finder.getROI();
-    QString path = getPostProcessPath();
-    qDebug() << "Writing post-process to " << path;
-    cv::imwrite(path.toStdString(), rotated(roi));
+    if (ui_->radio_rotated->isChecked()) {
+        QString path = getPostProcessPath();
+
+        qDebug() << "Writing post-process to " << path;
+        cv::imwrite(path.toStdString(), rotated);
+    }
+
+    if (ui_->radio_cut->isChecked()) {
+        cv::UMat rotated_mask;
+        std::vector<cv::UMat> channels;
+        cv::split(original, channels);
+        cv::UMat mask = channels.back();
+        cv::warpAffine(mask, rotated_mask, cvMatrix(mask), size, cv::INTER_NEAREST);
+
+        qDebug() << "Computing ROI";
+        InnerCutFinder finder(rotated_mask);
+        cv::Rect roi = finder.getROI();
+
+        QString path = getPostProcessPath();
+
+        qDebug() << "Writing post-process to " << path;
+        cv::imwrite(path.toStdString(), rotated(roi));
+    }
 }
 
 QString PostProcess::getPostProcessPath() const
 {
-    QFileInfo output = outputs_.output;
+    QFileInfo output(output_path_);
     QString basename = output.completeBaseName();
     QString suffix = output.suffix();
     QDir dir = output.absoluteDir();
-
-    QString final_basename;
-    int nr = 0;
-    do {
-        final_basename = basename + "_post_process";
-        if (nr++ > 0)
-            final_basename += "_" + QString::number(nr);
-
-        output = QFileInfo(dir.filePath(final_basename + "." + suffix));
-    } while (output.exists());
-    return output.absoluteFilePath();
+    return generateNewFilename(basename + "_post_process." + suffix, dir);
 }
 
 } // autopanorama
