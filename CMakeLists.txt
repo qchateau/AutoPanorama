@@ -6,7 +6,13 @@ set(TITLE_PROJECT_NAME "AutoPanorama")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(BUILD_SHARED_LIBS OFF)
+if (UNIX)
+    set(BUILD_SHARED_LIBS OFF)
+elseif (WIN32)
+    set(BUILD_SHARED_LIBS ON)
+else ()
+    message(FATAL_ERROR "Unsupported system")
+endif ()
 if (ENABLE_LOG)
     add_definitions(-DENABLE_LOG=1)
 endif ()
@@ -38,11 +44,11 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Custom definition and flags
 add_definitions(-DAPP_VERSION="${PROJECT_VERSION}")
 
-if(UNIX)
+if (UNIX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -fdiagnostics-color=always")
     # https://stackoverflow.com/questions/47117443/dynamic-linking-with-rpath-not-working-under-ubuntu-17-10
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--disable-new-dtags")
-elseif(WIN32)
+elseif (WIN32)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /WX")
 endif()
 
@@ -104,7 +110,7 @@ install(
 )
 
 # Install desktop file
-if(UNIX)
+if (UNIX)
     install(
         FILES
 
@@ -120,7 +126,7 @@ if(UNIX)
 endif()
 
 # Install dependencies
-if(WIN32)
+if (WIN32)
     # Install OpenCV libraries
     install(
         TARGETS ${OPENCV_LIBRARIES}
@@ -184,10 +190,10 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Compose panoramas from multiple photos or
 set(CPACK_PACKAGE_CONTACT "Quentin Chateau (quentin.chateau@gmail.com)")
 set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-${PROJECT_VERSION}")
 
-if(UNIX)
+if (UNIX)
     set(CPACK_GENERATOR "DEB")
     set(CPACK_DEBIAN_PACKAGE_DEPENDS "libqt5core5a, libqt5gui5, libqt5widgets5")
-elseif(WIN32)
+elseif (WIN32)
     set(CPACK_GENERATOR "NSIS")
 
     get_filename_component(ico_abspath ${ICO} REALPATH)
@@ -213,8 +219,6 @@ elseif(WIN32)
     set(CPACK_NSIS_URL_INFO_ABOUT "https://github.com/qchateau/AutoPanorama/")
     set(CPACK_NSIS_HELP_LINK "https://github.com/qchateau/AutoPanorama/")
     set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE.md")
-else ()
-    message(FATAL_ERROR "Unsupported system")
 endif()
 
 include(CPack)
