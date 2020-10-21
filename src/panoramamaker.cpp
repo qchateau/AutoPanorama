@@ -1,6 +1,5 @@
 #include "panoramamaker.h"
 #include "exposure_compensator.h"
-#include "innercutfinder.h"
 #include "videopreprocessor.h"
 
 #include <opencv2/core/ocl.hpp>
@@ -49,8 +48,7 @@ PanoramaMaker::PanoramaMaker(QObject* parent)
       proc_time(-1),
       progress(0),
       try_use_cuda(false),
-      try_use_opencl(false),
-      generate_inner_cut(false)
+      try_use_opencl(false)
 {
 }
 
@@ -183,9 +181,6 @@ QString PanoramaMaker::getStitcherConfString()
                     getCompositingResol() == cv::Stitcher::ORIG_RESOL
                         ? "Original"
                         : QString("%1  Mpx").arg(getCompositingResol()));
-    conf += QString("\n");
-    conf += QString("Generate inner cut panorama : %1")
-                .arg(generate_inner_cut ? "Yes" : "No");
     conf += QString("\n\n");
 
     conf += QString("Try to use OpenCL : %1").arg(try_use_opencl ? "Yes" : "No");
@@ -195,7 +190,6 @@ QString PanoramaMaker::getStitcherConfString()
 
 cv::Stitcher::Status PanoramaMaker::unsafeRun()
 {
-    cv::Rect inner_roi;
     cv::Stitcher::Status stitcher_status;
 
     loadImages();
@@ -207,7 +201,7 @@ cv::Stitcher::Status PanoramaMaker::unsafeRun()
     else
         setProgress(30);
 
-    cv::UMat pano;
+    cv::UMat pano, mask;
 
     stitcher_status = stitcher->composePanorama(pano);
     if (stitcher_status != cv::Stitcher::OK)
@@ -215,29 +209,16 @@ cv::Stitcher::Status PanoramaMaker::unsafeRun()
     else
         setProgress(80);
 
-    if (generate_inner_cut) {
-        cv::UMat pano_mask = stitcher->resultMask();
-        InnerCutFinder cutter(pano_mask);
-        inner_roi = cutter.getROI();
-        if (inner_roi.area() == 0)
-            generate_inner_cut = false;
-    }
-    setProgress(90);
-    proc_time = proc_timer.elapsed();
+    mask = stitcher->resultMask();
+    actual_output = genOutputFilesInfo();
 
-    std::string out = genOutputFileInfo().absoluteFilePath().toUtf8().constData();
-    std::string inner_cut_out =
-        genInnerCutOutputFileInfo().absoluteFilePath().toUtf8().constData();
-
-    qDebug() << "Writing full panorama to " << QString::fromStdString(out);
+    qDebug() << "Writing panorama to " << actual_output.output.absoluteFilePath();
+    std::string out = actual_output.output.absoluteFilePath().toStdString();
+    std::string mask_out = actual_output.mask.absoluteFilePath().toStdString();
     imwrite(out, pano);
-    setProgress(95);
+    imwrite(mask_out, mask);
 
-    if (generate_inner_cut) {
-        qDebug() << "Writing cut panorama to " << QString::fromStdString(out);
-        imwrite(inner_cut_out, pano(inner_roi));
-    }
-
+    proc_time = proc_timer.elapsed();
     setProgress(100);
     return stitcher_status;
 }
@@ -556,38 +537,22 @@ bool PanoramaMaker::configureStitcher()
     return true;
 }
 
-QFileInfo PanoramaMaker::genOutputFileInfo()
+OutputFiles PanoramaMaker::genOutputFilesInfo()
 {
     int nr = 0;
-    QFileInfo output_fileinfo;
-    QString final_filename;
+    OutputFiles infos;
+    QString final_basename;
     do {
-        final_filename = output_filename;
+        final_basename = output_filename;
         if (nr++ > 0)
-            final_filename += "_" + QString::number(nr);
+            final_basename += "_" + QString::number(nr);
 
-        final_filename += output_ext;
-        output_fileinfo = QFileInfo(QDir(output_dir).filePath(final_filename));
-    } while (output_fileinfo.exists());
-    return output_fileinfo;
-}
-
-QFileInfo PanoramaMaker::genInnerCutOutputFileInfo()
-{
-    int nr = 0;
-    QFileInfo output_fileinfo = genOutputFileInfo();
-    QFileInfo innner_cut_output_fileinfo;
-    QString final_filename;
-    do {
-        final_filename = "inner_" + output_fileinfo.completeBaseName();
-        if (nr++ > 0)
-            final_filename += "_" + QString::number(nr);
-
-        final_filename += output_ext;
-        innner_cut_output_fileinfo = QFileInfo(
-            QDir(output_dir).filePath(final_filename));
-    } while (innner_cut_output_fileinfo.exists());
-    return innner_cut_output_fileinfo;
+        infos.output = QFileInfo(
+            QDir(output_dir).filePath(final_basename + output_ext));
+        infos.mask = QFileInfo(
+            QDir(output_dir).filePath(final_basename + "_mask" + output_ext));
+    } while (infos.output.exists() || infos.mask.exists());
+    return infos;
 }
 
 } // autopanorama

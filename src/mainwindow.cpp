@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "env.h"
+#include "post_process.h"
 
 #include <QCloseEvent>
 #include <QFileDialog>
@@ -212,6 +213,16 @@ void MainWindow::onWorkerDone()
                       .arg(QString::number(sender->getProcTime(), 'f', 1)));
     progress_bars[sender].close->setText("Hide");
     progress_bars[sender].close->setEnabled(true);
+    progress_bars[sender].post_process->setEnabled(true);
+    auto outputs = progress_bars[sender].worker->getOutputFiles();
+
+    if (progress_bars[sender].auto_open_post_process) {
+        openPostProcess(outputs);
+    }
+
+    connect(progress_bars[sender].post_process, &QPushButton::clicked, this, [=]() {
+        openPostProcess(outputs);
+    });
 }
 
 void MainWindow::onBlenderTypeChange()
@@ -374,7 +385,7 @@ void MainWindow::onFastSettingsChanged()
 
 void MainWindow::resetAlgoSetting()
 {
-    ui->inner_cut_checkbox->setCheckState(Qt::Checked);
+    ui->post_process_checkbox->setCheckState(Qt::Checked);
     ui->regres_spinbox->setValue(1.0);
     ui->featuresfinder_combobox->setCurrentText("AKAZE");
     ui->featuresmatcher_combobox->setCurrentText("Best of 2 nearest");
@@ -589,11 +600,17 @@ void MainWindow::closeEvent(QCloseEvent* event)
     }
 }
 
-void MainWindow::startWorker(PanoramaMaker* worker)
+void MainWindow::openPostProcess(const OutputFiles& output)
+{
+    (new PostProcess(output, this))->show();
+}
+
+void MainWindow::startWorker(PanoramaMaker& worker)
 {
     qDebug() << "Starting worker";
-    progress_bars[worker].close->setDisabled(true);
-    worker->start();
+    progress_bars[&worker].close->setDisabled(true);
+    progress_bars[&worker].post_process->setDisabled(true);
+    worker.start();
 }
 
 void MainWindow::createWorkerUi(std::shared_ptr<PanoramaMaker> worker)
@@ -601,6 +618,7 @@ void MainWindow::createWorkerUi(std::shared_ptr<PanoramaMaker> worker)
     std::shared_ptr<QHBoxLayout> hbox = std::make_shared<QHBoxLayout>();
     QProgressBar* progress_bar = new QProgressBar(this);
     QPushButton* close = new QPushButton("Cancel", this);
+    QPushButton* post_process = new QPushButton("Post-process", this);
 
     progress_bar->setRange(0, 100);
     progress_bar->setFormat(worker->getOutputFilename() + " : %p%");
@@ -609,15 +627,21 @@ void MainWindow::createWorkerUi(std::shared_ptr<PanoramaMaker> worker)
     progress_bar->setToolTip(worker->getStitcherConfString());
 
     ProgressBarContent pb_struct;
+    pb_struct.auto_open_post_process = ui->post_process_checkbox->isChecked();
     pb_struct.pb = progress_bar;
     pb_struct.close = close;
+    pb_struct.post_process = post_process;
     pb_struct.worker = worker;
     pb_struct.layout = hbox;
 
     progress_bars[worker.get()] = pb_struct;
     progress_bars[close] = pb_struct;
 
-    connect(worker.get(), &PanoramaMaker::percentage, progress_bar, &QProgressBar::setValue);
+    connect(
+        worker.get(),
+        &PanoramaMaker::percentage,
+        progress_bar,
+        &QProgressBar::setValue);
     connect(worker.get(), &PanoramaMaker::percentage, this, &MainWindow::updateStatusBar);
     connect(worker.get(), &PanoramaMaker::is_failed, this, &MainWindow::onWorkerFailed);
     connect(worker.get(), &PanoramaMaker::is_done, this, &MainWindow::onWorkerDone);
@@ -691,9 +715,6 @@ void MainWindow::configureWorker(PanoramaMaker& worker)
 
     // Interpolation
     worker.setInterpolationMode(ui->interp_combobox->currentText());
-
-    // Inner cut
-    worker.setGenerateInnerCut(ui->inner_cut_checkbox->isChecked());
 
     // Images per video
     worker.setImagesPerVideo(ui->images_per_videos_spinbox->value());

@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include "panoramamaker.h"
+#include "types.h"
 #include "ui_mainwindow.h"
 
 #include <map>
@@ -56,14 +57,17 @@ protected:
     void closeEvent(QCloseEvent* event);
 
 private:
+    void openPostProcess(const OutputFiles& output);
     void startWorker(PanoramaMaker& worker);
     void createWorkerUi(std::shared_ptr<PanoramaMaker> worker);
     void configureWorker(PanoramaMaker& worker);
     QString oclDeviceTypeToString(int type);
 
     struct ProgressBarContent {
+        bool auto_open_post_process;
         QProgressBar* pb;
         QPushButton* close;
+        QPushButton* post_process;
         std::shared_ptr<QHBoxLayout> layout;
         std::shared_ptr<PanoramaMaker> worker;
     };

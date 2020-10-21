@@ -62,6 +62,7 @@ set(
     src/videopreprocessor.cpp
     src/panoramamaker.cpp
     src/innercutfinder.cpp
+    src/post_process.cpp
 
     ${ICO}
     ${RC}

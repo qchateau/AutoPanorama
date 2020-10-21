@@ -1,6 +1,8 @@
 #ifndef PANORAMAMAKER_H
 #define PANORAMAMAKER_H
 
+#include "types.h"
+
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/opencv.hpp>
 #include <opencv2/stitching.hpp>
@@ -43,9 +45,6 @@ public:
 
     void setUseOpenCL(bool use) { try_use_opencl = use; }
     bool getUseOpenCL() { return try_use_opencl; }
-
-    void setGenerateInnerCut(bool gen) { generate_inner_cut = gen; }
-    bool getGenerateInnerCut() { return generate_inner_cut; }
 
     void setBlenderMode(BlenderMode mode) { blender_mode = mode; }
     BlenderMode getBlenderMode() { return blender_mode; }
@@ -109,6 +108,7 @@ public:
 
     QString getStitcherConfString();
     QString getOutputFilename() { return output_filename; }
+    OutputFiles getOutputFiles() { return actual_output; }
 
     cv::Stitcher::Status unsafeRun();
     void run();
@@ -126,11 +126,11 @@ private:
     void incProgress(double inc);
     bool configureStitcher();
 
-    QFileInfo genOutputFileInfo();
-    QFileInfo genInnerCutOutputFileInfo();
+    OutputFiles genOutputFilesInfo();
 
     QStringList images_path, videos_path;
     QString output_filename, output_ext, output_dir;
+    OutputFiles actual_output;
 
     cv::Ptr<cv::Stitcher> stitcher;
     std::vector<cv::Mat> images;
@@ -151,7 +151,7 @@ private:
     long total_time, proc_time;
     double progress;
     int images_per_video;
-    bool try_use_cuda, try_use_opencl, generate_inner_cut;
+    bool try_use_cuda, try_use_opencl;
 
 signals:
     void percentage(int);
