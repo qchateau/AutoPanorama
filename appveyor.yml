@@ -1,125 +1,105 @@
 version: 1.0.{build}
 image:
-- Visual Studio 2017
-- Ubuntu1804
+  - Visual Studio 2017
+  - Ubuntu1804
 test: off
 
 configuration:
   - Release
 
 for:
--
-  matrix:
-    only:
-      - image: Visual Studio 2017
-  clone_folder: C:\projects\autopanorama
+  - matrix:
+      only:
+        - image: Visual Studio 2017
+    clone_folder: C:\projects\autopanorama
 
-  install:
-    - set QTDIR=C:\Qt\5.11.3\msvc2017_64
-    - set PATH=%PATH%;%QTDIR%\bin
+    install:
+      - set QTDIR=C:\Qt\5.11.3\msvc2017_64
+      - set PATH=%PATH%;%QTDIR%\bin
 
-    ############################################################################
-    # Clone submodules
-    ############################################################################
-    - cd C:\projects\autopanorama
-    - git submodule init
-    - git submodule update --depth 1 --init --recursive
+      ############################################################################
+      # Clone submodules
+      ############################################################################
+      - cd C:\projects\autopanorama
+      - git submodule init
+      - git submodule update --depth 1 --init --recursive
 
-    ############################################################################
-    # All external dependencies are installed in C:\projects\deps
-    ############################################################################
-    - mkdir C:\projects\deps
-    - cd C:\projects\deps
+      ############################################################################
+      # All external dependencies are installed in C:\projects\deps
+      ############################################################################
+      - mkdir C:\projects\deps
+      - cd C:\projects\deps
 
-    ############################################################################
-    # Install Ninja
-    ############################################################################
-    - set NINJA_URL="https://github.com/ninja-build/ninja/releases/download/v1.6.0/ninja-win.zip"
-    - appveyor DownloadFile %NINJA_URL% -FileName ninja.zip
-    - 7z x ninja.zip -oC:\projects\deps\ninja > nul
-    - set PATH=C:\projects\deps\ninja;%PATH%
-    - ninja --version
+      ############################################################################
+      # Install Ninja
+      ############################################################################
+      - set NINJA_URL="https://github.com/ninja-build/ninja/releases/download/v1.6.0/ninja-win.zip"
+      - appveyor DownloadFile %NINJA_URL% -FileName ninja.zip
+      - 7z x ninja.zip -oC:\projects\deps\ninja > nul
+      - set PATH=C:\projects\deps\ninja;%PATH%
+      - ninja --version
 
-    ############################################################################
-    # Install a recent CMake
-    ############################################################################
-    - set CMAKE_URL="https://cmake.org/files/v3.10/cmake-3.10.0-win64-x64.zip"
-    - appveyor DownloadFile %CMAKE_URL% -FileName cmake.zip
-    - 7z x cmake.zip -oC:\projects\deps > nul
-    - move C:\projects\deps\cmake-* C:\projects\deps\cmake # Move to a version-agnostic directory
-    - set PATH=C:\projects\deps\cmake\bin;%PATH%
-    - cmake --version
+      ############################################################################
+      # Install a recent CMake
+      ############################################################################
+      - set CMAKE_URL="https://cmake.org/files/v3.10/cmake-3.10.0-win64-x64.zip"
+      - appveyor DownloadFile %CMAKE_URL% -FileName cmake.zip
+      - 7z x cmake.zip -oC:\projects\deps > nul
+      - move C:\projects\deps\cmake-* C:\projects\deps\cmake # Move to a version-agnostic directory
+      - set PATH=C:\projects\deps\cmake\bin;%PATH%
+      - cmake --version
 
-    ############################################################################
-    # Install Eigen
-    ############################################################################
-    - set EIGEN_URL="http://bitbucket.org/eigen/eigen/get/3.3.7.zip"
-    - appveyor DownloadFile %EIGEN_URL% -FileName eigen.zip
-    - 7z x eigen.zip -oC:\projects\deps > nul
-    - move C:\projects\deps\eigen-* C:\projects\deps\eigen # Move to a version-agnostic directory
-    - set INCLUDE=C:\projects\deps\eigen;%INCLUDE%
+      ############################################################################
+      # Install Eigen
+      ############################################################################
+      - set EIGEN_URL="https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.zip"
+      - appveyor DownloadFile %EIGEN_URL% -FileName eigen.zip
+      - 7z x eigen.zip -oC:\projects\deps > nul
+      - move C:\projects\deps\eigen-* C:\projects\deps\eigen # Move to a version-agnostic directory
+      - set INCLUDE=C:\projects\deps\eigen;%INCLUDE%
 
-  before_build:
-    - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
+    before_build:
+      - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
 
-    - cd C:\projects\autopanorama
-    - md build
-    - cd build
+      - cd C:\projects\autopanorama
+      - md build
+      - cd build
 
-    - md autopanorama
-    - cd autopanorama
+    build_script:
+      - cd c:\projects\autopanorama\build\
+      - cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_SH="CMAKE_SH-NOTFOUND" ../
+      - cmake --build . --target package
 
-    - cd c:\projects\autopanorama\build
-    - md opencv
-    - cd opencv
+    artifacts:
+      - path: build\autopanorama-*.exe
+        name: nsis
 
-  build_script:
-    - cd c:\projects\autopanorama\build\opencv
-    - cmake -G Ninja -C ../../opencv.cmake -DCMAKE_SH="CMAKE_SH-NOTFOUND" ../../opencv
-    - cmake --build . --target install
+  - matrix:
+      only:
+        - image: Ubuntu1804
+    install:
+      - git submodule init
+      - git submodule update --depth 1 --init --recursive
+      - sudo apt update && sudo apt-get install -y qt5-default libeigen3-dev
+    build_script:
+      - NCPU=$(nproc)
+      - echo "Will compile on $NCPU CPUs"
 
-    - cd c:\projects\autopanorama\build\autopanorama
-    - cmake -DCMAKE_BUILD_TYPE=Release -G Ninja ../../
-    - cmake --build . --target package
+      - mkdir build && cd build
+      - cmake .. -DCMAKE_BUILD_TYPE=Release
+      - make -j$NCPU package
 
-  artifacts:
-    - path: build\autopanorama\autopanorama-*.exe
-      name: nsis
-
--
-  matrix:
-    only:
-      - image: Ubuntu1804
-  install:
-    - git submodule init
-    - git submodule update --depth 1 --init --recursive
-    - sudo apt update && sudo apt-get install -y qt5-default libeigen3-dev
-  build_script:
-    - NCPU=$(nproc)
-    - echo "Will compile on $NCPU CPUs"
-
-    - mkdir -p build/opencv && cd build/opencv
-    - cmake -C ../../opencv.cmake ../../opencv
-    - make -j$NCPU install
-    - cd ../../
-
-    - mkdir -p build/autopanorama && cd build/autopanorama
-    - cmake ../../ -DCMAKE_BUILD_TYPE=Release
-    - make -j$NCPU package
-    - cd ../../
-
-    - dpkg -c build/autopanorama/*.deb
-  artifacts:
-    - path: build/autopanorama/*.deb
-      name: ubuntu1804
+      - dpkg -c *.deb
+    artifacts:
+      - path: build/*.deb
+        name: ubuntu1804
 
 deploy:
-  description: 'Automatic release from AppVeyor'
+  description: "Automatic release from AppVeyor"
   provider: GitHub
   auth_token:
-    secure: f/Ixlhv5ZAa/7VwNWFU76+Z9jYdPOZcj72WdGUG5O8mks8tBbOsSNi0vKCYqBaQA
+    secure: ZXNglLjYiDZKntOtUYbC/3iVcAJ/VSiaGNMxV++LlWR9uyp4yysVRCEkr3SYpLVK
   draft: false
   prerelease: false
   on:
     APPVEYOR_REPO_TAG: true
-

@@ -1,14 +1,11 @@
 #ifndef INNERCUTFINDER_H
 #define INNERCUTFINDER_H
 
-#include <opencv2/opencv.hpp>
 #include <iostream>
 #include <vector>
+#include <opencv2/opencv.hpp>
 
-using namespace cv;
-
-#define ENABLE_LOG 1
-#if ENABLE_LOG
+#if defined(ENABLE_LOG) && ENABLE_LOG
 #define LOG(x) std::cout << x
 #define LOGLN(x) std::cout << x << std::endl
 #else
@@ -16,22 +13,27 @@ using namespace cv;
 #define LOGLN(x)
 #endif
 
-class InnerCutFinder
-{
+namespace autopanorama {
+
+class InnerCutFinder {
 public:
-    InnerCutFinder(InputArray mask);
-    Rect getROI();
+    InnerCutFinder(cv::InputArray mask);
+    cv::Rect getROI();
     void process();
 
 private:
-    Rect processFirst();
+    cv::Rect processFirst();
     bool processLevel(int level);
-    std::vector<Mat> pyramid;
-    std::vector<Rect> pyramid_roi;
+
+    std::vector<cv::Mat> pyramid;
+    std::vector<cv::Rect> pyramid_roi;
+
     int min_search_res;
     double step_down_scale;
     double roi_min_area;
     bool done, failed;
 };
+
+} // autopanorama
 
 #endif // INNERCUTFINDER_H

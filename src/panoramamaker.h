@@ -1,55 +1,71 @@
 #ifndef PANORAMAMAKER_H
 #define PANORAMAMAKER_H
 
-#include <opencv2/stitching.hpp>
+#include "types.h"
+
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/opencv.hpp>
+#include <opencv2/stitching.hpp>
 
-#include <QThread>
 #include <QElapsedTimer>
 #include <QFileInfo>
+#include <QThread>
 
-using namespace cv;
-using namespace std;
+namespace autopanorama {
 
-class PanoramaMaker : public QThread
-{
+class PanoramaMaker : public QThread {
     Q_OBJECT
 public:
     enum Status { STOPPED, WORKING, DONE, FAILED };
-    struct BlenderMode { QString mode; double sharpness; int bands; };
-    struct ExposureComensatorMode { QString mode;
-                                    detail::GainCompensator::Mode type;
-                                    int block_size;
-                                    int nfeed;
-                                    double similarity_th; };
-    struct FeaturesMatchingMode { QString mode; double conf; };
+    struct BlenderMode {
+        QString mode;
+        double sharpness;
+        int bands;
+    };
+    struct ExposureComensatorMode {
+        QString mode;
+        QString type;
+        int block_size;
+        int nfeed;
+        double similarity_th;
+    };
+    struct FeaturesMatchingMode {
+        QString mode;
+        double conf;
+    };
 
     static QStringList getSupportedImageExtensions();
     static QStringList getSupportedVideoExtensions();
 
-    explicit PanoramaMaker(QObject *parent = 0);
+    explicit PanoramaMaker(QObject* parent = 0);
 
     void setImages(QStringList files);
     void setVideos(QStringList files);
-    void setOutput(QString output_filename_,
-                   QString output_ext_,
-                   QString output_dir_);
+    void setOutput(QString output_filename_, QString output_ext_, QString output_dir_);
 
     void setUseOpenCL(bool use) { try_use_opencl = use; }
     bool getUseOpenCL() { return try_use_opencl; }
 
-    void setGenerateInnerCut(bool gen) { generate_inner_cut = gen; }
-    bool getGenerateInnerCut() { return generate_inner_cut; }
-
     void setBlenderMode(BlenderMode mode) { blender_mode = mode; }
     BlenderMode getBlenderMode() { return blender_mode; }
 
-    void setExposureCompensatorMode(ExposureComensatorMode mode) { exposure_compensator_mode = mode; }
-    ExposureComensatorMode getExposureCompensatorMode() { return exposure_compensator_mode; }
+    void setExposureCompensatorMode(ExposureComensatorMode mode)
+    {
+        exposure_compensator_mode = mode;
+    }
+    ExposureComensatorMode getExposureCompensatorMode()
+    {
+        return exposure_compensator_mode;
+    }
 
-    void setFeaturesMatchingMode(FeaturesMatchingMode mode) { features_matching_mode = mode; }
-    FeaturesMatchingMode getFeaturesMatchingMode() { return features_matching_mode; }
+    void setFeaturesMatchingMode(FeaturesMatchingMode mode)
+    {
+        features_matching_mode = mode;
+    }
+    FeaturesMatchingMode getFeaturesMatchingMode()
+    {
+        return features_matching_mode;
+    }
 
     void setWarpMode(QString mode) { warp_mode = mode; }
     QString getWarpMode() { return warp_mode; }
@@ -84,16 +100,17 @@ public:
     void setImagesPerVideo(int nr) { images_per_video = nr; }
     int getImagesPerVideo() { return images_per_video; }
 
-    float getTotalTime() { return total_time/1000.; }
-    float getProcTime() { return proc_time/1000.; }
+    float getTotalTime() { return total_time / 1000.; }
+    float getProcTime() { return proc_time / 1000.; }
     Status getStatus() { return status; }
     QString getStatusMsg() { return status_msg; }
     int getProgress() { return progress; }
 
     QString getStitcherConfString();
     QString getOutputFilename() { return output_filename; }
+    OutputFiles getOutputFiles() { return actual_output; }
 
-    Stitcher::Status unsafeRun();
+    cv::Stitcher::Status unsafeRun();
     void run();
 
 private:
@@ -101,22 +118,22 @@ private:
     void loadImagesFromImages();
     void loadImagesFromVideos();
     void loadVideo(const QString& path);
-    void failed(Stitcher::Status status);
-    void failed(QString msg=QString("Unknown error"));
+    void failed(cv::Stitcher::Status status);
+    void failed(QString msg = QString("Unknown error"));
     void done();
     void clean();
     void setProgress(double prog);
     void incProgress(double inc);
     bool configureStitcher();
 
-    QFileInfo genOutputFileInfo();
-    QFileInfo genInnerCutOutputFileInfo();
+    OutputFiles genOutputFilesInfo();
 
     QStringList images_path, videos_path;
     QString output_filename, output_ext, output_dir;
+    OutputFiles actual_output;
 
-    Ptr<Stitcher> stitcher;
-    vector<Mat> images;
+    cv::Ptr<cv::Stitcher> stitcher;
+    std::vector<cv::Mat> images;
 
     QString status_msg;
     Status status;
@@ -134,14 +151,14 @@ private:
     long total_time, proc_time;
     double progress;
     int images_per_video;
-    bool try_use_cuda, try_use_opencl, generate_inner_cut;
+    bool try_use_cuda, try_use_opencl;
 
 signals:
     void percentage(int);
-    void is_failed(QString msg=QString());
+    void is_failed(QString msg = QString());
     void is_done();
-
-public slots:
 };
+
+} // autopanorama
 
 #endif // PANORAMAMAKER_H

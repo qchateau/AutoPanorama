@@ -5,8 +5,9 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/videoio.hpp>
 
-class VideoPreprocessor
-{
+namespace autopanorama {
+
+class VideoPreprocessor {
 public:
     VideoPreprocessor(const std::string& video_path);
 
@@ -16,5 +17,7 @@ private:
     cv::VideoCapture capture;
     double frame_count;
 };
+
+} // autopanorama
 
 #endif // VIDEOPREPROCESSOR_H

@@ -2,27 +2,27 @@
 #define MAINWINDOW_H
 
 #include "panoramamaker.h"
+#include "types.h"
+#include "ui_mainwindow.h"
 
-#include <opencv2/stitching.hpp>
 #include <map>
+#include <memory>
+#include <opencv2/stitching.hpp>
 
+#include <QHBoxLayout>
 #include <QMainWindow>
-#include <QTimer>
 #include <QProgressBar>
 #include <QPushButton>
-#include <QHBoxLayout>
+#include <QTimer>
 
-namespace Ui {
-class MainWindow;
-}
+namespace autopanorama {
 
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+    explicit MainWindow(QWidget* parent = 0);
+
     int getNbQueued();
     int getNbDone();
     int getNbFailed();
@@ -33,14 +33,14 @@ public:
 public slots:
     void onMakePanoramaClicked();
     void runWorkers();
-    void onWorkerFailed(QString msg=QString());
+    void onWorkerFailed(QString msg = QString());
     void onWorkerDone();
     void onBlenderTypeChange();
     void onExposureCompensatorChange();
-    void onOutputFilenameChanged(QString edit=QString());
-    void onOutputDirChanged(QString edit=QString());
-    void onOutputFilenameEdit(QString edit=QString());
-    void onOutputDirEdit(QString edit=QString());
+    void onOutputFilenameChanged(QString edit = QString());
+    void onOutputDirChanged(QString edit = QString());
+    void onOutputFilenameEdit(QString edit = QString());
+    void onOutputDirEdit(QString edit = QString());
     void onSelectOutputDirClicked();
     void onFastSettingsChanged();
     void resetAlgoSetting();
@@ -54,33 +54,38 @@ public slots:
     void updateStatusBar();
 
 protected:
-    void closeEvent(QCloseEvent *event);
+    void closeEvent(QCloseEvent* event);
 
 private:
-    void startWorker(PanoramaMaker *worker);
-    void createWorkerUi(PanoramaMaker *worker);
-    void configureWorker(PanoramaMaker *worker);
+    void openPostProcess(const OutputFiles& output);
+    void startWorker(PanoramaMaker& worker);
+    void createWorkerUi(std::shared_ptr<PanoramaMaker> worker);
+    void configureWorker(PanoramaMaker& worker);
     QString oclDeviceTypeToString(int type);
 
     struct ProgressBarContent {
-        QProgressBar *pb;
-        QPushButton *close;
-        PanoramaMaker *worker;
-        QHBoxLayout *layout;
+        bool auto_open_post_process;
+        QProgressBar* pb;
+        QPushButton* close;
+        QPushButton* post_process;
+        std::shared_ptr<QHBoxLayout> layout;
+        std::shared_ptr<PanoramaMaker> worker;
     };
 
-    Ui::MainWindow *ui;
+    std::unique_ptr<Ui::MainWindow> ui;
 
-    QList<PanoramaMaker*> workers;
+    QList<std::shared_ptr<PanoramaMaker>> workers;
     std::map<QObject*, ProgressBarContent> progress_bars;
     int worker_index;
 
-    Stitcher stitcher;
+    cv::Stitcher stitcher;
     bool manual_output_filename, manual_output_dir;
     int max_filename_length;
 
 private slots:
     void closeSenderWorker();
 };
+
+} // autopanorama
 
 #endif // MAINWINDOW_H

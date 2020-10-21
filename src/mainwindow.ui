@@ -45,7 +45,7 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
-         <widget class="QFileWidget" name="filesListWidget">
+         <widget class="autopanorama::QFileWidget" name="filesListWidget">
           <property name="editTriggers">
            <set>QAbstractItemView::NoEditTriggers</set>
           </property>
@@ -1391,12 +1391,12 @@ compensation</string>
        </widget>
       </item>
       <item row="2" column="2">
-       <widget class="QCheckBox" name="inner_cut_checkbox">
+       <widget class="QCheckBox" name="post_process_checkbox">
         <property name="toolTip">
-         <string>The inner cut panorama will be save in the same directory and prefixed with &quot;inner_&quot;</string>
+         <string>Auto-open post process dialog</string>
         </property>
         <property name="text">
-         <string>Generate an inner cut</string>
+         <string>Post process</string>
         </property>
         <property name="checked">
          <bool>true</bool>
@@ -1474,7 +1474,7 @@ compensation</string>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>QFileWidget</class>
+   <class>autopanorama::QFileWidget</class>
    <extends>QListWidget</extends>
    <header>src/qfilewidget.h</header>
    <slots>
