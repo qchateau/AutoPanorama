@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1.0)
+cmake_minimum_required(VERSION 3.10.0)
 project(autopanorama VERSION 1.3.1)
 set(TITLE_PROJECT_NAME "AutoPanorama")
 
@@ -16,6 +16,12 @@ endif ()
 if (ENABLE_LOG)
     add_definitions(-DENABLE_LOG=1)
 endif ()
+
+# Set a default build type if none was specified
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  message(STATUS "Setting build type to 'Release' as none was specified.")
+  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build." FORCE)
+endif()
 
 # Include OpenCV
 set(WITH_EIGEN ON)
@@ -102,6 +108,17 @@ target_link_libraries(
     ${Qt5Widgets_LIBRARIES}
     ${OPENCV_LIBRARIES}
 )
+
+# Enable LTO
+include(CheckIPOSupported)
+check_ipo_supported(RESULT lto_supported)
+if (lto_supported)
+    message(STATUS "Enabling LTO")
+    set_property(TARGET ${PROJECT_NAME} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
+else ()
+    message(STATUS "LTO not supported")
+endif ()
 
 # Install main binary
 install(
