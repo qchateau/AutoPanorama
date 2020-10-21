@@ -2,8 +2,10 @@
 #define MAINWINDOW_H
 
 #include "panoramamaker.h"
+#include "ui_mainwindow.h"
 
 #include <map>
+#include <memory>
 #include <opencv2/stitching.hpp>
 
 #include <QHBoxLayout>
@@ -12,10 +14,6 @@
 #include <QPushButton>
 #include <QTimer>
 
-namespace Ui {
-class MainWindow;
-}
-
 namespace autopanorama {
 
 class MainWindow : public QMainWindow {
@@ -23,7 +21,7 @@ class MainWindow : public QMainWindow {
 
 public:
     explicit MainWindow(QWidget* parent = 0);
-    ~MainWindow();
+
     int getNbQueued();
     int getNbDone();
     int getNbFailed();
@@ -58,21 +56,21 @@ protected:
     void closeEvent(QCloseEvent* event);
 
 private:
-    void startWorker(PanoramaMaker* worker);
-    void createWorkerUi(PanoramaMaker* worker);
-    void configureWorker(PanoramaMaker* worker);
+    void startWorker(PanoramaMaker& worker);
+    void createWorkerUi(std::shared_ptr<PanoramaMaker> worker);
+    void configureWorker(PanoramaMaker& worker);
     QString oclDeviceTypeToString(int type);
 
     struct ProgressBarContent {
         QProgressBar* pb;
         QPushButton* close;
-        PanoramaMaker* worker;
-        QHBoxLayout* layout;
+        std::shared_ptr<QHBoxLayout> layout;
+        std::shared_ptr<PanoramaMaker> worker;
     };
 
-    Ui::MainWindow* ui;
+    std::unique_ptr<Ui::MainWindow> ui;
 
-    QList<PanoramaMaker*> workers;
+    QList<std::shared_ptr<PanoramaMaker>> workers;
     std::map<QObject*, ProgressBarContent> progress_bars;
     int worker_index;
 

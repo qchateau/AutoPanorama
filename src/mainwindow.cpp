@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "env.h"
-#include "ui_mainwindow.h"
 
 #include <QCloseEvent>
 #include <QFileDialog>
@@ -11,7 +10,6 @@
 #include <QString>
 #include <QToolTip>
 #include <QtDebug>
-#include <iostream>
 
 #include <opencv2/core.hpp>
 #include <opencv2/core/ocl.hpp>
@@ -20,7 +18,7 @@ namespace autopanorama {
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent),
-      ui(new Ui::MainWindow),
+      ui(std::make_unique<Ui::MainWindow>()),
       manual_output_filename(false),
       manual_output_dir(false),
       max_filename_length(50)
@@ -48,11 +46,6 @@ MainWindow::MainWindow(QWidget* parent)
     for (const QString& ext : PanoramaMaker::getSupportedVideoExtensions()) {
         ui->filesListWidget->addSupportedExtension(ext);
     }
-}
-
-MainWindow::~MainWindow()
-{
-    delete ui;
 }
 
 int MainWindow::getNbQueued()
@@ -142,7 +135,7 @@ void MainWindow::onMakePanoramaClicked()
         return;
     }
 
-    PanoramaMaker* worker = new PanoramaMaker;
+    std::shared_ptr<PanoramaMaker> worker = std::make_shared<PanoramaMaker>();
 
     if (images.size() > 0) {
         try {
@@ -167,9 +160,9 @@ void MainWindow::onMakePanoramaClicked()
         ui->output_filename_lineedit->text(),
         ui->extension_combobox->currentText(),
         ui->output_dir_lineedit->text());
-    configureWorker(worker);
+    configureWorker(*worker);
     createWorkerUi(worker);
-    connect(worker, &PanoramaMaker::finished, this, &MainWindow::runWorkers);
+    connect(worker.get(), &PanoramaMaker::finished, this, &MainWindow::runWorkers);
 
     qDebug() << "Queuing worker";
     workers << worker;
@@ -186,7 +179,7 @@ void MainWindow::runWorkers()
         if (workers[i]->isRunning())
             break;
         if (workers[i]->getStatus() == PanoramaMaker::STOPPED) {
-            startWorker(workers[i]);
+            startWorker(*workers[i]);
             break;
         }
     }
@@ -599,17 +592,15 @@ void MainWindow::closeEvent(QCloseEvent* event)
 void MainWindow::startWorker(PanoramaMaker* worker)
 {
     qDebug() << "Starting worker";
-    QPushButton* close = progress_bars[worker].close;
-    close->setDisabled(true);
+    progress_bars[worker].close->setDisabled(true);
     worker->start();
 }
 
-void MainWindow::createWorkerUi(PanoramaMaker* worker)
+void MainWindow::createWorkerUi(std::shared_ptr<PanoramaMaker> worker)
 {
-    QProgressBar* progress_bar = new QProgressBar;
-    QHBoxLayout* hbox = new QHBoxLayout;
-    QPushButton* close;
-    close = new QPushButton("Cancel");
+    std::shared_ptr<QHBoxLayout> hbox = std::make_shared<QHBoxLayout>();
+    QProgressBar* progress_bar = new QProgressBar(this);
+    QPushButton* close = new QPushButton("Cancel", this);
 
     progress_bar->setRange(0, 100);
     progress_bar->setFormat(worker->getOutputFilename() + " : %p%");
@@ -623,50 +614,51 @@ void MainWindow::createWorkerUi(PanoramaMaker* worker)
     pb_struct.worker = worker;
     pb_struct.layout = hbox;
 
-    progress_bars[worker] = pb_struct;
+    progress_bars[worker.get()] = pb_struct;
     progress_bars[close] = pb_struct;
 
-    connect(worker, &PanoramaMaker::percentage, progress_bar, &QProgressBar::setValue);
-    connect(worker, &PanoramaMaker::percentage, this, &MainWindow::updateStatusBar);
-    connect(worker, &PanoramaMaker::is_failed, this, &MainWindow::onWorkerFailed);
-    connect(worker, &PanoramaMaker::is_done, this, &MainWindow::onWorkerDone);
-    connect(worker, &PanoramaMaker::finished, this, &MainWindow::updateStatusBar);
+    connect(worker.get(), &PanoramaMaker::percentage, progress_bar, &QProgressBar::setValue);
+    connect(worker.get(), &PanoramaMaker::percentage, this, &MainWindow::updateStatusBar);
+    connect(worker.get(), &PanoramaMaker::is_failed, this, &MainWindow::onWorkerFailed);
+    connect(worker.get(), &PanoramaMaker::is_done, this, &MainWindow::onWorkerDone);
+    connect(worker.get(), &PanoramaMaker::finished, this, &MainWindow::updateStatusBar);
 
     connect(close, &QPushButton::clicked, this, &MainWindow::closeSenderWorker);
 
     hbox->addWidget(progress_bar);
+    hbox->addWidget(post_process);
     hbox->addWidget(close);
-    ui->tabProgressLayout->addLayout(hbox);
+    ui->tabProgressLayout->addLayout(hbox.get());
 }
 
-void MainWindow::configureWorker(PanoramaMaker* worker)
+void MainWindow::configureWorker(PanoramaMaker& worker)
 {
     // OpenCL
-    worker->setUseOpenCL(ui->use_opencl_checkbox->isChecked());
+    worker.setUseOpenCL(ui->use_opencl_checkbox->isChecked());
 
     // Registration resolution
-    worker->setRegistrationResol(ui->regres_spinbox->value());
+    worker.setRegistrationResol(ui->regres_spinbox->value());
 
     // Feature finder mode
-    worker->setFeaturesFinderMode(ui->featuresfinder_combobox->currentText());
+    worker.setFeaturesFinderMode(ui->featuresfinder_combobox->currentText());
 
     // Feature matching mode and confidence
     PanoramaMaker::FeaturesMatchingMode f_matching_mode;
     f_matching_mode.mode = ui->featuresmatcher_combobox->currentText();
     f_matching_mode.conf = ui->featuresmatcherconf_spinbox->value();
-    worker->setFeaturesMatchingMode(f_matching_mode);
+    worker.setFeaturesMatchingMode(f_matching_mode);
 
     // Warp mode
-    worker->setWarpMode(ui->warpmode_combobox->currentText());
+    worker.setWarpMode(ui->warpmode_combobox->currentText());
 
     // Wave correction
-    worker->setWaveCorrectionMode(ui->wavecorkind_combobox->currentText());
+    worker.setWaveCorrectionMode(ui->wavecorkind_combobox->currentText());
 
     // Bundle adjuster
-    worker->setBundleAdjusterMode(ui->bundleadj_combobox->currentText());
+    worker.setBundleAdjusterMode(ui->bundleadj_combobox->currentText());
 
     // Panorama confidence
-    worker->setPanoConfidenceThresh(ui->confth_spinbox->value());
+    worker.setPanoConfidenceThresh(ui->confth_spinbox->value());
 
     // Exposure compensator mode
     PanoramaMaker::ExposureComensatorMode exp_comp_mode;
@@ -675,50 +667,46 @@ void MainWindow::configureWorker(PanoramaMaker* worker)
     exp_comp_mode.block_size = ui->blocksize_spinbox->value();
     exp_comp_mode.nfeed = ui->nfeed_spinbox->value();
     exp_comp_mode.similarity_th = ui->exp_sim_th_spinbox->value();
-    worker->setExposureCompensatorMode(exp_comp_mode);
+    worker.setExposureCompensatorMode(exp_comp_mode);
 
     // Seam estimation resolution
-    worker->setSeamEstimationResol(ui->seamfinderres_spinbox->value());
+    worker.setSeamEstimationResol(ui->seamfinderres_spinbox->value());
 
     // Seam finder mode
-    worker->setSeamFinderMode(ui->seamfindermode_combobox->currentText());
+    worker.setSeamFinderMode(ui->seamfindermode_combobox->currentText());
 
     // Blender
     PanoramaMaker::BlenderMode blender_mode;
     blender_mode.mode = ui->blendertype_combobox->currentText();
     blender_mode.sharpness = ui->sharpness_spinbox->value();
     blender_mode.bands = ui->nbands_spinbox->value();
-    worker->setBlenderMode(blender_mode);
+    worker.setBlenderMode(blender_mode);
 
     // Compositing resolution
     double compositing_res = ui->compositingres_spinbox->value();
     if (compositing_res <= 0)
         compositing_res = cv::Stitcher::ORIG_RESOL;
 
-    worker->setCompositingResol(compositing_res);
+    worker.setCompositingResol(compositing_res);
 
     // Interpolation
-    worker->setInterpolationMode(ui->interp_combobox->currentText());
+    worker.setInterpolationMode(ui->interp_combobox->currentText());
 
     // Inner cut
-    worker->setGenerateInnerCut(ui->inner_cut_checkbox->isChecked());
+    worker.setGenerateInnerCut(ui->inner_cut_checkbox->isChecked());
 
     // Images per video
-    worker->setImagesPerVideo(ui->images_per_videos_spinbox->value());
+    worker.setImagesPerVideo(ui->images_per_videos_spinbox->value());
 }
 
 void MainWindow::closeSenderWorker()
 {
-    ProgressBarContent pb_struct = progress_bars[QObject::sender()];
+    ProgressBarContent& pb_struct = progress_bars[QObject::sender()];
     progress_bars.erase(pb_struct.close);
-    progress_bars.erase(pb_struct.worker);
-    delete pb_struct.pb;
-    delete pb_struct.close;
-    delete pb_struct.layout;
+    progress_bars.erase(pb_struct.worker.get());
+    pb_struct.layout.reset();
     workers.removeAll(pb_struct.worker);
-    if (pb_struct.worker) {
-        delete pb_struct.worker;
-    }
+    pb_struct.worker.reset();
     updateStatusBar();
 }
 
