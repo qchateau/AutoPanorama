@@ -24,6 +24,7 @@ public:
 private:
     cv::Rect processFirst();
     bool processLevel(int level);
+
     std::vector<cv::Mat> pyramid;
     std::vector<cv::Rect> pyramid_roi;
 

@@ -1,14 +1,45 @@
 #include "innercutfinder.h"
 
 namespace autopanorama {
+namespace {
+
+bool isOutOfMask(cv::Mat_<uchar> mask)
+{
+    for (int y = 0; y < mask.rows; ++y) {
+        for (int x = 0; x < mask.cols; ++x) {
+            if (!mask(y, x)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+}
 
 InnerCutFinder::InnerCutFinder(cv::InputArray mask)
     : min_search_res(5000), step_down_scale(0.5), done(false), failed(false)
 {
     CV_Assert(mask.type() == CV_8U);
-
-    LOGLN("Creating the mask pyramid ...");
     pyramid.push_back(mask.getMat());
+}
+
+cv::Rect InnerCutFinder::getROI()
+{
+    if (!done)
+        process();
+    if (failed)
+        return cv::Rect();
+    else
+        return pyramid_roi[0];
+}
+
+void InnerCutFinder::process()
+{
+#if ENABLE_LOG
+    int64_t t0 = cv::getTickCount();
+#endif
+    LOGLN("Creating the mask pyramid ...");
     while (long(pyramid.back().total()) > min_search_res) {
         cv::Mat down;
         resize(
@@ -24,23 +55,13 @@ InnerCutFinder::InnerCutFinder(cv::InputArray mask)
     roi_min_area = (min_search_res / 2) * 0.10;
     LOGLN("  pyramid has " << pyramid.size() << " levels.");
     LOGLN("  the smallest is " << pyramid.back().cols << "x" << pyramid.back().rows);
-}
+    LOGLN(
+        "Crated pyramid, time: "
+        << ((cv::getTickCount() - t0) / cv::getTickFrequency()) << " sec");
 
-cv::Rect InnerCutFinder::getROI()
-{
-    if (!done)
-        process();
-    if (failed)
-        return cv::Rect();
-    else
-        return pyramid_roi[0];
-}
-
-void InnerCutFinder::process()
-{
     LOGLN("Processing pyramid ...");
 #if ENABLE_LOG
-    int64_t t = cv::getTickCount();
+    int64_t t1 = cv::getTickCount();
 #endif
     for (int level = static_cast<int>(pyramid.size() - 1); level >= 0; --level)
         if (!processLevel(level)) {
@@ -48,9 +69,10 @@ void InnerCutFinder::process()
             break;
         }
     done = true;
+
     LOGLN(
         "Processing pyramid, time: "
-        << ((cv::getTickCount() - t) / cv::getTickFrequency()) << " sec");
+        << ((cv::getTickCount() - t1) / cv::getTickFrequency()) << " sec");
 }
 
 cv::Rect InnerCutFinder::processFirst()
@@ -62,11 +84,10 @@ cv::Rect InnerCutFinder::processFirst()
             for (int br_x = search_size.width; br_x > tl_x; --br_x)
                 for (int br_y = search_size.height; br_y > tl_y; --br_y) {
                     cv::Rect roi(cv::Point(tl_x, tl_y), cv::Point(br_x, br_y));
-                    if (roi.area() < roi_min_area)
+                    if (roi.area() < roi_min_area || roi.area() < best_roi.area())
                         continue;
                     cv::Mat pyr_roi = pyramid.back()(roi);
-                    if (countNonZero(pyr_roi) == long(roi.area())
-                        && roi.area() > best_roi.area())
+                    if (!isOutOfMask(pyr_roi))
                         best_roi = roi;
                 }
     return best_roi;
@@ -74,6 +95,9 @@ cv::Rect InnerCutFinder::processFirst()
 
 bool InnerCutFinder::processLevel(int level)
 {
+#if ENABLE_LOG
+    int64_t t0 = cv::getTickCount();
+#endif
     LOGLN("  level " << level + 1);
     cv::Rect roi;
     if (level == long(pyramid.size() - 1)) {
@@ -116,22 +140,40 @@ bool InnerCutFinder::processLevel(int level)
 
                 cv::Point2f new_tl = best_tl;
                 cv::Point2f new_br = best_br;
+                cv::Rect grown_roi;
 
-                if (s == 0) // top
+                if (s == 0) { // top
                     new_tl -= cv::Point2f(0, y_inc * inc);
-                else if (s == 1) // right
+                    grown_roi = cv::Rect(new_tl, cv::Point2f(best_br.x, best_tl.y));
+                }
+                else if (s == 1) { // right
                     new_br += cv::Point2f(x_inc * inc, 0);
-                else if (s == 2) // bottom
+                    grown_roi = cv::Rect(cv::Point2f(best_br.x, best_tl.y), new_br);
+                }
+                else if (s == 2) { // bottom
                     new_br += cv::Point2f(0, y_inc * inc);
-                else if (s == 3) // left
+                    grown_roi = cv::Rect(cv::Point2f(best_tl.x, best_br.y), new_br);
+                }
+                else if (s == 3) { // left
                     new_tl -= cv::Point2f(x_inc * inc, 0);
-
+                    grown_roi = cv::Rect(new_tl, cv::Point2f(best_tl.x, best_br.y));
+                }
                 cv::Rect new_roi = cv::Rect(cv::Point(new_tl), cv::Point(new_br));
+
+                cv::Rect(
+                    std::min(new_roi.x, best_roi.x),
+                    std::min(new_roi.y, best_roi.y),
+                    new_roi.width > best_roi.width ? new_roi.width - best_roi.width
+                                                   : new_roi.width,
+                    new_roi.height > best_roi.height
+                        ? new_roi.height - best_roi.height
+                        : new_roi.height);
+
                 if (new_roi.tl() == best_roi.tl() && new_roi.br() == best_roi.br())
                     continue;
                 if (new_roi.x + new_roi.width > mask.cols || new_roi.x < 0
                     || new_roi.y + new_roi.height > mask.rows || new_roi.y < 0
-                    || countNonZero(mask(new_roi)) != long(new_roi.area())) {
+                    || isOutOfMask(mask(grown_roi))) {
                     max_side[s] = true;
                 }
                 else {
@@ -147,6 +189,9 @@ bool InnerCutFinder::processLevel(int level)
                           << inc << " iterations");
         roi = best_roi;
     }
+    LOGLN(
+        "  time: " << ((cv::getTickCount() - t0) / cv::getTickFrequency())
+                   << " sec");
 
     bool ret = (roi.area() >= roi_min_area);
     if (level != 0)
