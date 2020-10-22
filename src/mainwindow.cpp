@@ -19,13 +19,13 @@ namespace autopanorama {
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent),
-      ui(std::make_unique<Ui::MainWindow>()),
-      manual_output_filename(false),
-      manual_output_dir(false),
-      max_filename_length(50)
+      ui_(std::make_unique<Ui::MainWindow>()),
+      manual_output_filename_(false),
+      manual_output_dir_(false),
+      max_filename_length_(50)
 {
     qRegisterMetaType<QVector<int>>();
-    ui->setupUi(this);
+    ui_->setupUi(this);
 
     std::cout << cv::getBuildInformation() << std::endl;
 
@@ -42,20 +42,20 @@ MainWindow::MainWindow(QWidget* parent)
     updateMakeEnabled();
 
     for (const QString& ext : PanoramaMaker::getSupportedImageExtensions()) {
-        ui->filesListWidget->addSupportedExtension(ext);
+        ui_->filesListWidget->addSupportedExtension(ext);
     }
     for (const QString& ext : PanoramaMaker::getSupportedVideoExtensions()) {
-        ui->filesListWidget->addSupportedExtension(ext);
+        ui_->filesListWidget->addSupportedExtension(ext);
     }
 }
 
 int MainWindow::getNbQueued()
 {
     int nb = 0;
-    for (int i = 0; i < workers.size(); ++i) {
-        if (!workers[i])
+    for (int i = 0; i < workers_.size(); ++i) {
+        if (!workers_[i])
             continue;
-        PanoramaMaker::Status status = workers[i]->getStatus();
+        PanoramaMaker::Status status = workers_[i]->getStatus();
         if (status == PanoramaMaker::STOPPED || status == PanoramaMaker::WORKING)
             ++nb;
     }
@@ -65,10 +65,10 @@ int MainWindow::getNbQueued()
 int MainWindow::getNbDone()
 {
     int nb = 0;
-    for (int i = 0; i < workers.size(); ++i) {
-        if (!workers[i])
+    for (int i = 0; i < workers_.size(); ++i) {
+        if (!workers_[i])
             continue;
-        PanoramaMaker::Status status = workers[i]->getStatus();
+        PanoramaMaker::Status status = workers_[i]->getStatus();
         if (status == PanoramaMaker::DONE)
             ++nb;
     }
@@ -78,10 +78,10 @@ int MainWindow::getNbDone()
 int MainWindow::getNbFailed()
 {
     int nb = 0;
-    for (int i = 0; i < workers.size(); ++i) {
-        if (!workers[i])
+    for (int i = 0; i < workers_.size(); ++i) {
+        if (!workers_[i])
             continue;
-        PanoramaMaker::Status status = workers[i]->getStatus();
+        PanoramaMaker::Status status = workers_[i]->getStatus();
         if (status == PanoramaMaker::FAILED)
             ++nb;
     }
@@ -90,9 +90,9 @@ int MainWindow::getNbFailed()
 
 int MainWindow::getCurrentProgress()
 {
-    for (int i = 0; i < workers.size(); ++i) {
-        if (workers[i]->getStatus() == PanoramaMaker::WORKING)
-            return workers[i]->getProgress();
+    for (int i = 0; i < workers_.size(); ++i) {
+        if (workers_[i]->getStatus() == PanoramaMaker::WORKING)
+            return workers_[i]->getProgress();
     }
     return 0;
 }
@@ -101,11 +101,11 @@ void MainWindow::onMakePanoramaClicked()
 {
     QStringList files;
     bool clear_files = false;
-    if (ui->selectedOnly_checkbox->isChecked()) {
-        files = ui->filesListWidget->getSelectedFilesList();
+    if (ui_->selectedOnly_checkbox->isChecked()) {
+        files = ui_->filesListWidget->getSelectedFilesList();
     }
     else {
-        files = ui->filesListWidget->getFilesList();
+        files = ui_->filesListWidget->getFilesList();
         clear_files = true;
     }
 
@@ -158,27 +158,27 @@ void MainWindow::onMakePanoramaClicked()
     }
 
     worker->setOutput(
-        ui->output_filename_lineedit->text(), ui->output_dir_lineedit->text());
+        ui_->output_filename_lineedit->text(), ui_->output_dir_lineedit->text());
     configureWorker(*worker);
     createWorkerUi(worker);
     connect(worker.get(), &PanoramaMaker::finished, this, &MainWindow::runWorkers);
 
     qDebug() << "Queuing worker";
-    workers << worker;
+    workers_ << worker;
     runWorkers();
 
     if (clear_files)
-        ui->filesListWidget->clear();
+        ui_->filesListWidget->clear();
     updateStatusBar();
 }
 
 void MainWindow::runWorkers()
 {
-    for (int i = 0; i < workers.size(); ++i) {
-        if (workers[i]->isRunning())
+    for (int i = 0; i < workers_.size(); ++i) {
+        if (workers_[i]->isRunning())
             break;
-        if (workers[i]->getStatus() == PanoramaMaker::STOPPED) {
-            startWorker(*workers[i]);
+        if (workers_[i]->getStatus() == PanoramaMaker::STOPPED) {
+            startWorker(*workers_[i]);
             break;
         }
     }
@@ -187,21 +187,21 @@ void MainWindow::runWorkers()
 void MainWindow::onWorkerFailed(QString msg)
 {
     PanoramaMaker* sender = qobject_cast<PanoramaMaker*>(QObject::sender());
-    QProgressBar* pb = progress_bars[sender].pb;
+    QProgressBar* pb = progress_bars_[sender].pb;
     if (!pb)
         return;
     pb->setFormat(
         QString("%1 : Failed (%2)").arg(sender->getOutputFilename()).arg(msg));
     pb->setValue(100);
     pb->setStyleSheet("QProgressBar::chunk{background-color:red}");
-    progress_bars[sender].close->setText("Hide");
-    progress_bars[sender].close->setEnabled(true);
+    progress_bars_[sender].close->setText("Hide");
+    progress_bars_[sender].close->setEnabled(true);
 }
 
 void MainWindow::onWorkerDone()
 {
     PanoramaMaker* sender = qobject_cast<PanoramaMaker*>(QObject::sender());
-    QProgressBar* pb = progress_bars[sender].pb;
+    QProgressBar* pb = progress_bars_[sender].pb;
     if (!pb)
         return;
     pb->setStyleSheet("QProgressBar::chunk{background-color:green}");
@@ -209,71 +209,71 @@ void MainWindow::onWorkerDone()
                       .arg(sender->getOutputFilename())
                       .arg(QString::number(sender->getTotalTime(), 'f', 1))
                       .arg(QString::number(sender->getProcTime(), 'f', 1)));
-    progress_bars[sender].close->setText("Hide");
-    progress_bars[sender].close->setEnabled(true);
-    progress_bars[sender].post_process->setEnabled(true);
-    QString output_path = progress_bars[sender].worker->getOutputFilePath();
+    progress_bars_[sender].close->setText("Hide");
+    progress_bars_[sender].close->setEnabled(true);
+    progress_bars_[sender].post_process->setEnabled(true);
+    QString output_path = progress_bars_[sender].worker->getOutputFilePath();
 
-    if (progress_bars[sender].auto_open_post_process) {
+    if (progress_bars_[sender].auto_open_post_process) {
         openPostProcess(output_path);
     }
 
-    connect(progress_bars[sender].post_process, &QPushButton::clicked, this, [=]() {
+    connect(progress_bars_[sender].post_process, &QPushButton::clicked, this, [=]() {
         openPostProcess(output_path);
     });
 }
 
 void MainWindow::onBlenderTypeChange()
 {
-    QString type = ui->blendertype_combobox->currentText();
+    QString type = ui_->blendertype_combobox->currentText();
     if (type == QString("Multiband")) {
-        ui->sharpness_label->hide();
-        ui->sharpness_spinbox->hide();
-        ui->nbands_label->show();
-        ui->nbands_spinbox->show();
+        ui_->sharpness_label->hide();
+        ui_->sharpness_spinbox->hide();
+        ui_->nbands_label->show();
+        ui_->nbands_spinbox->show();
     }
     else if (type == QString("Feather")) {
-        ui->sharpness_label->show();
-        ui->sharpness_spinbox->show();
-        ui->nbands_label->hide();
-        ui->nbands_spinbox->hide();
+        ui_->sharpness_label->show();
+        ui_->sharpness_spinbox->show();
+        ui_->nbands_label->hide();
+        ui_->nbands_spinbox->hide();
     }
     else {
-        ui->sharpness_label->hide();
-        ui->sharpness_spinbox->hide();
-        ui->nbands_label->hide();
-        ui->nbands_spinbox->hide();
+        ui_->sharpness_label->hide();
+        ui_->sharpness_spinbox->hide();
+        ui_->nbands_label->hide();
+        ui_->nbands_spinbox->hide();
     }
 }
 
 void MainWindow::onExposureCompensatorChange()
 {
-    QString mode = ui->expcomp_mode_combobox->currentText();
+    QString mode = ui_->expcomp_mode_combobox->currentText();
     if (mode == QString("Blocks") || mode == QString("Combined")) {
-        ui->blocksize_label->show();
-        ui->blocksize_spinbox->show();
-        ui->exp_sim_th_spinbox->setValue(0.30);
+        ui_->blocksize_label->show();
+        ui_->blocksize_spinbox->show();
+        ui_->exp_sim_th_spinbox->setValue(0.30);
     }
     else {
-        ui->blocksize_label->hide();
-        ui->blocksize_spinbox->hide();
-        ui->exp_sim_th_spinbox->setValue(1);
+        ui_->blocksize_label->hide();
+        ui_->blocksize_spinbox->hide();
+        ui_->exp_sim_th_spinbox->setValue(1);
     }
     if (mode == QString("None")) {
-        ui->nfeed_label->hide();
-        ui->nfeed_spinbox->hide();
-        ui->expcomp_type_combobox->hide();
-        ui->expcomp_type_label->hide();
-        ui->exp_sim_th_label->hide();
-        ui->exp_sim_th_spinbox->hide();
+        ui_->nfeed_label->hide();
+        ui_->nfeed_spinbox->hide();
+        ui_->expcomp_type_combobox->hide();
+        ui_->expcomp_type_label->hide();
+        ui_->exp_sim_th_label->hide();
+        ui_->exp_sim_th_spinbox->hide();
     }
     else {
-        ui->nfeed_label->show();
-        ui->nfeed_spinbox->show();
-        ui->expcomp_type_combobox->show();
-        ui->expcomp_type_label->show();
-        ui->exp_sim_th_label->show();
-        ui->exp_sim_th_spinbox->show();
+        ui_->nfeed_label->show();
+        ui_->nfeed_spinbox->show();
+        ui_->expcomp_type_combobox->show();
+        ui_->expcomp_type_label->show();
+        ui_->exp_sim_th_label->show();
+        ui_->exp_sim_th_spinbox->show();
     }
 }
 
@@ -300,29 +300,29 @@ void MainWindow::onOutputDirChanged(QString edit)
 void MainWindow::onOutputFilenameEdit(QString edit)
 {
     if (edit.isEmpty())
-        manual_output_filename = false;
+        manual_output_filename_ = false;
     else
-        manual_output_filename = true;
+        manual_output_filename_ = true;
 }
 
 void MainWindow::onOutputDirEdit(QString edit)
 {
     if (edit.isEmpty())
-        manual_output_dir = false;
+        manual_output_dir_ = false;
     else
-        manual_output_dir = true;
+        manual_output_dir_ = true;
 }
 
 void MainWindow::onSelectOutputDirClicked()
 {
     QString dir = QFileDialog::getExistingDirectory(
-        this, "Select output directory", ui->output_dir_lineedit->text());
+        this, "Select output directory", ui_->output_dir_lineedit->text());
     if (!dir.isEmpty()) {
-        ui->output_dir_lineedit->setText(dir);
-        manual_output_dir = true;
+        ui_->output_dir_lineedit->setText(dir);
+        manual_output_dir_ = true;
     }
     else {
-        manual_output_dir = false;
+        manual_output_dir_ = false;
         updateOutputDirFilename();
     }
 }
@@ -330,119 +330,119 @@ void MainWindow::onSelectOutputDirClicked()
 void MainWindow::onFastSettingsChanged()
 {
     resetAlgoSetting();
-    int exp_comp = ui->fast_excomp_value->value();
+    int exp_comp = ui_->fast_excomp_value->value();
     switch (exp_comp) {
     case 0: // Very fast
-        ui->nfeed_spinbox->setValue(1);
-        ui->seamfinderres_spinbox->setValue(0.1);
-        ui->regres_spinbox->setValue(0.6);
-        ui->expcomp_mode_combobox->setCurrentText("Simple");
+        ui_->nfeed_spinbox->setValue(1);
+        ui_->seamfinderres_spinbox->setValue(0.1);
+        ui_->regres_spinbox->setValue(0.6);
+        ui_->expcomp_mode_combobox->setCurrentText("Simple");
         break;
     case 1: // Fast
-        ui->nfeed_spinbox->setValue(3);
-        ui->seamfinderres_spinbox->setValue(0.1);
-        ui->regres_spinbox->setValue(0.6);
-        ui->expcomp_mode_combobox->setCurrentText("Simple");
+        ui_->nfeed_spinbox->setValue(3);
+        ui_->seamfinderres_spinbox->setValue(0.1);
+        ui_->regres_spinbox->setValue(0.6);
+        ui_->expcomp_mode_combobox->setCurrentText("Simple");
         break;
     case 2: // Slow
-        ui->nfeed_spinbox->setValue(1);
-        ui->seamfinderres_spinbox->setValue(0.2);
-        ui->regres_spinbox->setValue(1.0);
-        ui->expcomp_mode_combobox->setCurrentText("Combined");
+        ui_->nfeed_spinbox->setValue(1);
+        ui_->seamfinderres_spinbox->setValue(0.2);
+        ui_->regres_spinbox->setValue(1.0);
+        ui_->expcomp_mode_combobox->setCurrentText("Combined");
         break;
     case 3: // Very slow
-        ui->nfeed_spinbox->setValue(3);
-        ui->seamfinderres_spinbox->setValue(0.2);
-        ui->regres_spinbox->setValue(1.0);
-        ui->expcomp_mode_combobox->setCurrentText("Combined");
+        ui_->nfeed_spinbox->setValue(3);
+        ui_->seamfinderres_spinbox->setValue(0.2);
+        ui_->regres_spinbox->setValue(1.0);
+        ui_->expcomp_mode_combobox->setCurrentText("Combined");
         break;
     }
 
-    int pan_size = ui->fast_pan_size_value->value();
+    int pan_size = ui_->fast_pan_size_value->value();
     switch (pan_size) {
     case 0: // Small
-        ui->compositingres_spinbox->setValue(1);
+        ui_->compositingres_spinbox->setValue(1);
         break;
     case 1: // Medium
-        ui->compositingres_spinbox->setValue(5);
+        ui_->compositingres_spinbox->setValue(5);
         break;
     case 2: // Full size
-        ui->compositingres_spinbox->setValue(0);
+        ui_->compositingres_spinbox->setValue(0);
         break;
     }
 
     QString proj_type = "Spherical";
-    if (ui->fast_proj_type_sph->isChecked())
+    if (ui_->fast_proj_type_sph->isChecked())
         proj_type = "Spherical";
-    else if (ui->fast_proj_type_cyl->isChecked())
+    else if (ui_->fast_proj_type_cyl->isChecked())
         proj_type = "Cylindrical";
-    else if (ui->fast_proj_type_pla->isChecked())
+    else if (ui_->fast_proj_type_pla->isChecked())
         proj_type = "Perspective";
-    ui->warpmode_combobox->setCurrentText(proj_type);
+    ui_->warpmode_combobox->setCurrentText(proj_type);
 }
 
 void MainWindow::resetAlgoSetting()
 {
-    ui->post_process_checkbox->setCheckState(Qt::Checked);
-    ui->regres_spinbox->setValue(1.0);
-    ui->featuresfinder_combobox->setCurrentText("AKAZE");
-    ui->featuresmatcher_combobox->setCurrentText("Best of 2 nearest");
-    ui->featuresmatcherconf_spinbox->setValue(0.65);
-    ui->warpmode_combobox->setCurrentText("Spherical");
-    ui->wavecorkind_combobox->setCurrentText("None");
-    ui->bundleadj_combobox->setCurrentText("Ray");
-    ui->confth_spinbox->setValue(1.0);
+    ui_->post_process_checkbox->setCheckState(Qt::Checked);
+    ui_->regres_spinbox->setValue(1.0);
+    ui_->featuresfinder_combobox->setCurrentText("AKAZE");
+    ui_->featuresmatcher_combobox->setCurrentText("Best of 2 nearest");
+    ui_->featuresmatcherconf_spinbox->setValue(0.65);
+    ui_->warpmode_combobox->setCurrentText("Spherical");
+    ui_->wavecorkind_combobox->setCurrentText("Auto");
+    ui_->bundleadj_combobox->setCurrentText("Ray");
+    ui_->confth_spinbox->setValue(1.0);
 
-    ui->expcomp_mode_combobox->setCurrentText("Combined");
-    ui->expcomp_type_combobox->setCurrentText("BGR");
-    ui->nfeed_spinbox->setValue(3);
-    ui->blocksize_spinbox->setValue(32);
-    ui->exp_sim_th_spinbox->setValue(0.30);
+    ui_->expcomp_mode_combobox->setCurrentText("Combined");
+    ui_->expcomp_type_combobox->setCurrentText("BGR");
+    ui_->nfeed_spinbox->setValue(3);
+    ui_->blocksize_spinbox->setValue(32);
+    ui_->exp_sim_th_spinbox->setValue(0.30);
 
-    ui->seamfinderres_spinbox->setValue(0.2);
-    ui->seamfindermode_combobox->setCurrentText("Graph cut color");
+    ui_->seamfinderres_spinbox->setValue(0.2);
+    ui_->seamfindermode_combobox->setCurrentText("Graph cut color");
 
-    ui->blendertype_combobox->setCurrentText("Multiband");
-    ui->nbands_spinbox->setValue(3);
+    ui_->blendertype_combobox->setCurrentText("Multiband");
+    ui_->nbands_spinbox->setValue(3);
 
-    ui->compositingres_spinbox->setValue(0);
-    ui->interp_combobox->setCurrentText("Cubic");
+    ui_->compositingres_spinbox->setValue(0);
+    ui_->interp_combobox->setCurrentText("Cubic");
 
-    ui->images_per_videos_spinbox->setValue(30);
+    ui_->images_per_videos_spinbox->setValue(30);
 }
 
 void MainWindow::updateMakeEnabled()
 {
-    QString filename = ui->output_filename_lineedit->text();
-    QString dir = ui->output_dir_lineedit->text();
-    bool enabled = ui->buttonMakePanorama->isEnabled();
+    QString filename = ui_->output_filename_lineedit->text();
+    QString dir = ui_->output_dir_lineedit->text();
+    bool enabled = ui_->buttonMakePanorama->isEnabled();
 
     if (enabled) {
         if (filename.isEmpty()) {
-            ui->buttonMakePanorama->setEnabled(false);
+            ui_->buttonMakePanorama->setEnabled(false);
             return;
         }
 
         if (dir.isEmpty() || !QDir(dir).exists()) {
-            ui->buttonMakePanorama->setEnabled(false);
+            ui_->buttonMakePanorama->setEnabled(false);
             return;
         }
     }
     else if (!filename.isEmpty() && !dir.isEmpty() && QDir(dir).exists())
-        ui->buttonMakePanorama->setEnabled(true);
+        ui_->buttonMakePanorama->setEnabled(true);
 }
 
 void MainWindow::updateOCL()
 {
     QString yes("Yes"), no("No");
     bool have_opencl = cv::ocl::haveOpenCL();
-    ui->haveopencl_value->setText(have_opencl ? yes : no);
-    ui->use_opencl_checkbox->setEnabled(have_opencl);
-    ui->use_opencl_checkbox->setChecked(false);
+    ui_->haveopencl_value->setText(have_opencl ? yes : no);
+    ui_->use_opencl_checkbox->setEnabled(have_opencl);
+    ui_->use_opencl_checkbox->setChecked(false);
 
     if (!have_opencl) {
-        ui->opencl_device_tree->hide();
-        ui->opencl_device_tree_label->hide();
+        ui_->opencl_device_tree->hide();
+        ui_->opencl_device_tree_label->hide();
     }
     else {
         cv::ocl::Device default_device = cv::ocl::Device::getDefault();
@@ -454,7 +454,7 @@ void MainWindow::updateOCL()
             QString platform_txt = QString::fromStdString(platform->name());
             QTreeWidgetItem* platform_item = new QTreeWidgetItem(
                 QStringList(platform_txt));
-            ui->opencl_device_tree->insertTopLevelItem(i, platform_item);
+            ui_->opencl_device_tree->insertTopLevelItem(i, platform_item);
 
             cv::ocl::Device current_device;
             for (int j = 0; j < platform->deviceNumber(); j++) {
@@ -497,9 +497,9 @@ void MainWindow::updateOCL()
                 device_item->setToolTip(0, tooltip);
             }
         }
-        ui->opencl_device_tree->expandAll();
-        ui->opencl_device_tree->show();
-        ui->opencl_device_tree_label->show();
+        ui_->opencl_device_tree->expandAll();
+        ui_->opencl_device_tree->show();
+        ui_->opencl_device_tree_label->show();
     }
 }
 
@@ -507,7 +507,7 @@ void MainWindow::updateEigen()
 {
     QRegExp regex(".*Eigen:([ \\t]*)([^\\n\\r]*)");
     regex.indexIn(cv::getBuildInformation().c_str());
-    ui->have_eigen_value->setText(
+    ui_->have_eigen_value->setText(
         regex.cap(2).replace("YES", "Yes").replace("NO", "No"));
 }
 
@@ -515,54 +515,54 @@ void MainWindow::updateIPP()
 {
     QRegExp regex(".*IPP:([ \\t]*)([^\\n\\r]*)");
     regex.indexIn(cv::getBuildInformation().c_str());
-    ui->have_ipp_value->setText(
+    ui_->have_ipp_value->setText(
         regex.cap(2).replace("YES", "Yes").replace("NO", "No"));
 }
 
 void MainWindow::updateArch()
 {
 #ifdef ENVIRONMENT64
-    ui->arch_value->setText("64 bits");
+    ui_->arch_value->setText("64 bits");
 #else
 #ifdef ENVIRONMENT32
-    ui->arch_value->setText("32 bits");
+    ui_->arch_value->setText("32 bits");
 #endif
 #endif
 }
 
 void MainWindow::updateVersion()
 {
-    ui->version_value->setText(APP_VERSION);
+    ui_->version_value->setText(APP_VERSION);
 }
 
 void MainWindow::updateOutputDirFilename()
 {
     QStringList fl;
-    if (ui->selectedOnly_checkbox->isChecked())
-        fl = ui->filesListWidget->getSelectedFilesList();
+    if (ui_->selectedOnly_checkbox->isChecked())
+        fl = ui_->filesListWidget->getSelectedFilesList();
     else
-        fl = ui->filesListWidget->getFilesList();
+        fl = ui_->filesListWidget->getFilesList();
 
-    if (!manual_output_dir) {
+    if (!manual_output_dir_) {
         if (fl.size() > 0)
-            ui->output_dir_lineedit->setText(
+            ui_->output_dir_lineedit->setText(
                 QFileInfo(fl[0]).absoluteDir().path());
         else
-            ui->output_dir_lineedit->setText("");
+            ui_->output_dir_lineedit->setText("");
     }
 
-    if (!manual_output_filename) {
+    if (!manual_output_filename_) {
         if (fl.size() > 0) {
             QStringList basenames;
             QString new_name;
             for (int i = 0; i < fl.size(); ++i)
                 basenames << QFileInfo(fl[i]).baseName();
             new_name = "pano_" + basenames.join("_");
-            new_name.truncate(max_filename_length);
-            ui->output_filename_lineedit->setText(new_name);
+            new_name.truncate(max_filename_length_);
+            ui_->output_filename_lineedit->setText(new_name);
         }
         else
-            ui->output_filename_lineedit->setText("");
+            ui_->output_filename_lineedit->setText("");
     }
 }
 
@@ -575,7 +575,7 @@ void MainWindow::updateStatusBar()
                        .arg(getNbQueued())
                        .arg(getNbDone())
                        .arg(getNbFailed());
-    ui->statusBar->showMessage(text);
+    ui_->statusBar->showMessage(text);
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
@@ -606,8 +606,8 @@ void MainWindow::openPostProcess(const QString& output_path)
 void MainWindow::startWorker(PanoramaMaker& worker)
 {
     qDebug() << "Starting worker";
-    progress_bars[&worker].close->setDisabled(true);
-    progress_bars[&worker].post_process->setDisabled(true);
+    progress_bars_[&worker].close->setDisabled(true);
+    progress_bars_[&worker].post_process->setDisabled(true);
     worker.start();
 }
 
@@ -625,15 +625,15 @@ void MainWindow::createWorkerUi(std::shared_ptr<PanoramaMaker> worker)
     progress_bar->setToolTip(worker->getStitcherConfString());
 
     ProgressBarContent pb_struct;
-    pb_struct.auto_open_post_process = ui->post_process_checkbox->isChecked();
+    pb_struct.auto_open_post_process = ui_->post_process_checkbox->isChecked();
     pb_struct.pb = progress_bar;
     pb_struct.close = close;
     pb_struct.post_process = post_process;
     pb_struct.worker = worker;
     pb_struct.layout = hbox;
 
-    progress_bars[worker.get()] = pb_struct;
-    progress_bars[close] = pb_struct;
+    progress_bars_[worker.get()] = pb_struct;
+    progress_bars_[close] = pb_struct;
 
     connect(
         worker.get(),
@@ -641,8 +641,8 @@ void MainWindow::createWorkerUi(std::shared_ptr<PanoramaMaker> worker)
         progress_bar,
         &QProgressBar::setValue);
     connect(worker.get(), &PanoramaMaker::percentage, this, &MainWindow::updateStatusBar);
-    connect(worker.get(), &PanoramaMaker::is_failed, this, &MainWindow::onWorkerFailed);
-    connect(worker.get(), &PanoramaMaker::is_done, this, &MainWindow::onWorkerDone);
+    connect(worker.get(), &PanoramaMaker::isFailed, this, &MainWindow::onWorkerFailed);
+    connect(worker.get(), &PanoramaMaker::isDone, this, &MainWindow::onWorkerDone);
     connect(worker.get(), &PanoramaMaker::finished, this, &MainWindow::updateStatusBar);
 
     connect(close, &QPushButton::clicked, this, &MainWindow::closeSenderWorker);
@@ -650,81 +650,81 @@ void MainWindow::createWorkerUi(std::shared_ptr<PanoramaMaker> worker)
     hbox->addWidget(progress_bar);
     hbox->addWidget(post_process);
     hbox->addWidget(close);
-    ui->tabProgressLayout->addLayout(hbox.get());
+    ui_->tabProgressLayout->addLayout(hbox.get());
 }
 
 void MainWindow::configureWorker(PanoramaMaker& worker)
 {
     // OpenCL
-    worker.setUseOpenCL(ui->use_opencl_checkbox->isChecked());
+    worker.setUseOpenCL(ui_->use_opencl_checkbox->isChecked());
 
     // Registration resolution
-    worker.setRegistrationResol(ui->regres_spinbox->value());
+    worker.setRegistrationResol(ui_->regres_spinbox->value());
 
     // Feature finder mode
-    worker.setFeaturesFinderMode(ui->featuresfinder_combobox->currentText());
+    worker.setFeaturesFinderMode(ui_->featuresfinder_combobox->currentText());
 
     // Feature matching mode and confidence
     PanoramaMaker::FeaturesMatchingMode f_matching_mode;
-    f_matching_mode.mode = ui->featuresmatcher_combobox->currentText();
-    f_matching_mode.conf = ui->featuresmatcherconf_spinbox->value();
+    f_matching_mode.mode = ui_->featuresmatcher_combobox->currentText();
+    f_matching_mode.conf = ui_->featuresmatcherconf_spinbox->value();
     worker.setFeaturesMatchingMode(f_matching_mode);
 
     // Warp mode
-    worker.setWarpMode(ui->warpmode_combobox->currentText());
+    worker.setWarpMode(ui_->warpmode_combobox->currentText());
 
     // Wave correction
-    worker.setWaveCorrectionMode(ui->wavecorkind_combobox->currentText());
+    worker.setWaveCorrectionMode(ui_->wavecorkind_combobox->currentText());
 
     // Bundle adjuster
-    worker.setBundleAdjusterMode(ui->bundleadj_combobox->currentText());
+    worker.setBundleAdjusterMode(ui_->bundleadj_combobox->currentText());
 
     // Panorama confidence
-    worker.setPanoConfidenceThresh(ui->confth_spinbox->value());
+    worker.setPanoConfidenceThresh(ui_->confth_spinbox->value());
 
     // Exposure compensator mode
     PanoramaMaker::ExposureComensatorMode exp_comp_mode;
-    exp_comp_mode.mode = ui->expcomp_mode_combobox->currentText();
-    exp_comp_mode.type = ui->expcomp_type_combobox->currentText();
-    exp_comp_mode.block_size = ui->blocksize_spinbox->value();
-    exp_comp_mode.nfeed = ui->nfeed_spinbox->value();
-    exp_comp_mode.similarity_th = ui->exp_sim_th_spinbox->value();
+    exp_comp_mode.mode = ui_->expcomp_mode_combobox->currentText();
+    exp_comp_mode.type = ui_->expcomp_type_combobox->currentText();
+    exp_comp_mode.block_size = ui_->blocksize_spinbox->value();
+    exp_comp_mode.nfeed = ui_->nfeed_spinbox->value();
+    exp_comp_mode.similarity_th = ui_->exp_sim_th_spinbox->value();
     worker.setExposureCompensatorMode(exp_comp_mode);
 
     // Seam estimation resolution
-    worker.setSeamEstimationResol(ui->seamfinderres_spinbox->value());
+    worker.setSeamEstimationResol(ui_->seamfinderres_spinbox->value());
 
     // Seam finder mode
-    worker.setSeamFinderMode(ui->seamfindermode_combobox->currentText());
+    worker.setSeamFinderMode(ui_->seamfindermode_combobox->currentText());
 
     // Blender
     PanoramaMaker::BlenderMode blender_mode;
-    blender_mode.mode = ui->blendertype_combobox->currentText();
-    blender_mode.sharpness = ui->sharpness_spinbox->value();
-    blender_mode.bands = ui->nbands_spinbox->value();
+    blender_mode.mode = ui_->blendertype_combobox->currentText();
+    blender_mode.sharpness = ui_->sharpness_spinbox->value();
+    blender_mode.bands = ui_->nbands_spinbox->value();
     worker.setBlenderMode(blender_mode);
 
     // Compositing resolution
-    double compositing_res = ui->compositingres_spinbox->value();
+    double compositing_res = ui_->compositingres_spinbox->value();
     if (compositing_res <= 0)
         compositing_res = cv::Stitcher::ORIG_RESOL;
 
     worker.setCompositingResol(compositing_res);
 
     // Interpolation
-    worker.setInterpolationMode(ui->interp_combobox->currentText());
+    worker.setInterpolationMode(ui_->interp_combobox->currentText());
 
     // Images per video
-    worker.setImagesPerVideo(ui->images_per_videos_spinbox->value());
+    worker.setImagesPerVideo(ui_->images_per_videos_spinbox->value());
 }
 
 void MainWindow::closeSenderWorker()
 {
-    ProgressBarContent& pb_struct = progress_bars[QObject::sender()];
-    progress_bars.erase(pb_struct.close);
-    progress_bars.erase(pb_struct.worker.get());
+    ProgressBarContent& pb_struct = progress_bars_[QObject::sender()];
+    progress_bars_.erase(pb_struct.close);
+    progress_bars_.erase(pb_struct.worker.get());
     pb_struct.layout.reset();
-    workers.removeAll(pb_struct.worker);
+    workers_.removeAll(pb_struct.worker);
     pb_struct.worker.reset();
     updateStatusBar();
 }

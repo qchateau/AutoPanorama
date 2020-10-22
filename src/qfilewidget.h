@@ -10,12 +10,17 @@ namespace autopanorama {
 
 class QFileWidget : public QListWidget {
     Q_OBJECT
+signals:
+    void iconChanged();
+    void itemsAdded();
+    void itemsRemoved();
+
 public:
     QFileWidget(QWidget* parent = 0);
 
     void addSupportedExtension(QString ext)
     {
-        supported_extensions << ext.toLower();
+        supported_extensions_ << ext.toLower();
     }
     void addFiles(QStringList files);
     void asyncAddFiles(QStringList files);
@@ -40,19 +45,16 @@ protected:
     void remove(QListWidgetItem* item);
 
 private:
-    QIcon default_icon, no_preview_icon, video_icon;
-    QTimer items_cleaner;
-    QPoint drag_start_position;
-    QDrag* drag;
-    QList<QListWidgetItem*> items_to_delete;
-    QStringList supported_extensions;
-
     void refreshIcons();
 
-signals:
-    void iconChanged();
-    void itemsAdded();
-    void itemsRemoved();
+    QIcon default_icon_;
+    QIcon no_preview_icon_;
+    QIcon video_icon_;
+    QTimer items_cleaner_;
+    QPoint drag_start_position_;
+    QDrag* drag_;
+    QList<QListWidgetItem*> items_to_delete_;
+    QStringList supported_extensions_;
 };
 
 } // autopanorama

@@ -25,13 +25,14 @@ private:
     cv::Rect processFirst();
     bool processLevel(int level);
 
-    std::vector<cv::Mat> pyramid;
-    std::vector<cv::Rect> pyramid_roi;
+    std::vector<cv::Mat> pyramid_;
+    std::vector<cv::Rect> pyramid_roi_;
 
-    int min_search_res;
-    double step_down_scale;
-    double roi_min_area;
-    bool done, failed;
+    int min_search_res_;
+    double step_down_scale_;
+    double roi_min_area_;
+    bool done_;
+    bool failed_;
 };
 
 } // autopanorama
