@@ -158,9 +158,7 @@ void MainWindow::onMakePanoramaClicked()
     }
 
     worker->setOutput(
-        ui->output_filename_lineedit->text(),
-        ui->extension_combobox->currentText(),
-        ui->output_dir_lineedit->text());
+        ui->output_filename_lineedit->text(), ui->output_dir_lineedit->text());
     configureWorker(*worker);
     createWorkerUi(worker);
     connect(worker.get(), &PanoramaMaker::finished, this, &MainWindow::runWorkers);
@@ -214,14 +212,14 @@ void MainWindow::onWorkerDone()
     progress_bars[sender].close->setText("Hide");
     progress_bars[sender].close->setEnabled(true);
     progress_bars[sender].post_process->setEnabled(true);
-    auto outputs = progress_bars[sender].worker->getOutputFiles();
+    QString output_path = progress_bars[sender].worker->getOutputFilePath();
 
     if (progress_bars[sender].auto_open_post_process) {
-        openPostProcess(outputs);
+        openPostProcess(output_path);
     }
 
     connect(progress_bars[sender].post_process, &QPushButton::clicked, this, [=]() {
-        openPostProcess(outputs);
+        openPostProcess(output_path);
     });
 }
 
@@ -600,9 +598,9 @@ void MainWindow::closeEvent(QCloseEvent* event)
     }
 }
 
-void MainWindow::openPostProcess(const OutputFiles& output)
+void MainWindow::openPostProcess(const QString& output_path)
 {
-    (new PostProcess(output, this))->show();
+    (new PostProcess(output_path, this))->show();
 }
 
 void MainWindow::startWorker(PanoramaMaker& worker)

@@ -2,7 +2,6 @@
 #define MAINWINDOW_H
 
 #include "panoramamaker.h"
-#include "types.h"
 #include "ui_mainwindow.h"
 
 #include <map>
@@ -57,7 +56,7 @@ protected:
     void closeEvent(QCloseEvent* event);
 
 private:
-    void openPostProcess(const OutputFiles& output);
+    void openPostProcess(const QString& output_path);
     void startWorker(PanoramaMaker& worker);
     void createWorkerUi(std::shared_ptr<PanoramaMaker> worker);
     void configureWorker(PanoramaMaker& worker);

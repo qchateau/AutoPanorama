@@ -1,36 +1,52 @@
 #ifndef POST_PROCESS_H
 #define POST_PROCESS_H
 
-#include "types.h"
+#include "rescalable_label.h"
+#include "ui_post_process.h"
+
+#include <condition_variable>
+#include <mutex>
 
 #include <QDialog>
 #include <QLabel>
 #include <QPixmap>
+#include <QRadioButton>
 #include <QSlider>
-#include <QVBoxLayout>
+#include <QThread>
 
 #include <opencv2/opencv.hpp>
 
 namespace autopanorama {
 
-class RescalableLabel : public QLabel {
-public:
-    RescalableLabel(QPixmap pixmap, QWidget* parent = nullptr);
-    void setPixmap(QPixmap pixmap);
+class UpdaterThread : public QThread {
+    Q_OBJECT
+signals:
+    void rotated(QPixmap);
+    void cropped(QPixmap);
 
-protected:
-    void resizeEvent(QResizeEvent*) override;
+public:
+    UpdaterThread(const QString& path, QObject* parent = nullptr);
+    ~UpdaterThread();
+
+    void setAngle(double angle);
 
 private:
-    void updatePixmap();
+    void run() override;
 
-    QPixmap original_;
+    std::mutex mutex_;
+    std::condition_variable cv_;
+    double angle_;
+    bool is_new_;
+
+    QPixmap pixmap_;
+    cv::UMat mask_;
+    double mask_scale_;
 };
 
 class PostProcess : public QDialog {
     Q_OBJECT
 public:
-    PostProcess(const OutputFiles& outputs, QWidget* parent = nullptr);
+    PostProcess(const QString& output_path, QWidget* parent = nullptr);
 
 private:
     static constexpr double kPreciseSliderScale = 100;
@@ -42,16 +58,11 @@ private:
     void onSave();
     QString getPostProcessPath() const;
 
-    QSlider* slider_angle_coarse_;
-    QSlider* slider_angle_precise_;
-    QLabel* label_angle_;
-    RescalableLabel* label_rotated_;
-    RescalableLabel* label_cut_;
+    Ui::PostProcess* ui_;
 
-    OutputFiles outputs_;
+    UpdaterThread* updater_thread_;
+    QString output_path_;
     QPixmap original_;
-    cv::UMat downscaled_mask_;
-    double mask_scale_;
 };
 
 } // autopanorama

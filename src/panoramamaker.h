@@ -1,8 +1,6 @@
 #ifndef PANORAMAMAKER_H
 #define PANORAMAMAKER_H
 
-#include "types.h"
-
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/opencv.hpp>
 #include <opencv2/stitching.hpp>
@@ -41,7 +39,7 @@ public:
 
     void setImages(QStringList files);
     void setVideos(QStringList files);
-    void setOutput(QString output_filename_, QString output_ext_, QString output_dir_);
+    void setOutput(QString output_filename_, QString output_dir_);
 
     void setUseOpenCL(bool use) { try_use_opencl = use; }
     bool getUseOpenCL() { return try_use_opencl; }
@@ -108,7 +106,7 @@ public:
 
     QString getStitcherConfString();
     QString getOutputFilename() { return output_filename; }
-    OutputFiles getOutputFiles() { return actual_output; }
+    QString getOutputFilePath() { return output_path; }
 
     cv::Stitcher::Status unsafeRun();
     void run();
@@ -126,11 +124,10 @@ private:
     void incProgress(double inc);
     bool configureStitcher();
 
-    OutputFiles genOutputFilesInfo();
+    QString genOutputFilePath();
 
     QStringList images_path, videos_path;
-    QString output_filename, output_ext, output_dir;
-    OutputFiles actual_output;
+    QString output_filename, output_dir, output_path;
 
     cv::Ptr<cv::Stitcher> stitcher;
     std::vector<cv::Mat> images;

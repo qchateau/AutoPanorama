@@ -1,15 +1,27 @@
-cmake_minimum_required(VERSION 3.1.0)
-project(autopanorama VERSION 1.3.0)
+cmake_minimum_required(VERSION 3.10.0)
+project(autopanorama VERSION 1.3.1)
 set(TITLE_PROJECT_NAME "AutoPanorama")
 
 # Configure project
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(BUILD_SHARED_LIBS OFF)
+if (UNIX)
+    set(BUILD_SHARED_LIBS OFF)
+elseif (WIN32)
+    set(BUILD_SHARED_LIBS ON)
+else ()
+    message(FATAL_ERROR "Unsupported system")
+endif ()
 if (ENABLE_LOG)
     add_definitions(-DENABLE_LOG=1)
 endif ()
+
+# Set a default build type if none was specified
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  message(STATUS "Setting build type to 'Release' as none was specified.")
+  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build." FORCE)
+endif()
 
 # Include OpenCV
 set(WITH_EIGEN ON)
@@ -38,11 +50,11 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Custom definition and flags
 add_definitions(-DAPP_VERSION="${PROJECT_VERSION}")
 
-if(UNIX)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror")
+if (UNIX)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -fdiagnostics-color=always")
     # https://stackoverflow.com/questions/47117443/dynamic-linking-with-rpath-not-working-under-ubuntu-17-10
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--disable-new-dtags")
-elseif(WIN32)
+elseif (WIN32)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /WX")
 endif()
 
@@ -63,9 +75,24 @@ set(
     src/panoramamaker.cpp
     src/innercutfinder.cpp
     src/post_process.cpp
+    src/rescalable_label.cpp
+    src/utils.cpp
 
     ${ICO}
     ${RC}
+)
+
+set(
+    OPENCV_LIBRARIES
+
+    opencv_stitching
+    opencv_features2d
+    opencv_calib3d
+    opencv_flann
+    opencv_videoio
+    opencv_imgcodecs
+    opencv_imgproc
+    opencv_core
 )
 
 # Main binary
@@ -79,31 +106,28 @@ target_link_libraries(
     ${PROJECT_NAME}
 
     ${Qt5Widgets_LIBRARIES}
-    opencv_stitching
-    opencv_videoio
+    ${OPENCV_LIBRARIES}
 )
 
-# Install tool function
-if(UNIX)
-    set(SH_EXT "so")
-    set(SH_PREFIX "lib")
-    set(DESTINATION_BINARY "bin")
-    set(DESTINATION_SH "share/${PROJECT_NAME}/lib")
-else()
-    set(SH_EXT "dll")
-    set(SH_PREFIX "")
-    set(DESTINATION_BINARY "bin")
-    set(DESTINATION_SH "bin")
-endif()
+# Enable LTO
+include(CheckIPOSupported)
+check_ipo_supported(RESULT lto_supported)
+if (lto_supported)
+    message(STATUS "Enabling LTO")
+    set_property(TARGET ${PROJECT_NAME} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
+else ()
+    message(STATUS "LTO not supported")
+endif ()
 
 # Install main binary
 install(
     TARGETS ${PROJECT_NAME}
-    RUNTIME DESTINATION ${DESTINATION_BINARY}
+    RUNTIME DESTINATION bin
 )
 
 # Install desktop file
-if(UNIX)
+if (UNIX)
     install(
         FILES
 
@@ -119,7 +143,13 @@ if(UNIX)
 endif()
 
 # Install dependencies
-if(WIN32)
+if (WIN32)
+    # Install OpenCV libraries
+    install(
+        TARGETS ${OPENCV_LIBRARIES}
+        RUNTIME DESTINATION bin
+    )
+
     # Install Qt libraries
     set(QT_REQUIRED_LIBS_TARGET_NAMES
         Qt5::Widgets
@@ -130,7 +160,7 @@ if(WIN32)
         get_target_property(location ${target_name} LOCATION_Release)
         get_filename_component(dir ${location} DIRECTORY)
         get_filename_component(basename ${location} NAME_WE)
-        file(GLOB all_locations ${dir}/${basename}.${SH_EXT}*)
+        file(GLOB all_locations ${dir}/${basename}.dll*)
 
         if(NOT all_locations)
             message(SEND_ERROR "Not found: ${target_name}")
@@ -139,36 +169,36 @@ if(WIN32)
         endif()
         list(APPEND QT_LIBS_PATHS ${all_locations})
     endforeach()
-    install(FILES ${QT_LIBS_PATHS} DESTINATION ${DESTINATION_SH})
+    install(FILES ${QT_LIBS_PATHS} DESTINATION bin)
 
     # Install required Qt plugins
     get_filename_component(QT_ROOT ${Qt5_DIR}/../../.. ABSOLUTE)
     set(QT_PLATFORMS ${QT_ROOT}/plugins/platforms)
     set(QT_IMAGE_FORMATS ${QT_ROOT}/plugins/imageformats)
 
-    file(GLOB qjpeg_library "${QT_IMAGE_FORMATS}/${SH_PREFIX}qjpeg.${SH_EXT}")
+    file(GLOB qjpeg_library "${QT_IMAGE_FORMATS}/qjpeg.dll")
     if(NOT qjpeg_library)
         message(SEND_ERROR "Not found: qjpeg in ${QT_IMAGE_FORMATS}")
     else()
         message(STATUS "Found qjpeg: ${qjpeg_library}")
     endif()
-    install(FILES ${qjpeg_library} DESTINATION ${DESTINATION_SH}/imageformats)
+    install(FILES ${qjpeg_library} DESTINATION bin/imageformats)
 
-    file(GLOB qico_library "${QT_IMAGE_FORMATS}/${SH_PREFIX}qico.${SH_EXT}")
+    file(GLOB qico_library "${QT_IMAGE_FORMATS}/qico.dll")
     if(NOT qico_library)
         message(SEND_ERROR "Not found: qico in ${QT_IMAGE_FORMATS}")
     else()
         message(STATUS "Found qico: ${qico_library}")
     endif()
-    install(FILES ${qico_library} DESTINATION ${DESTINATION_SH}/imageformats)
+    install(FILES ${qico_library} DESTINATION bin/imageformats)
 
-    file(GLOB qwindows_library "${QT_PLATFORMS}/${SH_PREFIX}qwindows.${SH_EXT}")
+    file(GLOB qwindows_library "${QT_PLATFORMS}/qwindows.dll")
     if(NOT qwindows_library)
         message(SEND_ERROR "Not found: qwindows in ${QT_PLATFORMS}")
     else()
         message(STATUS "Found qjpeg: ${qwindows_library}")
     endif()
-    install(FILES ${qwindows_library} DESTINATION ${DESTINATION_SH}/platforms)
+    install(FILES ${qwindows_library} DESTINATION bin/platforms)
 endif()
 
 # Package
@@ -177,10 +207,10 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Compose panoramas from multiple photos or
 set(CPACK_PACKAGE_CONTACT "Quentin Chateau (quentin.chateau@gmail.com)")
 set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-${PROJECT_VERSION}")
 
-if(UNIX)
+if (UNIX)
     set(CPACK_GENERATOR "DEB")
     set(CPACK_DEBIAN_PACKAGE_DEPENDS "libqt5core5a, libqt5gui5, libqt5widgets5")
-elseif(WIN32)
+elseif (WIN32)
     set(CPACK_GENERATOR "NSIS")
 
     get_filename_component(ico_abspath ${ICO} REALPATH)
@@ -206,8 +236,6 @@ elseif(WIN32)
     set(CPACK_NSIS_URL_INFO_ABOUT "https://github.com/qchateau/AutoPanorama/")
     set(CPACK_NSIS_HELP_LINK "https://github.com/qchateau/AutoPanorama/")
     set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE.md")
-else ()
-    message(FATAL_ERROR "Unsupported system")
 endif()
 
 include(CPack)
