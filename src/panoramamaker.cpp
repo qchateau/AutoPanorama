@@ -109,6 +109,7 @@ QString PanoramaMaker::getStitcherConfString()
         conf += QString("Videos : ");
         conf += QString("\n");
         conf += files_filename.join(", ");
+        conf += QString("\n");
         conf += QString("Images extracted : %1").arg(getImagesPerVideo());
     }
     conf += QString("\n\n");
