@@ -521,6 +521,10 @@ bool PanoramaMaker::configureStitcher()
         stitcher->setWaveCorrection(true);
         stitcher->setWaveCorrectKind(cv::detail::WAVE_CORRECT_VERT);
     }
+    else if (wave_correction_mode == QString("Auto")) {
+        stitcher->setWaveCorrection(true);
+        stitcher->setWaveCorrectKind(cv::detail::WAVE_CORRECT_AUTO);
+    }
     else {
         stitcher->setWaveCorrection(false);
     }

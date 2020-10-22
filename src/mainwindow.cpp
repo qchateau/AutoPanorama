@@ -389,7 +389,7 @@ void MainWindow::resetAlgoSetting()
     ui->featuresmatcher_combobox->setCurrentText("Best of 2 nearest");
     ui->featuresmatcherconf_spinbox->setValue(0.65);
     ui->warpmode_combobox->setCurrentText("Spherical");
-    ui->wavecorkind_combobox->setCurrentText("None");
+    ui->wavecorkind_combobox->setCurrentText("Auto");
     ui->bundleadj_combobox->setCurrentText("Ray");
     ui->confth_spinbox->setValue(1.0);
 

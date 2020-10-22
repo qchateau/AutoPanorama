@@ -792,7 +792,7 @@ compensation</string>
          <widget class="QComboBox" name="wavecorkind_combobox">
           <item>
            <property name="text">
-            <string>None</string>
+            <string>Auto</string>
            </property>
           </item>
           <item>
@@ -803,6 +803,11 @@ compensation</string>
           <item>
            <property name="text">
             <string>Vertical</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>None</string>
            </property>
           </item>
          </widget>
