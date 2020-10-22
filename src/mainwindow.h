@@ -26,7 +26,7 @@ public:
     int getNbDone();
     int getNbFailed();
     int getNbFinished() { return getNbDone() + getNbFailed(); }
-    int getNbTotal() { return workers.size(); }
+    int getNbTotal() { return workers_.size(); }
     int getCurrentProgress();
 
 public slots:
@@ -71,15 +71,16 @@ private:
         std::shared_ptr<PanoramaMaker> worker;
     };
 
-    std::unique_ptr<Ui::MainWindow> ui;
+    std::unique_ptr<Ui::MainWindow> ui_;
 
-    QList<std::shared_ptr<PanoramaMaker>> workers;
-    std::map<QObject*, ProgressBarContent> progress_bars;
-    int worker_index;
+    QList<std::shared_ptr<PanoramaMaker>> workers_;
+    std::map<QObject*, ProgressBarContent> progress_bars_;
+    int worker_index_;
 
-    cv::Stitcher stitcher;
-    bool manual_output_filename, manual_output_dir;
-    int max_filename_length;
+    cv::Stitcher stitcher_;
+    bool manual_output_filename_;
+    bool manual_output_dir_;
+    int max_filename_length_;
 
 private slots:
     void closeSenderWorker();

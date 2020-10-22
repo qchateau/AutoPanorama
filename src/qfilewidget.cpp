@@ -24,17 +24,17 @@
 namespace autopanorama {
 
 QFileWidget::QFileWidget(QWidget* parent)
-    : QListWidget(parent), items_cleaner(this)
+    : QListWidget(parent), items_cleaner_(this)
 {
     installEventFilter(this);
 
-    default_icon = QIcon(":/icon_loading.png");
-    no_preview_icon = QIcon(":/icon_invalid.png");
-    video_icon = QIcon(":/icon_video.png");
+    default_icon_ = QIcon(":/icon_loading.png");
+    no_preview_icon_ = QIcon(":/icon_invalid.png");
+    video_icon_ = QIcon(":/icon_video.png");
     connect(this, &QFileWidget::iconChanged, this, &QFileWidget::refreshIcons);
-    connect(&items_cleaner, &QTimer::timeout, this, &QFileWidget::cleanItems);
-    items_cleaner.start(5000);
-    items_cleaner.moveToThread(QApplication::instance()->thread());
+    connect(&items_cleaner_, &QTimer::timeout, this, &QFileWidget::cleanItems);
+    items_cleaner_.start(5000);
+    items_cleaner_.moveToThread(QApplication::instance()->thread());
 }
 
 void QFileWidget::addFiles(QStringList files)
@@ -45,21 +45,21 @@ void QFileWidget::addFiles(QStringList files)
         QFileInfo fileinfo(files[i]);
         QString extension = fileinfo.suffix().toLower();
         if (fileinfo.exists() && fileinfo.isFile()
-            && (supported_extensions.empty()
-                || supported_extensions.contains(extension))
+            && (supported_extensions_.empty()
+                || supported_extensions_.contains(extension))
             && (!getFilesList().contains(fileinfo.absoluteFilePath()))) {
             QListWidgetItem* new_item =
-                new QListWidgetItem(default_icon, fileinfo.fileName(), this);
+                new QListWidgetItem(default_icon_, fileinfo.fileName(), this);
             new_item->setToolTip(fileinfo.absoluteFilePath());
             added_items << new_item;
         }
     }
     QApplication::restoreOverrideCursor();
-    emit itemsAdded();
+    itemsAdded();
 
     // Delayed icon set
     for (int i = 0; i < added_items.size(); ++i) {
-        if (items_to_delete.contains(added_items[i])) {
+        if (items_to_delete_.contains(added_items[i])) {
             // Change the icon so item will be deleted
             // but don't spend time loading the full image
             added_items[i]->setIcon(QIcon());
@@ -76,15 +76,15 @@ void QFileWidget::addFiles(QStringList files)
                 small_icon = QIcon(big_icon.pixmap(iconSize()));
             }
             else if (videos.contains(ext)) {
-                small_icon = video_icon;
+                small_icon = video_icon_;
             }
             else {
-                small_icon = no_preview_icon;
+                small_icon = no_preview_icon_;
             }
             added_items[i]->setIcon(small_icon);
         }
     }
-    emit iconChanged();
+    iconChanged();
 }
 
 void QFileWidget::asyncAddFiles(QStringList files)
@@ -129,16 +129,16 @@ void QFileWidget::cleanItems()
     }
 
     QList<QListWidgetItem*> items_not_deleted;
-    while (items_to_delete.size() > 0) {
-        QListWidgetItem* item = items_to_delete.takeFirst();
+    while (items_to_delete_.size() > 0) {
+        QListWidgetItem* item = items_to_delete_.takeFirst();
         if (item) {
-            if (item->icon().cacheKey() == default_icon.cacheKey())
+            if (item->icon().cacheKey() == default_icon_.cacheKey())
                 items_not_deleted << item;
             else
                 delete item;
         }
     }
-    items_to_delete = items_not_deleted;
+    items_to_delete_ = items_not_deleted;
 }
 
 void QFileWidget::clear()
@@ -158,8 +158,8 @@ void QFileWidget::removeSelected()
 void QFileWidget::selectAndAddFiles()
 {
     QStringList filters;
-    for (int i = 0; i < supported_extensions.size(); ++i)
-        filters << "*." + supported_extensions[i];
+    for (int i = 0; i < supported_extensions_.size(); ++i)
+        filters << "*." + supported_extensions_[i];
     QString filter = QString("Images/Videos (%1)").arg(filters.join(' '));
     QStringList files =
         QFileDialog::getOpenFileNames(Q_NULLPTR, QString(), QString(), filter);
@@ -249,8 +249,8 @@ void QFileWidget::remove(int row)
 void QFileWidget::remove(QListWidgetItem* item)
 {
     item->setHidden(true);
-    items_to_delete << item;
-    emit itemsRemoved();
+    items_to_delete_ << item;
+    itemsRemoved();
 }
 
 } // autopanorama

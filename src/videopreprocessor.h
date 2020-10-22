@@ -14,8 +14,8 @@ public:
     std::vector<cv::Mat> evenTimeSpace(int nr);
 
 private:
-    cv::VideoCapture capture;
-    double frame_count;
+    cv::VideoCapture capture_;
+    double frame_count_;
 };
 
 } // autopanorama
