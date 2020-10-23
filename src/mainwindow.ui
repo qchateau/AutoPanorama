@@ -331,10 +331,10 @@ type</string>
              <number>1</number>
             </property>
             <property name="value">
-             <number>3</number>
+             <number>2</number>
             </property>
             <property name="sliderPosition">
-             <number>3</number>
+             <number>2</number>
             </property>
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -437,7 +437,7 @@ type</string>
            </font>
           </property>
           <property name="text">
-           <string>Exposure 
+           <string>Exposure
 compensation</string>
           </property>
           <property name="alignment">

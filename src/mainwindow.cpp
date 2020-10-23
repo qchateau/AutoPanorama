@@ -339,15 +339,15 @@ void MainWindow::onFastSettingsChanged()
         ui_->expcomp_mode_combobox->setCurrentText("Simple");
         break;
     case 1: // Fast
+        ui_->nfeed_spinbox->setValue(1);
+        ui_->seamfinderres_spinbox->setValue(0.1);
+        ui_->regres_spinbox->setValue(0.6);
+        ui_->expcomp_mode_combobox->setCurrentText("Combined");
+        break;
+    case 2: // Slow
         ui_->nfeed_spinbox->setValue(3);
         ui_->seamfinderres_spinbox->setValue(0.1);
         ui_->regres_spinbox->setValue(0.6);
-        ui_->expcomp_mode_combobox->setCurrentText("Simple");
-        break;
-    case 2: // Slow
-        ui_->nfeed_spinbox->setValue(1);
-        ui_->seamfinderres_spinbox->setValue(0.2);
-        ui_->regres_spinbox->setValue(1.0);
         ui_->expcomp_mode_combobox->setCurrentText("Combined");
         break;
     case 3: // Very slow
