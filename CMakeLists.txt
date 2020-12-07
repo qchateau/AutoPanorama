@@ -23,6 +23,25 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build." FORCE)
 endif()
 
+# Download conan cmake script
+if (NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
+   message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
+   file(
+       DOWNLOAD
+       "https://raw.githubusercontent.com/conan-io/cmake-conan/master/conan.cmake"
+        "${CMAKE_BINARY_DIR}/conan.cmake"
+    )
+endif ()
+include(${CMAKE_BINARY_DIR}/conan.cmake)
+
+# Declare conan dependencies
+conan_cmake_run(
+    REQUIRES
+        lyra/1.5.1
+    BASIC_SETUP
+    CMAKE_TARGETS
+)
+
 # Include OpenCV
 set(WITH_EIGEN ON)
 set(WITH_LAPACK OFF)
@@ -68,7 +87,6 @@ endif()
 set(
     SOURCES
 
-    src/main.cpp
     src/mainwindow.cpp
     src/qfilewidget.cpp
     src/videopreprocessor.cpp
@@ -95,18 +113,42 @@ set(
     opencv_core
 )
 
+add_library(
+    ${PROJECT_NAME}_obj
+    OBJECT
+    ${SOURCES}
+)
+target_link_libraries(
+    ${PROJECT_NAME}_obj
+
+    ${Qt5Widgets_LIBRARIES}
+    ${OPENCV_LIBRARIES}
+)
+
+
 # Main binary
 add_executable(
     ${PROJECT_NAME}
 
     WIN32
-    ${SOURCES}
+    src/main.cpp
 )
 target_link_libraries(
     ${PROJECT_NAME}
+    ${PROJECT_NAME}_obj
+)
 
-    ${Qt5Widgets_LIBRARIES}
-    ${OPENCV_LIBRARIES}
+
+add_executable(
+    ${PROJECT_NAME}_cli
+
+    src/main_cli.cpp
+)
+target_link_libraries(
+    ${PROJECT_NAME}_cli
+
+    ${PROJECT_NAME}_obj
+    CONAN_PKG::lyra
 )
 
 # Enable LTO
