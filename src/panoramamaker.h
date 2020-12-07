@@ -44,7 +44,7 @@ public:
 
     void setImages(QStringList files);
     void setVideos(QStringList files);
-    void setOutput(QString output_filename, QString output_dir);
+    void setOutput(QString output_filename, QString output_dir, bool overwrite);
 
     void setUseOpenCL(bool use) { try_use_opencl_ = use; }
     bool getUseOpenCL() { return try_use_opencl_; }
@@ -136,6 +136,7 @@ private:
     QString output_filename_;
     QString output_dir_;
     QString output_path_;
+    bool overwrite_output_;
 
     cv::Ptr<cv::Stitcher> stitcher_;
     std::vector<cv::Mat> images_;

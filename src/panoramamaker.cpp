@@ -44,6 +44,7 @@ QStringList PanoramaMaker::getSupportedVideoExtensions()
 
 PanoramaMaker::PanoramaMaker(QObject* parent)
     : QThread(parent),
+      overwrite_output_(false),
       status_(STOPPED),
       total_time_(-1),
       proc_time_(-1),
@@ -85,10 +86,11 @@ void PanoramaMaker::setVideos(QStringList files)
     videos_path_ = files;
 }
 
-void PanoramaMaker::setOutput(QString output_filename, QString output_dir)
+void PanoramaMaker::setOutput(QString output_filename, QString output_dir, bool overwrite)
 {
     output_filename_ = output_filename;
     output_dir_ = output_dir;
+    overwrite_output_ = overwrite;
 }
 
 QString PanoramaMaker::getStitcherConfString()
@@ -543,7 +545,13 @@ bool PanoramaMaker::configureStitcher()
 
 QString PanoramaMaker::genOutputFilePath()
 {
-    return generateNewFilename(output_filename_ + ".png", output_dir_);
+    QString filename = output_filename_ + ".png";
+    if (overwrite_output_) {
+        return QDir(output_dir_).absoluteFilePath(filename);
+    }
+    else {
+        return generateNewFilename(filename, output_dir_);
+    }
 }
 
 } // autopanorama

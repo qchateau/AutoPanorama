@@ -158,7 +158,9 @@ void MainWindow::onMakePanoramaClicked()
     }
 
     worker->setOutput(
-        ui_->output_filename_lineedit->text(), ui_->output_dir_lineedit->text());
+        ui_->output_filename_lineedit->text(),
+        ui_->output_dir_lineedit->text(),
+        false);
     configureWorker(*worker);
     createWorkerUi(worker);
     connect(worker.get(), &PanoramaMaker::finished, this, &MainWindow::runWorkers);
