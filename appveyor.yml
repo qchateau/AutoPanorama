@@ -58,6 +58,11 @@ for:
       - move C:\projects\deps\eigen-* C:\projects\deps\eigen # Move to a version-agnostic directory
       - set INCLUDE=C:\projects\deps\eigen;%INCLUDE%
 
+      ############################################################################
+      # Install Conan
+      ############################################################################
+      - python -m pip install conan
+
     before_build:
       - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
 
@@ -81,6 +86,7 @@ for:
       - git submodule init
       - git submodule update --depth 1 --init --recursive
       - sudo apt update && sudo apt-get install -y qt5-default libeigen3-dev
+      - sudo python3 -m pip install conan
     build_script:
       - NCPU=$(nproc)
       - echo "Will compile on $NCPU CPUs"
