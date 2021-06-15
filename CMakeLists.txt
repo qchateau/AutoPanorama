@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10.0)
-project(autopanorama VERSION 1.3.2)
+project(autopanorama VERSION 1.3.3)
 set(TITLE_PROJECT_NAME "AutoPanorama")
 
 # Configure project
