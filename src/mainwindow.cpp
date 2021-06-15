@@ -196,6 +196,7 @@ void MainWindow::onWorkerFailed(QString msg)
         QString("%1 : Failed (%2)").arg(sender->getOutputFilename()).arg(msg));
     pb->setValue(100);
     pb->setStyleSheet("QProgressBar::chunk{background-color:red}");
+    pb->setToolTip(pb->toolTip() + "\n\nError:\n" + msg);
     progress_bars_[sender].close->setText("Hide");
     progress_bars_[sender].close->setEnabled(true);
 }
