@@ -138,15 +138,23 @@ PostProcess::PostProcess(const QString& output_path, QWidget* parent)
 
     set_disabled_effect(ui_->label_cut);
     ui_->radio_rotated->setChecked(true);
-    connect(ui_->label_rotated, &RescalableLabel::clicked, this, [=]() {
+    connect(ui_->label_rotated, &RescalableLabel::clicked, this, [this]() {
         ui_->radio_rotated->setChecked(true);
-        clear_disabled_effect(ui_->label_rotated);
-        set_disabled_effect(ui_->label_cut);
     });
-    connect(ui_->label_cut, &RescalableLabel::clicked, this, [=]() {
+    connect(ui_->label_cut, &RescalableLabel::clicked, this, [this]() {
         ui_->radio_cut->setChecked(true);
-        clear_disabled_effect(ui_->label_cut);
-        set_disabled_effect(ui_->label_rotated);
+    });
+    connect(ui_->radio_rotated, &QRadioButton::toggled, this, [=](bool checked) {
+        if (checked)
+            clear_disabled_effect(ui_->label_rotated);
+        else
+            set_disabled_effect(ui_->label_rotated);
+    });
+    connect(ui_->radio_cut, &QRadioButton::toggled, this, [=](bool checked) {
+        if (checked)
+            clear_disabled_effect(ui_->label_cut);
+        else
+            set_disabled_effect(ui_->label_cut);
     });
 
     connect(

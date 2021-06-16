@@ -158,7 +158,9 @@ void MainWindow::onMakePanoramaClicked()
     }
 
     worker->setOutput(
-        ui_->output_filename_lineedit->text(), ui_->output_dir_lineedit->text());
+        ui_->output_filename_lineedit->text(),
+        ui_->output_dir_lineedit->text(),
+        false);
     configureWorker(*worker);
     createWorkerUi(worker);
     connect(worker.get(), &PanoramaMaker::finished, this, &MainWindow::runWorkers);
@@ -194,6 +196,7 @@ void MainWindow::onWorkerFailed(QString msg)
         QString("%1 : Failed (%2)").arg(sender->getOutputFilename()).arg(msg));
     pb->setValue(100);
     pb->setStyleSheet("QProgressBar::chunk{background-color:red}");
+    pb->setToolTip(pb->toolTip() + "\n\nError:\n" + msg);
     progress_bars_[sender].close->setText("Hide");
     progress_bars_[sender].close->setEnabled(true);
 }
