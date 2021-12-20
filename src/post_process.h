@@ -52,7 +52,7 @@ private:
     static constexpr double kPreciseSliderScale = 100;
 
     double rotation() const;
-    QMatrix qtMatrix() const;
+    QTransform qTransform() const;
     cv::Mat cvMatrix(cv::InputArray image_to_rotate) const;
     void updateRotated();
     void onSave();
