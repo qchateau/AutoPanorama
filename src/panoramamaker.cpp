@@ -217,7 +217,7 @@ cv::Stitcher::Status PanoramaMaker::unsafeRun()
 
     output_path_ = genOutputFilePath();
 
-    qDebug() << "Writing panorama to " << output_path_;
+    qInfo() << "Writing panorama to " << output_path_;
     imwrite(output_path_.toStdString(), alpha_pano);
 
     proc_time_ = proc_timer_.elapsed();
@@ -245,20 +245,20 @@ void PanoramaMaker::run()
                 failed(stitcher_status);
         }
         catch (cv::Exception& e) {
-            qDebug() << "OpenCV error during stitching : " << QString(e.what());
+            qWarning() << "OpenCV error during stitching : " << QString(e.what());
             failed("OpenCV error during stitching");
         }
         catch (std::bad_alloc& e) {
             failed("Bad alloc error");
-            qDebug() << "Bad alloc error : " << QString(e.what());
+            qWarning() << "Bad alloc error : " << QString(e.what());
         }
         catch (std::exception& e) {
             failed(e.what());
-            qDebug() << "Exception :" << e.what();
+            qWarning() << "Exception :" << e.what();
         }
         catch (...) {
             failed();
-            qDebug() << "Unknown exception";
+            qWarning() << "Unknown exception";
         }
     }
     clean();

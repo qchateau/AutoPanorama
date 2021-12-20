@@ -16,6 +16,66 @@
 #include <opencv2/core/ocl.hpp>
 
 namespace autopanorama {
+namespace {
+
+class LogSink {
+public:
+    static void onMessageOutput(
+        QtMsgType type,
+        const QMessageLogContext&,
+        const QString& msg)
+    {
+        QString level;
+        switch (type) {
+        case QtDebugMsg:
+            level = "DEBUG";
+            break;
+        case QtInfoMsg:
+            level = "INFO";
+            break;
+        case QtWarningMsg:
+            level = "WARNING";
+            break;
+        case QtCriticalMsg:
+            level = "ERROR";
+            break;
+        case QtFatalMsg:
+            level = "FATAL";
+            break;
+        }
+
+        auto line = level + QString(7 - level.size(), ' ') + ": " + msg;
+        std::cerr << line.toStdString() << std::endl;
+
+        QString newText;
+        {
+            std::unique_lock<std::mutex> lock(mtx_);
+            static QStringList lines;
+            lines.append(line);
+            if (lines.size() > 100000) {
+                lines.pop_front();
+            }
+            if (browser_) {
+                QMetaObject::invokeMethod(
+                    browser_, "setPlainText", Q_ARG(QString, lines.join('\n')));
+            }
+        }
+    }
+
+    static void setTextBrowser(QTextBrowser* browser)
+    {
+        std::unique_lock<std::mutex> lock(mtx_);
+        browser_ = browser;
+    }
+
+private:
+    static std::mutex mtx_;
+    static QTextBrowser* browser_;
+};
+
+std::mutex LogSink::mtx_;
+QTextBrowser* LogSink::browser_ = nullptr;
+}
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent),
@@ -26,8 +86,9 @@ MainWindow::MainWindow(QWidget* parent)
 {
     qRegisterMetaType<QVector<int>>();
     ui_->setupUi(this);
+    setupLogsTable();
 
-    std::cout << cv::getBuildInformation() << std::endl;
+    qInfo() << cv::getBuildInformation().c_str();
 
     updateOutputDirFilename();
     onFastSettingsChanged();
@@ -47,6 +108,12 @@ MainWindow::MainWindow(QWidget* parent)
     for (const QString& ext : PanoramaMaker::getSupportedVideoExtensions()) {
         ui_->filesListWidget->addSupportedExtension(ext);
     }
+}
+
+MainWindow::~MainWindow()
+{
+    LogSink::setTextBrowser(nullptr);
+    qInstallMessageHandler(0);
 }
 
 int MainWindow::getNbQueued()
@@ -599,6 +666,18 @@ void MainWindow::closeEvent(QCloseEvent* event)
         else
             event->ignore();
     }
+}
+
+void MainWindow::setupLogsTable()
+{
+    LogSink::setTextBrowser(ui_->logsBrowser);
+    ui_->logsBrowser->setFont([] {
+        QFont font("Monospace");
+        font.setStyleHint(QFont::TypeWriter);
+        return font;
+    }());
+
+    qInstallMessageHandler(&LogSink::onMessageOutput);
 }
 
 void MainWindow::openPostProcess(const QString& output_path)

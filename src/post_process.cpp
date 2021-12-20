@@ -223,7 +223,7 @@ void PostProcess::onSave()
     if (ui_->radio_rotated->isChecked()) {
         QString path = getPostProcessPath();
 
-        qDebug() << "Writing post-process to " << path;
+        qInfo() << "Writing post-process to " << path;
         cv::imwrite(path.toStdString(), rotated);
     }
 
@@ -240,7 +240,7 @@ void PostProcess::onSave()
 
         QString path = getPostProcessPath();
 
-        qDebug() << "Writing post-process to " << path;
+        qInfo() << "Writing post-process to " << path;
         cv::imwrite(path.toStdString(), rotated(roi));
     }
 }
