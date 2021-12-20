@@ -123,8 +123,7 @@ void QFileWidget::refreshIcons()
 void QFileWidget::cleanItems()
 {
     if (thread() != QApplication::instance()->thread()) {
-        qDebug() << "WARNING : clean_item must be called in the GUI thread. "
-                    "Skipping.";
+        qWarning() << "clean_item must be called in the GUI thread. Skipping.";
         return;
     }
 

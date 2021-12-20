@@ -30,7 +30,7 @@ std::vector<cv::Mat> VideoPreprocessor::evenTimeSpace(int nr)
         while (img.empty() && nr_try++ < interval)
             capture_.read(img);
         if (img.empty())
-            qDebug()
+            qInfo()
                 << "Could not find a non empty image at" << idx << ": skipping";
         else
             images.push_back(img);

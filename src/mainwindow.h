@@ -21,6 +21,7 @@ class MainWindow : public QMainWindow {
 
 public:
     explicit MainWindow(QWidget* parent = 0);
+    ~MainWindow();
 
     int getNbQueued();
     int getNbDone();
@@ -56,6 +57,7 @@ protected:
     void closeEvent(QCloseEvent* event);
 
 private:
+    void setupLogsTable();
     void openPostProcess(const QString& output_path);
     void startWorker(PanoramaMaker& worker);
     void createWorkerUi(std::shared_ptr<PanoramaMaker> worker);

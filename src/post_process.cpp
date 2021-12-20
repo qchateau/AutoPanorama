@@ -13,17 +13,17 @@
 namespace autopanorama {
 namespace {
 
-QMatrix qtMatrix(double angle)
+QTransform qTransform(double angle)
 {
-    QMatrix q_rot_matrix;
-    q_rot_matrix.rotate(angle);
-    return q_rot_matrix;
+    QTransform q_rot_trans;
+    q_rot_trans.rotate(angle);
+    return q_rot_trans;
 }
 
 cv::Mat cvMatrix(double angle, cv::InputArray image_to_rotate)
 {
-    QMatrix q_true_matrix = QPixmap::trueMatrix(
-        qtMatrix(angle), image_to_rotate.cols(), image_to_rotate.rows());
+    QTransform q_true_matrix = QPixmap::trueMatrix(
+        qTransform(angle), image_to_rotate.cols(), image_to_rotate.rows());
     double data[] = {
         q_true_matrix.m11(),
         q_true_matrix.m21(),
@@ -85,7 +85,7 @@ void UpdaterThread::run()
             is_new_ = false;
         }
 
-        QPixmap rotated = pixmap_.transformed(qtMatrix(angle));
+        QPixmap rotated = pixmap_.transformed(qTransform(angle));
         this->rotated(rotated);
 
         cv::UMat rotated_mask;
@@ -188,9 +188,10 @@ double PostProcess::rotation() const
     return ui_->slider_coarse->value()
            + ui_->slider_precise->value() / kPreciseSliderScale;
 }
-QMatrix PostProcess::qtMatrix() const
+
+QTransform PostProcess::qTransform() const
 {
-    return ::autopanorama::qtMatrix(rotation());
+    return ::autopanorama::qTransform(rotation());
 }
 
 cv::Mat PostProcess::cvMatrix(cv::InputArray image_to_rotate) const
@@ -201,7 +202,7 @@ cv::Mat PostProcess::cvMatrix(cv::InputArray image_to_rotate) const
 void PostProcess::updateRotated()
 {
     QString text;
-    text.sprintf("Angle: %.2f°", rotation());
+    text.asprintf("Angle: %.2f°", rotation());
     ui_->label_angle->setText(text);
     updater_thread_->setAngle(rotation());
 }
@@ -213,7 +214,7 @@ void PostProcess::onSave()
     cv::imread(output_path_.toStdString(), cv::IMREAD_UNCHANGED).copyTo(original);
 
     qDebug() << "Rotating the image";
-    QPixmap qt_rotated = original_.transformed(qtMatrix());
+    QPixmap qt_rotated = original_.transformed(qTransform());
     cv::Size size(qt_rotated.width(), qt_rotated.height());
 
     cv::UMat rotated;
@@ -222,7 +223,7 @@ void PostProcess::onSave()
     if (ui_->radio_rotated->isChecked()) {
         QString path = getPostProcessPath();
 
-        qDebug() << "Writing post-process to " << path;
+        qInfo() << "Writing post-process to " << path;
         cv::imwrite(path.toStdString(), rotated);
     }
 
@@ -239,7 +240,7 @@ void PostProcess::onSave()
 
         QString path = getPostProcessPath();
 
-        qDebug() << "Writing post-process to " << path;
+        qInfo() << "Writing post-process to " << path;
         cv::imwrite(path.toStdString(), rotated(roi));
     }
 }
